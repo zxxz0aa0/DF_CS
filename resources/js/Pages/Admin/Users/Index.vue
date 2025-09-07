@@ -64,7 +64,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="user in users.data" :key="user.id">
+                                    <tr v-for="user in props.users.data" :key="user.id">
                                         <td>{{ user.id }}</td>
                                         <td>{{ user.name }}</td>
                                         <td>{{ user.email }}</td>
@@ -102,20 +102,20 @@
                         </div>
 
                         <!-- 分頁 -->
-                        <div class="d-flex justify-content-between align-items-center mt-3" v-if="users.last_page > 1">
+                        <div class="d-flex justify-content-between align-items-center mt-3" v-if="props.users.last_page > 1">
                             <div>
-                                顯示第 {{ users.from }} 到 {{ users.to }} 項，共 {{ users.total }} 項結果
+                                顯示第 {{ props.users.from }} 到 {{ props.users.to }} 項，共 {{ props.users.total }} 項結果
                             </div>
                             <nav>
                                 <ul class="pagination mb-0">
-                                    <li class="page-item" :class="{ disabled: !users.prev_page_url }">
-                                        <Link class="page-link" :href="users.prev_page_url || '#'" preserve-state>上一頁</Link>
+                                    <li class="page-item" :class="{ disabled: !props.users.prev_page_url }">
+                                        <Link class="page-link" :href="props.users.prev_page_url || '#'" preserve-state>上一頁</Link>
                                     </li>
                                     <li
                                         v-for="page in paginationRange"
                                         :key="page"
                                         class="page-item"
-                                        :class="{ active: page === users.current_page }"
+                                        :class="{ active: page === props.users.current_page }"
                                     >
                                         <Link
                                             v-if="page !== '...'"
@@ -127,8 +127,8 @@
                                         </Link>
                                         <span v-else class="page-link">{{ page }}</span>
                                     </li>
-                                    <li class="page-item" :class="{ disabled: !users.next_page_url }">
-                                        <Link class="page-link" :href="users.next_page_url || '#'" preserve-state>下一頁</Link>
+                                    <li class="page-item" :class="{ disabled: !props.users.next_page_url }">
+                                        <Link class="page-link" :href="props.users.next_page_url || '#'" preserve-state>下一頁</Link>
                                     </li>
                                 </ul>
                             </nav>
@@ -165,7 +165,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 
-defineProps({
+const props = defineProps({
     users: {
         type: Object,
         required: true,
@@ -184,8 +184,8 @@ const deleteUser = ref(null)
 
 const paginationRange = computed(() => {
     const range = []
-    const current = users.current_page
-    const last = users.last_page
+    const current = props.users.current_page
+    const last = props.users.last_page
     
     // 簡單的分頁邏輯
     for (let i = Math.max(1, current - 2); i <= Math.min(last, current + 2); i++) {

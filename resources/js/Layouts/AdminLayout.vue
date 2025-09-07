@@ -47,17 +47,6 @@
 
             <!-- 側邊欄內容 -->
             <div class="sidebar-wrapper">
-                <!-- 使用者面板 -->
-                <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
-                    <div class="flex-shrink-0">
-                        <div class="img-circle bg-light d-flex align-items-center justify-content-center" style="width: 2.1rem; height: 2.1rem;">
-                            <i class="bi bi-person-fill text-dark"></i>
-                        </div>
-                    </div>
-                    <div class="flex-grow-1 ms-2">
-                        <span class="d-block text-white">{{ user.name }}</span>
-                    </div>
-                </div>
 
                 <!-- 側邊欄選單 -->
                 <nav class="mt-2">
@@ -71,8 +60,8 @@
                         </li>
 
                         <!-- 使用者管理 -->
-                        <li class="nav-item" :class="{ 'menu-open': isUserManagementActive }">
-                            <a href="#" class="nav-link" :class="{ active: isUserManagementActive }">
+                        <li class="nav-item" :class="{ 'menu-open': isUserManagementActive || userMenuOpen }">
+                            <a href="#" class="nav-link" :class="{ active: isUserManagementActive }" @click.prevent="toggleUserMenu">
                                 <i class="nav-icon bi bi-people"></i>
                                 <p>
                                     使用者管理
@@ -84,6 +73,31 @@
                                     <Link :href="route('admin.users.index')" class="nav-link" :class="{ active: route().current('admin.users.*') }">
                                         <i class="nav-icon bi bi-circle"></i>
                                         <p>所有使用者</p>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- 權限管理 -->
+                        <li class="nav-item" :class="{ 'menu-open': isPermissionManagementActive || permissionMenuOpen }">
+                            <a href="#" class="nav-link" :class="{ active: isPermissionManagementActive }" @click.prevent="togglePermissionMenu">
+                                <i class="nav-icon bi bi-shield-lock"></i>
+                                <p>
+                                    權限管理
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <Link :href="route('admin.roles.index')" class="nav-link" :class="{ active: route().current('admin.roles.*') }">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>角色管理</p>
+                                    </Link>
+                                </li>
+                                <li class="nav-item">
+                                    <Link :href="route('admin.permissions.index')" class="nav-link" :class="{ active: route().current('admin.permissions.*') }">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>權限管理</p>
                                     </Link>
                                 </li>
                             </ul>
@@ -134,8 +148,8 @@
 </template>
 
 <script setup>
-import { Link, usePage } from '@inertiajs/vue3'
-import { computed, onMounted, onBeforeUnmount } from 'vue'
+import { Link } from '@inertiajs/vue3'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 
 defineProps({
     user: {
@@ -144,16 +158,35 @@ defineProps({
     },
 })
 
-const page = usePage()
+const userMenuOpen = ref(false)
+const permissionMenuOpen = ref(false)
 
 const isUserManagementActive = computed(() => {
     return route().current('admin.users.*')
 })
 
+const isPermissionManagementActive = computed(() => {
+    return route().current('admin.roles.*') || route().current('admin.permissions.*')
+})
+
+const toggleUserMenu = () => {
+    userMenuOpen.value = !userMenuOpen.value
+    if (userMenuOpen.value) {
+        permissionMenuOpen.value = false
+    }
+}
+
+const togglePermissionMenu = () => {
+    permissionMenuOpen.value = !permissionMenuOpen.value
+    if (permissionMenuOpen.value) {
+        userMenuOpen.value = false
+    }
+}
+
 // 設定 AdminLTE v4 需要的 body 類名
 // 依 AdminLTE v4 範例：預設展開側欄於桌面，行動裝置使用 overlay
 // 這裡不啟用 mini 模式，避免與收合互相干擾
-const bodyClasses = ['layout-fixed', 'sidebar-expand-lg', 'sidebar-open']
+const bodyClasses = ['layout-fixed', 'sidebar-expand-lg', 'sidebar-collapse']
 
 onMounted(() => {
     document.body.classList.add(...bodyClasses)
