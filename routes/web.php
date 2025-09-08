@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    // 如果用戶已登入，跳轉到儀表板；未登入則跳轉到登入頁面
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    
+    return redirect()->route('login');
 });
 
 Route::get('/dashboard', function () {
