@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Support\Facades\Crypt;
 
 class User extends Authenticatable
 {
@@ -45,7 +43,6 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        'id_number', // 身分證字號需要隱藏
     ];
 
     /**
@@ -62,16 +59,7 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * 身分證字號加密處理
-     */
-    protected function idNumber(): Attribute
-    {
-        return Attribute::make(
-            get: fn (string $value) => Crypt::decryptString($value),
-            set: fn (string $value) => Crypt::encryptString($value),
-        );
-    }
+    // 已移除：身分證字號加密/解密的 Attribute 轉換
 
     /**
      * 根據帳號查找使用者（支援登入）

@@ -130,7 +130,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="birth_date" class="form-label">出生日期 <span class="text-danger">*</span></label>
+                                <label for="birth_date" class="form-label">出生日期</label>
                                 <input
                                     id="birth_date"
                                     v-model="form.birth_date"
@@ -138,7 +138,7 @@
                                     class="form-control"
                                     :class="{ 'is-invalid': form.errors.birth_date }"
                                     :max="maxBirthDate"
-                                    required
+
                                 >
                                 <div v-if="form.errors.birth_date" class="invalid-feedback">
                                     {{ form.errors.birth_date }}
@@ -324,10 +324,14 @@
                                             type="checkbox"
                                             :value="role.name"
                                             class="form-check-input"
+                                            :disabled="user.id === $page.props.auth.user.id && role.name === 'admin'"
                                         >
                                         <label :for="'role-' + role.id" class="form-check-label">
                                             {{ role.name }}
                                         </label>
+                                    </div>
+                                    <div class="form-text" v-if="user.id === $page.props.auth.user.id">
+                                        為避免將自己移出管理員群組，編輯本人時「admin」角色固定保留。
                                     </div>
                                 </div>
                                 <div v-if="form.errors.roles" class="invalid-feedback d-block">
@@ -420,11 +424,13 @@ const props = defineProps({
 const showPassword = ref(false)
 const showDeleteModal = ref(false)
 
-// 解密身分證字號的簡單函數 (實際上需要從伺服器端處理)
-const decryptIdNumber = (encryptedId) => {
-    // 這裡應該從API獲取解密後的身分證字號
-    // 為了示例，我們暫時返回部分遮蔽的格式
-    return '***請重新輸入***'
+
+const toYMD = (d) => {
+    if (!d) return ''
+    // 支援 "YYYY-MM-DD" 或 ISO 字串，統一轉成 input[type=date] 需要的格式
+    const date = typeof d === 'string' && d.length === 10 ? new Date(d + 'T00:00:00') : new Date(d)
+    if (isNaN(date.getTime())) return ''
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10)
 }
 
 const form = useForm({
@@ -433,8 +439,8 @@ const form = useForm({
     email: props.user.email,
     password: '',
     password_confirmation: '',
-    id_number: decryptIdNumber(props.user.id_number),
-    birth_date: props.user.birth_date,
+    id_number: props.user.id_number || '',
+    birth_date: toYMD(props.user.birth_date),
     gender: props.user.gender,
     mobile_phone: props.user.mobile_phone,
     home_phone: props.user.home_phone,

@@ -75,7 +75,7 @@ class UserManagementController extends Controller
             'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'id_number' => encrypt($request->id_number),
+            'id_number' => $request->id_number,
             'birth_date' => $request->birth_date,
             'gender' => $request->gender,
             'mobile_phone' => $request->mobile_phone,
@@ -98,24 +98,18 @@ class UserManagementController extends Controller
     public function show(User $user): Response
     {
         $user->load('roles.permissions');
-        
-        // 為了安全考量，將身分證字號部分遮蔽
+
+        // 為了安全考量，將身分證字號部分遮蔽（不再解密，直接使用原值）
         $userData = $user->toArray();
         if ($user->id_number) {
-            try {
-                $decryptedIdNumber = decrypt($user->id_number);
-                // 遮蔽中間幾位數字，只顯示前面和後面的部分
-                $userData['id_number_display'] = substr($decryptedIdNumber, 0, 1) . '***-***' . substr($decryptedIdNumber, -3);
-                $userData['id_number_full'] = $decryptedIdNumber; // 完整的身分證字號（如果需要的話）
-            } catch (\Exception $e) {
-                $userData['id_number_display'] = '解密失敗';
-                $userData['id_number_full'] = null;
-            }
+            $raw = $user->id_number;
+            $userData['id_number_display'] = substr($raw, 0, 1) . '***-***' . substr($raw, -3);
+            $userData['id_number_full'] = $raw;
         } else {
             $userData['id_number_display'] = '未提供';
             $userData['id_number_full'] = null;
         }
-        
+
         return Inertia::render('Admin/Users/Show', [
             'user' => $userData,
         ]);
@@ -165,7 +159,7 @@ class UserManagementController extends Controller
             'name' => $request->name,
             'username' => $request->username,
             'email' => $request->email,
-            'id_number' => encrypt($request->id_number),
+            'id_number' => $request->id_number,
             'birth_date' => $request->birth_date,
             'gender' => $request->gender,
             'mobile_phone' => $request->mobile_phone,
@@ -184,7 +178,27 @@ class UserManagementController extends Controller
         $user->update($updateData);
 
         if ($request->has('roles')) {
-            $user->syncRoles($request->roles);
+            $newRoles = $request->roles ?? [];
+
+            // 保護：禁止使用者移除自己的 admin 角色，避免被立即踢出後台
+            if ($user->id === auth()->id()) {
+                if (!in_array('admin', $newRoles)) {
+                    return redirect()->back()
+                        ->with('error', '無法移除自己「admin」角色，請由其他管理員調整或保留 admin 身分。');
+                }
+            }
+
+            // 保護：避免系統沒有任何 admin 使用者
+            if (!in_array('admin', $newRoles)) {
+                $adminRole = \Spatie\Permission\Models\Role::findByName('admin');
+                $otherAdminsCount = $adminRole->users()->where('users.id', '!=', $user->id)->count();
+                if ($otherAdminsCount === 0) {
+                    return redirect()->back()
+                        ->with('error', '系統至少需要一位管理員，無法移除此帳號的 admin 角色。');
+                }
+            }
+
+            $user->syncRoles($newRoles);
         }
 
         return redirect()->route('admin.users.index')

@@ -21,6 +21,15 @@
                             {{ user.name }}
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
+                            <template v-if="hasRole('admin')">
+                                <Link :href="route('dashboard')" class="dropdown-item">
+                                    <i class="bi bi-house me-2"></i>前台
+                                </Link>
+                                <Link :href="route('admin.dashboard')" class="dropdown-item">
+                                    <i class="bi bi-speedometer2 me-2"></i>後台
+                                </Link>
+                                <div class="dropdown-divider"></div>
+                            </template>
                             <Link :href="route('profile.edit')" class="dropdown-item">
                                 <i class="bi bi-gear me-2"></i>個人設定
                             </Link>
@@ -60,7 +69,7 @@
                         </li>
 
                         <!-- 使用者管理 -->
-                        <li class="nav-item" :class="{ 'menu-open': isUserManagementActive || userMenuOpen }">
+                        <li v-if="canSeeUserManagement" class="nav-item" :class="{ 'menu-open': isUserManagementActive || userMenuOpen }">
                             <a href="#" class="nav-link" :class="{ active: isUserManagementActive }" @click.prevent="toggleUserMenu">
                                 <i class="nav-icon bi bi-people"></i>
                                 <p>
@@ -79,7 +88,7 @@
                         </li>
 
                         <!-- 權限管理 -->
-                        <li class="nav-item" :class="{ 'menu-open': isPermissionManagementActive || permissionMenuOpen }">
+                        <li v-if="canSeeRolePermission" class="nav-item" :class="{ 'menu-open': isPermissionManagementActive || permissionMenuOpen }">
                             <a href="#" class="nav-link" :class="{ active: isPermissionManagementActive }" @click.prevent="togglePermissionMenu">
                                 <i class="nav-icon bi bi-shield-lock"></i>
                                 <p>
@@ -98,6 +107,31 @@
                                     <Link :href="route('admin.permissions.index')" class="nav-link" :class="{ active: route().current('admin.permissions.*') }">
                                         <i class="nav-icon bi bi-circle"></i>
                                         <p>權限管理</p>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- 公司管理 -->
+                        <li v-if="canSeeCompanyManagement" class="nav-item" :class="{ 'menu-open': isCompanyManagementActive || companyMenuOpen }">
+                            <a href="#" class="nav-link" :class="{ active: isCompanyManagementActive }" @click.prevent="toggleCompanyMenu">
+                                <i class="nav-icon bi bi-buildings"></i>
+                                <p>
+                                    公司管理
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <Link :href="route('admin.company-categories.index')" class="nav-link" :class="{ active: route().current('admin.company-categories.*') }">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>公司類別管理</p>
+                                    </Link>
+                                </li>
+                                <li class="nav-item">
+                                    <Link :href="route('admin.companies.index')" class="nav-link" :class="{ active: route().current('admin.companies.*') }">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>公司資料管理</p>
                                     </Link>
                                 </li>
                             </ul>
@@ -148,7 +182,7 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Link, usePage } from '@inertiajs/vue3'
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 
 defineProps({
@@ -160,6 +194,30 @@ defineProps({
 
 const userMenuOpen = ref(false)
 const permissionMenuOpen = ref(false)
+const companyMenuOpen = ref(false)
+
+// 取得前端共享的角色/權限（在 <script setup> 需用 usePage 取得 $page）
+const page = usePage()
+const roles = computed(() => page.props.auth?.roles ?? [])
+const perms = computed(() => page.props.auth?.permissions ?? [])
+const hasRole = (name) => roles.value?.includes?.(name)
+const can = (name) => perms.value?.includes?.(name)
+
+// 控制側欄顯示：
+// - 只有 admin 或具備相關權限者才看得到「使用者管理」「權限管理」
+const canSeeUserManagement = computed(() => {
+    return hasRole('admin') ||
+        can('view users') || can('create users') || can('edit users') || can('delete users')
+})
+
+const canSeeRolePermission = computed(() => {
+    return hasRole('admin') || can('manage roles')
+})
+
+const canSeeCompanyManagement = computed(() => {
+    // 目前公司管理路由仍僅開放 admin 使用
+    return hasRole('admin')
+})
 
 const isUserManagementActive = computed(() => {
     return route().current('admin.users.*')
@@ -169,10 +227,15 @@ const isPermissionManagementActive = computed(() => {
     return route().current('admin.roles.*') || route().current('admin.permissions.*')
 })
 
+const isCompanyManagementActive = computed(() => {
+    return route().current('admin.company-categories.*') || route().current('admin.companies.*')
+})
+
 const toggleUserMenu = () => {
     userMenuOpen.value = !userMenuOpen.value
     if (userMenuOpen.value) {
         permissionMenuOpen.value = false
+        companyMenuOpen.value = false
     }
 }
 
@@ -180,6 +243,15 @@ const togglePermissionMenu = () => {
     permissionMenuOpen.value = !permissionMenuOpen.value
     if (permissionMenuOpen.value) {
         userMenuOpen.value = false
+        companyMenuOpen.value = false
+    }
+}
+
+const toggleCompanyMenu = () => {
+    companyMenuOpen.value = !companyMenuOpen.value
+    if (companyMenuOpen.value) {
+        userMenuOpen.value = false
+        permissionMenuOpen.value = false
     }
 }
 
@@ -190,6 +262,9 @@ const bodyClasses = ['layout-fixed', 'sidebar-expand-lg', 'sidebar-collapse']
 
 onMounted(() => {
     document.body.classList.add(...bodyClasses)
+    // 僅在後台載入 AdminLTE 的資源（CSS/JS），避免影響前台
+    import('../../css/admin.css')
+    import('admin-lte/dist/js/adminlte.min.js')
 })
 
 onBeforeUnmount(() => {

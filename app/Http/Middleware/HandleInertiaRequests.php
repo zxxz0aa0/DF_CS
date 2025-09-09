@@ -34,6 +34,9 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
+                // 供前端根據角色/權限決定側邊欄可見性
+                'roles' => fn () => $request->user()?->getRoleNames() ?? [],
+                'permissions' => fn () => $request->user()?->getAllPermissions()->pluck('name') ?? [],
             ],
             'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),

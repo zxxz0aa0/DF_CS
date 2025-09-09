@@ -110,6 +110,28 @@
 - 密碼使用 Laravel 的預設雜湊機制
 - CSRF 保護已啟用
 
+## 常見問題與解決方案
+
+### AdminLayout 使用注意事項
+- **重要**: 所有使用 `AdminLayout` 的 Vue 組件必須傳入 `user` prop，否則會導致白屏錯誤
+- **正確用法**: `<AdminLayout :user="$page.props.auth.user">`
+- **錯誤原因**: AdminLayout 內部需要 `user.name` 來顯示使用者名稱，缺少此 prop 會造成 Vue 渲染錯誤
+- **修復方式**: 在所有管理頁面的 template 標籤中確保正確傳入 user prop
+
+### Bootstrap Modal 初始化問題
+- **問題**: 在 Vue 組件中直接初始化 Bootstrap Modal 可能因為 DOM 時機問題導致白屏
+- **解決方案**: 使用 `setTimeout` 延遲初始化
+```javascript
+onMounted(() => {
+    setTimeout(() => {
+        const modalElement = document.getElementById('deleteModal')
+        if (modalElement && window.bootstrap) {
+            deleteModal = new window.bootstrap.Modal(modalElement)
+        }
+    }, 100)
+})
+```
+
 # important-instruction-reminders
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
