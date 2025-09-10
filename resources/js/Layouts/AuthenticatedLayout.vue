@@ -35,7 +35,7 @@ const closeSidebar = () => { sidebarOpen.value = false }
             <nav class="border-b border-gray-50 bg-white relative z-50">
                 <!-- Primary Navigation Menu -->
                 <div class="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex h-16 justify-between">
+                    <div class="flex h-14 justify-between">
                         <div class="flex">
                             <!-- Logo -->
                             <button
@@ -119,8 +119,8 @@ const closeSidebar = () => { sidebarOpen.value = false }
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
             aria-label="Sidebar navigation"
         >
-            <div class="flex items-center justify-between px-4 py-3 border-b">
-                <div class="font-semibold">功能選單</div>
+            <div class="flex items-center justify-between px-4 py-2 border-b">
+                <div class="font-semibold">車行管理 選單</div>
                 <button class="p-2 text-gray-500 hover:text-gray-700" @click="closeSidebar" aria-label="Close sidebar">
                     <i class="bi bi-x-lg"></i>
                 </button>
