@@ -6,7 +6,7 @@
                 <!-- 左側：側邊欄切換 -->
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-lte-toggle="sidebar" role="button" @click.prevent="toggleSidebar">
+                        <a class="nav-link" href="#" role="button" @click.prevent="toggleSidebar">
                             <i class="bi bi-list"></i>
                         </a>
                     </li>
@@ -59,10 +59,10 @@
 
                 <!-- 側邊欄選單 -->
                 <nav class="mt-2">
-                    <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation" data-accordion="false">
+                    <ul class="nav sidebar-menu flex-column" role="navigation" data-accordion="false">
                         <!-- 儀表板 -->
                         <li class="nav-item">
-                            <Link :href="route('admin.dashboard')" class="nav-link" :class="{ active: route().current('admin.dashboard') }">
+                            <Link :href="route('admin.dashboard')" class="nav-link" :class="{ active: route().current('admin.dashboard') }" @click="closeSidebar">
                                 <i class="nav-icon bi bi-speedometer2"></i>
                                 <p>儀表板</p>
                             </Link>
@@ -70,7 +70,7 @@
 
                         <!-- 使用者管理 -->
                         <li v-if="canSeeUserManagement" class="nav-item" :class="{ 'menu-open': isUserManagementActive || userMenuOpen }">
-                            <a href="#" class="nav-link" :class="{ active: isUserManagementActive }" @click.prevent="toggleUserMenu">
+                            <a href="#" class="nav-link" :class="{ active: isUserManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleUserMenu">
                                 <i class="nav-icon bi bi-people"></i>
                                 <p>
                                     使用者管理
@@ -79,7 +79,7 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <Link :href="route('admin.users.index')" class="nav-link" :class="{ active: route().current('admin.users.*') }">
+                                    <Link :href="route('admin.users.index')" class="nav-link" :class="{ active: route().current('admin.users.*') }" @click="closeSidebar">
                                         <i class="nav-icon bi bi-circle"></i>
                                         <p>所有使用者</p>
                                     </Link>
@@ -89,7 +89,7 @@
 
                         <!-- 權限管理 -->
                         <li v-if="canSeeRolePermission" class="nav-item" :class="{ 'menu-open': isPermissionManagementActive || permissionMenuOpen }">
-                            <a href="#" class="nav-link" :class="{ active: isPermissionManagementActive }" @click.prevent="togglePermissionMenu">
+                            <a href="#" class="nav-link" :class="{ active: isPermissionManagementActive }" data-lte-toggle="treeview" @click.prevent="togglePermissionMenu">
                                 <i class="nav-icon bi bi-shield-lock"></i>
                                 <p>
                                     權限管理
@@ -98,13 +98,13 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <Link :href="route('admin.roles.index')" class="nav-link" :class="{ active: route().current('admin.roles.*') }">
+                                    <Link :href="route('admin.roles.index')" class="nav-link" :class="{ active: route().current('admin.roles.*') }" @click="closeSidebar">
                                         <i class="nav-icon bi bi-circle"></i>
                                         <p>角色管理</p>
                                     </Link>
                                 </li>
                                 <li class="nav-item">
-                                    <Link :href="route('admin.permissions.index')" class="nav-link" :class="{ active: route().current('admin.permissions.*') }">
+                                    <Link :href="route('admin.permissions.index')" class="nav-link" :class="{ active: route().current('admin.permissions.*') }" @click="closeSidebar">
                                         <i class="nav-icon bi bi-circle"></i>
                                         <p>權限管理</p>
                                     </Link>
@@ -114,7 +114,7 @@
 
                         <!-- 公司管理 -->
                         <li v-if="canSeeCompanyManagement" class="nav-item" :class="{ 'menu-open': isCompanyManagementActive || companyMenuOpen }">
-                            <a href="#" class="nav-link" :class="{ active: isCompanyManagementActive }" @click.prevent="toggleCompanyMenu">
+                            <a href="#" class="nav-link" :class="{ active: isCompanyManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleCompanyMenu">
                                 <i class="nav-icon bi bi-buildings"></i>
                                 <p>
                                     公司管理
@@ -123,13 +123,13 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <Link :href="route('admin.company-categories.index')" class="nav-link" :class="{ active: route().current('admin.company-categories.*') }">
+                                    <Link :href="route('admin.company-categories.index')" class="nav-link" :class="{ active: route().current('admin.company-categories.*') }" @click="closeSidebar">
                                         <i class="nav-icon bi bi-circle"></i>
                                         <p>公司類別管理</p>
                                     </Link>
                                 </li>
                                 <li class="nav-item">
-                                    <Link :href="route('admin.companies.index')" class="nav-link" :class="{ active: route().current('admin.companies.*') }">
+                                    <Link :href="route('admin.companies.index')" class="nav-link" :class="{ active: route().current('admin.companies.*') }" @click="closeSidebar">
                                         <i class="nav-icon bi bi-circle"></i>
                                         <p>公司資料管理</p>
                                     </Link>
@@ -195,6 +195,7 @@ defineProps({
 const userMenuOpen = ref(false)
 const permissionMenuOpen = ref(false)
 const companyMenuOpen = ref(false)
+const sidebarOpen = ref(false)
 
 // 取得前端共享的角色/權限（在 <script setup> 需用 usePage 取得 $page）
 const page = usePage()
@@ -256,32 +257,90 @@ const toggleCompanyMenu = () => {
 }
 
 // 設定 AdminLTE v4 需要的 body 類名
-// 依 AdminLTE v4 範例：預設展開側欄於桌面，行動裝置使用 overlay
-// 這裡不啟用 mini 模式，避免與收合互相干擾
-const bodyClasses = ['layout-fixed', 'sidebar-expand-lg', 'sidebar-collapse']
+const bodyClasses = ['layout-fixed', 'sidebar-expand-lg']
 
-onMounted(() => {
+// 處理窗口大小變化
+const handleResize = () => {
+    const isLargeScreen = window.innerWidth >= 992
+    
+    if (isLargeScreen) {
+        // 大螢幕：移除小螢幕的 sidebar-open 狀態
+        document.body.classList.remove('sidebar-open')
+        // 根據當前狀態決定是否使用 sidebar-collapse
+        if (!sidebarOpen.value) {
+            document.body.classList.add('sidebar-collapse')
+        }
+    } else {
+        // 小螢幕：移除大螢幕的 sidebar-collapse 狀態
+        document.body.classList.remove('sidebar-collapse')
+        // 根據當前狀態決定是否顯示側邊欄
+        if (sidebarOpen.value) {
+            document.body.classList.add('sidebar-open')
+        }
+    }
+}
+
+onMounted(async () => {
     document.body.classList.add(...bodyClasses)
-    // 僅在後台載入 AdminLTE 的資源（CSS/JS），避免影響前台
+    // 載入 CSS
     import('../../css/admin.css')
-    import('admin-lte/dist/js/adminlte.min.js')
+    
+    // 載入 AdminLTE JS（只載入一次，讓其自動處理樹狀選單）
+    if (!window.AdminLTE) {
+        await import('admin-lte/dist/js/adminlte.min.js')
+    }
+    
+    // 添加窗口大小變化監聽器
+    window.addEventListener('resize', handleResize)
+    
+    // 初始化時執行一次
+    handleResize()
 })
 
 onBeforeUnmount(() => {
     document.body.classList.remove(...bodyClasses)
+    sidebarOpen.value = false
+    
+    // 移除事件監聽器
+    window.removeEventListener('resize', handleResize)
 })
 
 const toggleSidebar = () => {
-    const isLgUp = window.matchMedia('(min-width: 992px)').matches
-    if (isLgUp) {
-        document.body.classList.toggle('sidebar-collapse')
+    // 檢查當前螢幕是否為大螢幕（桌面模式）
+    const isLargeScreen = window.innerWidth >= 992 // Bootstrap lg 斷點
+    
+    if (isLargeScreen) {
+        // 大螢幕：使用 sidebar-collapse 來控制收合
+        const isCollapsed = document.body.classList.contains('sidebar-collapse')
+        if (isCollapsed) {
+            document.body.classList.remove('sidebar-collapse')
+            sidebarOpen.value = true
+        } else {
+            document.body.classList.add('sidebar-collapse')
+            sidebarOpen.value = false
+        }
     } else {
-        document.body.classList.toggle('sidebar-open')
+        // 小螢幕：使用 sidebar-open 來控制顯示
+        sidebarOpen.value = !sidebarOpen.value
+        if (sidebarOpen.value) {
+            document.body.classList.add('sidebar-open')
+        } else {
+            document.body.classList.remove('sidebar-open')
+        }
     }
 }
 
 const closeSidebar = () => {
+    sidebarOpen.value = false
+    
+    // 移除所有可能的側邊欄狀態類別
     document.body.classList.remove('sidebar-open')
+    
+    // 在大螢幕上，如果需要完全隱藏側邊欄，可以加上 sidebar-collapse
+    const isLargeScreen = window.innerWidth >= 992
+    if (isLargeScreen) {
+        document.body.classList.add('sidebar-collapse')
+    }
 }
 </script>
 

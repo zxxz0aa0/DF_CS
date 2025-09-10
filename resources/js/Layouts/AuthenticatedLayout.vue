@@ -32,9 +32,9 @@ const closeSidebar = () => { sidebarOpen.value = false }
 <template>
     <div>
         <div class="min-h-screen bg-gray-100">
-            <nav class="border-b border-gray-100 bg-white">
+            <nav class="border-b border-gray-50 bg-white relative z-50">
                 <!-- Primary Navigation Menu -->
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
                     <div class="flex h-16 justify-between">
                         <div class="flex">
                             <!-- Logo -->
@@ -49,13 +49,13 @@ const closeSidebar = () => { sidebarOpen.value = false }
 
                             <!-- Navigation Links -->
                             <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
+                                class="hidden space-x-8 sm:-my-px sm:ms-0 sm:flex"
                             >
                                 <NavLink
                                     :href="route('dashboard')"
                                     :active="route().current('dashboard')"
                                 >
-                                    Dashboard
+                                    車行管理系統
                                 </NavLink>
                             </div>
                         </div>
@@ -115,7 +115,7 @@ const closeSidebar = () => { sidebarOpen.value = false }
             <div class="absolute inset-0 bg-black/30" @click="closeSidebar"></div>
         </div>
         <aside
-            class="fixed top-0 left-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-200"
+            class="fixed top-0 left-0 z-50 h-full w-56 transform bg-white shadow-lg transition-transform duration-200"
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
             aria-label="Sidebar navigation"
         >
@@ -126,15 +126,15 @@ const closeSidebar = () => { sidebarOpen.value = false }
                 </button>
             </div>
             <nav class="p-3 space-y-1">
-                <Link :href="route('dashboard')" class="flex items-center rounded px-3 py-2 text-gray-700 hover:bg-gray-100">
+                <Link :href="route('dashboard')" @click="closeSidebar" class="flex items-center rounded px-3 py-2 text-gray-700 hover:bg-gray-100">
                     <i class="bi bi-speedometer2 me-2"></i> 儀表板
                 </Link>
-                <Link :href="route('profile.edit')" class="flex items-center rounded px-3 py-2 text-gray-700 hover:bg-gray-100">
+                <Link :href="route('profile.edit')" @click="closeSidebar" class="flex items-center rounded px-3 py-2 text-gray-700 hover:bg-gray-100">
                     <i class="bi bi-person-gear me-2"></i> 個人設定
                 </Link>
                 <template v-if="hasRole('admin')">
                     <div class="mt-3 text-xs text-gray-400 px-3">管理</div>
-                    <Link :href="route('admin.dashboard')" class="flex items-center rounded px-3 py-2 text-gray-700 hover:bg-gray-100">
+                    <Link :href="route('admin.dashboard')" @click="closeSidebar" class="flex items-center rounded px-3 py-2 text-gray-700 hover:bg-gray-100">
                         <i class="bi bi-shield-lock me-2"></i> 後台儀表板
                     </Link>
                 </template>
