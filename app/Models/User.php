@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -33,7 +34,26 @@ class User extends Authenticatable
         'position',
         'gender',
         'address',
+        'position_id',
     ];
+    
+    /**
+     * 取得職務名稱（字符串）
+     */
+    public function getPositionNameAttribute()
+    {
+        if ($this->position_id) {
+            if (!$this->relationLoaded('position')) {
+                $this->load('position');
+            }
+            $positionModel = $this->getRelation('position');
+            if ($positionModel) {
+                return $positionModel->name;
+            }
+        }
+        
+        return $this->attributes['position'] ?? null;
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -60,6 +80,69 @@ class User extends Authenticatable
     }
 
     // 已移除：身分證字號加密/解密的 Attribute 轉換
+
+    /**
+     * 使用者的職務
+     */
+    public function position(): BelongsTo
+    {
+        return $this->belongsTo(Position::class);
+    }
+
+    /**
+     * 檢查使用者是否有特定職務權限
+     */
+    public function hasPositionPermission(string $permission): bool
+    {
+        // 確保載入 position 關聯
+        if ($this->position_id && !$this->relationLoaded('position')) {
+            $this->load('position');
+        }
+        
+        $positionModel = $this->getRelation('position');
+        if (!$positionModel) {
+            return false;
+        }
+
+        return $positionModel->hasPermission($permission);
+    }
+
+    /**
+     * 檢查使用者是否有職務權限（職務優先架構）
+     */
+    public function hasAnyPermission(string $permission): bool
+    {
+        // 只檢查職務權限，不再檢查角色權限
+        return $this->hasPositionPermission($permission);
+    }
+
+    /**
+     * 獲取使用者所有權限（僅來自職務）
+     */
+    public function getAllPermissions()
+    {
+        // 確保載入 position 關聯及其權限
+        if ($this->position_id && !$this->relationLoaded('position')) {
+            $this->load('position.permissions');
+        }
+        
+        $positionModel = $this->getRelation('position');
+        return $positionModel?->permissions ?? collect([]);
+    }
+
+    /**
+     * 檢查是否有指定權限（覆蓋 Spatie 的預設方法）
+     */
+    public function hasPermissionTo($permission, $guardName = null): bool
+    {
+        // 優先使用職務權限檢查
+        if ($this->hasPositionPermission($permission)) {
+            return true;
+        }
+
+        // 如果沒有職務或職務沒有權限，則檢查角色權限（向後相容）
+        return parent::hasPermissionTo($permission, $guardName);
+    }
 
     /**
      * 根據帳號查找使用者（支援登入）

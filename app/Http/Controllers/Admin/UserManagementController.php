@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Position;
+use App\Models\Role;
 use App\Rules\TaiwanIdNumber;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
@@ -34,8 +35,9 @@ class UserManagementController extends Controller
 
     public function create(): Response
     {
-        $roles = Role::all();
-        $permissions = Permission::all();
+        $roles = Role::with(['positions' => function($query) {
+            $query->where('is_active', true)->orderBy('sort_order')->orderBy('name');
+        }])->get();
         
         // 常見部門選項
         $departmentOptions = [
@@ -45,7 +47,6 @@ class UserManagementController extends Controller
         
         return Inertia::render('Admin/Users/Create', [
             'roles' => $roles,
-            'permissions' => $permissions,
             'departmentOptions' => $departmentOptions,
         ]);
     }
@@ -65,6 +66,7 @@ class UserManagementController extends Controller
             'address' => 'nullable|string|max:500',
             'department' => 'required|string|max:100',
             'position' => 'required|string|max:100',
+            'position_id' => 'required|exists:positions,id',
             'emergency_contact' => 'required|string|max:100',
             'emergency_phone' => ['required', 'regex:/^09\d{8}$/'],
             'roles' => 'array',
@@ -83,6 +85,7 @@ class UserManagementController extends Controller
             'address' => $request->address,
             'department' => $request->department,
             'position' => $request->position,
+            'position_id' => $request->position_id, // 職務關聯
             'emergency_contact' => $request->emergency_contact,
             'emergency_phone' => $request->emergency_phone,
         ]);
@@ -117,7 +120,9 @@ class UserManagementController extends Controller
 
     public function edit(User $user): Response
     {
-        $roles = Role::all();
+        $roles = Role::with(['positions' => function($query) {
+            $query->where('is_active', true)->orderBy('sort_order')->orderBy('name');
+        }])->get();
         $permissions = Permission::all();
         $user->load('roles');
         
@@ -150,6 +155,7 @@ class UserManagementController extends Controller
             'address' => 'nullable|string|max:500',
             'department' => 'required|string|max:100',
             'position' => 'required|string|max:100',
+            'position_id' => 'required|exists:positions,id',
             'emergency_contact' => 'required|string|max:100',
             'emergency_phone' => ['required', 'regex:/^09\d{8}$/'],
             'roles' => 'array',
@@ -167,6 +173,7 @@ class UserManagementController extends Controller
             'address' => $request->address,
             'department' => $request->department,
             'position' => $request->position,
+            'position_id' => $request->position_id, // 職務關聯
             'emergency_contact' => $request->emergency_contact,
             'emergency_phone' => $request->emergency_phone,
         ];
@@ -190,7 +197,7 @@ class UserManagementController extends Controller
 
             // 保護：避免系統沒有任何 admin 使用者
             if (!in_array('admin', $newRoles)) {
-                $adminRole = \Spatie\Permission\Models\Role::findByName('admin');
+                $adminRole = Role::findByName('admin');
                 $otherAdminsCount = $adminRole->users()->where('users.id', '!=', $user->id)->count();
                 if ($otherAdminsCount === 0) {
                     return redirect()->back()

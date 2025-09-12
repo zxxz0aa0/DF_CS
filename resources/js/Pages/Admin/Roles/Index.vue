@@ -116,28 +116,27 @@
                 </div>
             </div>
 
-            <!-- 快速權限分配 -->
+            <!-- 權限管理說明 -->
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">權限分配</h3>
+                        <h3 class="card-title">權限管理</h3>
                     </div>
                     <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>新的權限管理方式：</strong>
+                            <p class="mb-2 mt-2">角色現在僅作為職務的分組工具，不再直接分配權限。</p>
+                            <p class="mb-2">所有權限設定請前往「職務管理」頁面進行。</p>
+                            <Link :href="route('admin.positions.index')" class="btn btn-primary btn-sm">
+                                <i class="bi bi-arrow-right"></i> 前往職務管理
+                            </Link>
+                        </div>
+                        
                         <div v-for="role in roles" :key="role.id" class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <strong>{{ role.name }}</strong>
-                                <small class="text-muted">{{ role.permissions_count }} 個權限</small>
-                            </div>
-                            <div class="permission-tags">
-                                <span 
-                                    v-for="permission in role.permissions" 
-                                    :key="permission.id" 
-                                    class="badge bg-secondary me-1 mb-1"
-                                    style="font-size: 0.7em;"
-                                >
-                                    {{ permission.name }}
-                                </span>
-                                <span v-if="!role.permissions.length" class="text-muted">無權限</span>
+                                <small class="text-muted">{{ role.users_count }} 位使用者</small>
                             </div>
                         </div>
                     </div>

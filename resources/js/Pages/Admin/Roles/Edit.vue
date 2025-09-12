@@ -44,43 +44,15 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">角色權限設定</label>
-                                <div class="row">
-                                    <div class="col-12 mb-3">
-                                        <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-outline-primary btn-sm" @click="selectAllPermissions">
-                                                <i class="bi bi-check-all"></i> 全選
-                                            </button>
-                                            <button type="button" class="btn btn-outline-secondary btn-sm" @click="clearAllPermissions">
-                                                <i class="bi bi-x"></i> 清空
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- 分組顯示權限 -->
-                                <div v-for="(permissions, group) in groupedPermissions" :key="group" class="mb-4">
-                                    <h6 class="text-muted mb-3">
-                                        <i class="bi bi-folder"></i> {{ formatGroupName(group) }}
-                                        <span class="badge bg-light text-dark ms-2">{{ permissions.length }} 項</span>
-                                    </h6>
-                                    <div class="row">
-                                        <div v-for="permission in permissions" :key="permission.id" class="col-md-6 col-lg-4">
-                                            <div class="form-check mb-2">
-                                                <input
-                                                    :id="'perm-' + permission.id"
-                                                    v-model="form.permissions"
-                                                    type="checkbox"
-                                                    :value="permission.id"
-                                                    class="form-check-input"
-                                                >
-                                                <label :for="'perm-' + permission.id" class="form-check-label">
-                                                    {{ permission.name }}
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <hr>
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i>
+                                    <strong>權限管理說明：</strong>
+                                    <p class="mb-0 mt-2">角色權限現在統一由「職務管理」來設定。角色僅作為職務的分組工具，不再直接分配權限。</p>
+                                    <p class="mb-0 mt-1">
+                                        <Link :href="route('admin.positions.index')" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-arrow-right"></i> 前往職務管理
+                                        </Link>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -216,30 +188,13 @@ const props = defineProps({
         type: Object,
         required: true,
     },
-    allPermissions: {
-        type: Array,
-        required: true,
-    },
-    groupedPermissions: {
-        type: Object,
-        required: true,
-    },
-    rolePermissions: {
-        type: Array,
-        required: true,
-    },
 })
 
 const showDeleteModal = ref(false)
 
 const form = useForm({
     name: props.role.name,
-    permissions: [...props.rolePermissions],
     errors: {}
-})
-
-const currentPermissionCount = computed(() => {
-    return form.permissions.length
 })
 
 const updateRole = () => {
@@ -248,25 +203,6 @@ const updateRole = () => {
             form.errors = errors
         }
     })
-}
-
-const selectAllPermissions = () => {
-    form.permissions = props.allPermissions.map(p => p.id)
-}
-
-const clearAllPermissions = () => {
-    form.permissions = []
-}
-
-const formatGroupName = (group) => {
-    const groupNames = {
-        'users': '使用者管理',
-        'roles': '角色管理', 
-        'dashboard': '儀表板',
-        'permissions': '權限管理',
-        'admin': '系統管理'
-    }
-    return groupNames[group] || `${group} 相關`
 }
 
 const confirmDelete = () => {

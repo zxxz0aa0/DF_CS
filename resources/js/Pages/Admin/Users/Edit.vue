@@ -315,27 +315,32 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">角色權限 <span class="text-danger">*</span></label>
-                                <div class="mt-2">
-                                    <div v-for="role in roles" :key="role.id" class="form-check">
-                                        <input
-                                            :id="'role-' + role.id"
-                                            v-model="form.roles"
-                                            type="checkbox"
-                                            :value="role.name"
-                                            class="form-check-input"
-                                            :disabled="user.id === $page.props.auth.user.id && role.name === 'admin'"
+                                <label for="position_id" class="form-label">職務 <span class="text-danger">*</span></label>
+                                <select
+                                    id="position_id"
+                                    v-model="form.position_id"
+                                    class="form-select"
+                                    :class="{ 'is-invalid': form.errors.position_id }"
+                                    required
+                                >
+                                    <option value="">請選擇職務</option>
+                                    <optgroup v-for="role in roles" :key="role.id" :label="role.name + ' 角色'">
+                                        <option 
+                                            v-for="position in role.positions" 
+                                            :key="position.id" 
+                                            :value="position.id"
+                                            :disabled="!position.is_active"
                                         >
-                                        <label :for="'role-' + role.id" class="form-check-label">
-                                            {{ role.name }}
-                                        </label>
-                                    </div>
-                                    <div class="form-text" v-if="user.id === $page.props.auth.user.id">
-                                        為避免將自己移出管理員群組，編輯本人時「admin」角色固定保留。
-                                    </div>
+                                            {{ position.name }} 
+                                            <span v-if="!position.is_active">(已停用)</span>
+                                        </option>
+                                    </optgroup>
+                                </select>
+                                <div v-if="form.errors.position_id" class="invalid-feedback">
+                                    {{ form.errors.position_id }}
                                 </div>
-                                <div v-if="form.errors.roles" class="invalid-feedback d-block">
-                                    {{ form.errors.roles }}
+                                <div class="form-text text-info">
+                                    <i class="bi bi-info-circle"></i> 選擇職務後會自動分配對應角色和權限
                                 </div>
                             </div>
                         </div>
@@ -447,6 +452,7 @@ const form = useForm({
     address: props.user.address,
     department: props.user.department,
     position: props.user.position,
+    position_id: props.user.position_id || '', // 職務ID
     emergency_contact: props.user.emergency_contact,
     emergency_phone: props.user.emergency_phone,
     roles: props.user.roles.map(role => role.name),

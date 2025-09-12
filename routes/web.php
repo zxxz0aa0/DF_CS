@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\CompanyCategoryController;
 use App\Http\Controllers\Admin\CompanyController;
+use App\Http\Controllers\Admin\DriverController;
+use App\Http\Controllers\Admin\PositionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -46,6 +48,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::post('/permissions', [RolePermissionController::class, 'storePermission'])->name('permissions.store');
     Route::delete('/permissions/{permission}', [RolePermissionController::class, 'destroyPermission'])->name('permissions.destroy');
 
+    // 職務管理路由
+    Route::resource('positions', PositionController::class);
+    Route::put('positions/{position}/sync-permissions', [PositionController::class, 'syncPermissions'])->name('positions.sync-permissions');
+    Route::get('api/positions/stats', [PositionController::class, 'getStats'])->name('api.positions.stats');
+
     // API 路由
     Route::put('/api/roles/{role}/permissions', [RolePermissionController::class, 'syncRolePermissions'])->name('api.roles.sync-permissions');
     Route::get('/api/roles/stats', [RolePermissionController::class, 'getRoleStats'])->name('api.roles.stats');
@@ -53,6 +60,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // 公司管理路由
     Route::resource('company-categories', CompanyCategoryController::class);
     Route::resource('companies', CompanyController::class);
+
+    // 駕駛管理路由 (靜態路由要放在 resource 之前)
+    Route::get('drivers/export', [DriverController::class, 'export'])->name('drivers.export');
+    Route::post('drivers/import', [DriverController::class, 'import'])->name('drivers.import');
+    Route::get('drivers/expiring-licenses', [DriverController::class, 'expiringLicenses'])->name('drivers.expiring-licenses');
+    Route::resource('drivers', DriverController::class);
 });
 
 require __DIR__.'/auth.php';

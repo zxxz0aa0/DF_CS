@@ -57,14 +57,13 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="email" class="form-label">電子郵件 <span class="text-danger">*</span></label>
+                                <label for="email" class="form-label">電子郵件 </label>
                                 <input
                                     id="email"
                                     v-model="form.email"
                                     type="email"
                                     class="form-control"
                                     :class="{ 'is-invalid': form.errors.email }"
-                                    required
                                 >
                                 <div v-if="form.errors.email" class="invalid-feedback">
                                     {{ form.errors.email }}
@@ -136,7 +135,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="birth_date" class="form-label">出生日期 <span class="text-danger">*</span></label>
+                                <label for="birth_date" class="form-label">出生日期</label>
                                 <input
                                     id="birth_date"
                                     v-model="form.birth_date"
@@ -144,7 +143,6 @@
                                     class="form-control"
                                     :class="{ 'is-invalid': form.errors.birth_date }"
                                     :max="maxBirthDate"
-                                    required
                                 >
                                 <div v-if="form.errors.birth_date" class="invalid-feedback">
                                     {{ form.errors.birth_date }}
@@ -249,7 +247,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="emergency_contact" class="form-label">緊急聯絡人 <span class="text-danger">*</span></label>
+                                <label for="emergency_contact" class="form-label">緊急聯絡人</label>
                                 <input
                                     id="emergency_contact"
                                     v-model="form.emergency_contact"
@@ -257,7 +255,6 @@
                                     class="form-control"
                                     :class="{ 'is-invalid': form.errors.emergency_contact }"
                                     placeholder="緊急聯絡人姓名"
-                                    required
                                 >
                                 <div v-if="form.errors.emergency_contact" class="invalid-feedback">
                                     {{ form.errors.emergency_contact }}
@@ -265,7 +262,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="emergency_phone" class="form-label">緊急聯絡人電話 <span class="text-danger">*</span></label>
+                                <label for="emergency_phone" class="form-label">緊急聯絡人電話</label>
                                 <input
                                     id="emergency_phone"
                                     v-model="form.emergency_phone"
@@ -273,7 +270,6 @@
                                     class="form-control"
                                     :class="{ 'is-invalid': form.errors.emergency_phone }"
                                     placeholder="09xxxxxxxx"
-                                    required
                                 >
                                 <div v-if="form.errors.emergency_phone" class="invalid-feedback">
                                     {{ form.errors.emergency_phone }}
@@ -328,29 +324,32 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">角色權限</label>
-                                <div class="mt-2">
-                                    <div v-for="role in roles" :key="role.id" class="form-check">
-                                        <input
-                                            :id="'role-' + role.id"
-                                            v-model="form.roles"
-                                            type="checkbox"
-                                            :value="role.name"
-                                            class="form-check-input"
+                                <label for="position_id" class="form-label">職務 <span class="text-danger">*</span></label>
+                                <select
+                                    id="position_id"
+                                    v-model="form.position_id"
+                                    class="form-select"
+                                    :class="{ 'is-invalid': form.errors.position_id }"
+                                    required
+                                >
+                                    <option value="">請選擇職務</option>
+                                    <optgroup v-for="role in roles" :key="role.id" :label="role.name + ' 角色'">
+                                        <option 
+                                            v-for="position in role.positions" 
+                                            :key="position.id" 
+                                            :value="position.id"
+                                            :disabled="!position.is_active"
                                         >
-                                        <label :for="'role-' + role.id" class="form-check-label">
-                                            <strong>{{ role.name }}</strong>
-                                            <div class="form-text">
-                                                權限數量: {{ role.permissions_count || 0 }}
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div v-if="form.errors.roles" class="invalid-feedback d-block">
-                                    {{ form.errors.roles }}
+                                            {{ position.name }} 
+                                            <span v-if="!position.is_active">(已停用)</span>
+                                        </option>
+                                    </optgroup>
+                                </select>
+                                <div v-if="form.errors.position_id" class="invalid-feedback">
+                                    {{ form.errors.position_id }}
                                 </div>
                                 <div class="form-text text-info">
-                                    <i class="bi bi-info-circle"></i> 預設會為新使用者分配 "user" 角色
+                                    <i class="bi bi-info-circle"></i> 選擇職務後會自動分配對應角色和權限
                                 </div>
                             </div>
                         </div>
@@ -394,7 +393,7 @@ const props = defineProps({
         type: Array,
         required: true,
     },
-    permissions: {
+    positions: {
         type: Array,
         required: true,
     },
@@ -422,7 +421,7 @@ const form = useForm({
     position: '',
     emergency_contact: '',
     emergency_phone: '',
-    roles: ['user'], // 預設分配 user 角色
+    position_id: '', // 職務ID
     errors: {}
 })
 
@@ -445,7 +444,6 @@ const createUser = () => {
 
 const resetForm = () => {
     form.reset()
-    form.roles = ['user'] // 重設後保持預設角色
 }
 </script>
 

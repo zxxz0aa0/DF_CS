@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Validation\Rule;
 
@@ -37,25 +37,15 @@ class RolePermissionController extends Controller
      */
     public function edit(Role $role): Response
     {
-        $role->load('permissions', 'users:id,name,email');
-        $allPermissions = Permission::all();
-
-        // 按模組分組權限
-        $groupedPermissions = $allPermissions->groupBy(function ($permission) {
-            $parts = explode(' ', $permission->name);
-            return end($parts); // 使用最後一個單字作為分組 (users, roles, dashboard etc.)
-        });
+        $role->load('users:id,name,email');
 
         return Inertia::render('Admin/Roles/Edit', [
             'role' => $role,
-            'allPermissions' => $allPermissions,
-            'groupedPermissions' => $groupedPermissions,
-            'rolePermissions' => $role->permissions->pluck('id')->toArray(),
         ]);
     }
 
     /**
-     * 更新角色權限
+     * 更新角色資訊
      */
     public function update(Request $request, Role $role): RedirectResponse
     {
@@ -66,20 +56,15 @@ class RolePermissionController extends Controller
                 'max:255',
                 Rule::unique('roles', 'name')->ignore($role->id),
             ],
-            'permissions' => 'array',
-            'permissions.*' => 'exists:permissions,id',
         ]);
 
-        // 更新角色名稱
+        // 更新角色名稱（不再處理權限）
         $role->update([
             'name' => $request->name,
         ]);
 
-        // 同步權限
-        $role->syncPermissions($request->permissions ?? []);
-
         return redirect()->route('admin.roles.index')
-            ->with('success', "角色「{$role->name}」已成功更新。");
+            ->with('success', "角色「{$role->name}」已成功更新。權限管理請前往職務管理頁面設定。");
     }
 
     /**
@@ -89,20 +74,14 @@ class RolePermissionController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:roles,name',
-            'permissions' => 'array',
-            'permissions.*' => 'exists:permissions,id',
         ]);
 
         $role = Role::create([
             'name' => $request->name,
         ]);
 
-        if ($request->permissions) {
-            $role->syncPermissions($request->permissions);
-        }
-
         return redirect()->route('admin.roles.index')
-            ->with('success', "角色「{$role->name}」已成功建立。");
+            ->with('success', "角色「{$role->name}」已成功建立。請前往職務管理頁面為此角色建立職務並分配權限。");
     }
 
     /**

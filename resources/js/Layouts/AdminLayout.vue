@@ -109,6 +109,12 @@
                                         <p>權限管理</p>
                                     </Link>
                                 </li>
+                                <li class="nav-item">
+                                    <Link :href="route('admin.positions.index')" class="nav-link" :class="{ active: route().current('admin.positions.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>職務管理</p>
+                                    </Link>
+                                </li>
                             </ul>
                         </li>
 
@@ -133,6 +139,31 @@
                                         <i class="nav-icon bi bi-circle"></i>
                                         <p>公司資料管理</p>
                                     </Link>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- 駕駛管理 -->
+                        <li v-if="canSeeDriverManagement" class="nav-item" :class="{ 'menu-open': isDriverManagementActive || driverMenuOpen }">
+                            <a href="#" class="nav-link" :class="{ active: isDriverManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleDriverMenu">
+                                <i class="nav-icon bi bi-person-vcard"></i>
+                                <p>
+                                    駕駛管理
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <Link :href="route('admin.drivers.index')" class="nav-link" :class="{ active: route().current('admin.drivers.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>駕駛資料管理</p>
+                                    </Link>
+                                </li>
+                                <li class="nav-item">
+                                    <a :href="route('admin.drivers.expiring-licenses')" class="nav-link" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>證照到期提醒</p>
+                                    </a>
                                 </li>
                             </ul>
                         </li>
@@ -195,6 +226,7 @@ defineProps({
 const userMenuOpen = ref(false)
 const permissionMenuOpen = ref(false)
 const companyMenuOpen = ref(false)
+const driverMenuOpen = ref(false)
 const sidebarOpen = ref(false)
 
 // 取得前端共享的角色/權限（在 <script setup> 需用 usePage 取得 $page）
@@ -220,6 +252,11 @@ const canSeeCompanyManagement = computed(() => {
     return hasRole('admin')
 })
 
+const canSeeDriverManagement = computed(() => {
+    // 駕駛管理路由僅開放 admin 使用
+    return hasRole('admin')
+})
+
 const isUserManagementActive = computed(() => {
     return route().current('admin.users.*')
 })
@@ -232,11 +269,16 @@ const isCompanyManagementActive = computed(() => {
     return route().current('admin.company-categories.*') || route().current('admin.companies.*')
 })
 
+const isDriverManagementActive = computed(() => {
+    return route().current('admin.drivers.*')
+})
+
 const toggleUserMenu = () => {
     userMenuOpen.value = !userMenuOpen.value
     if (userMenuOpen.value) {
         permissionMenuOpen.value = false
         companyMenuOpen.value = false
+        driverMenuOpen.value = false
     }
 }
 
@@ -245,6 +287,7 @@ const togglePermissionMenu = () => {
     if (permissionMenuOpen.value) {
         userMenuOpen.value = false
         companyMenuOpen.value = false
+        driverMenuOpen.value = false
     }
 }
 
@@ -253,6 +296,16 @@ const toggleCompanyMenu = () => {
     if (companyMenuOpen.value) {
         userMenuOpen.value = false
         permissionMenuOpen.value = false
+        driverMenuOpen.value = false
+    }
+}
+
+const toggleDriverMenu = () => {
+    driverMenuOpen.value = !driverMenuOpen.value
+    if (driverMenuOpen.value) {
+        userMenuOpen.value = false
+        permissionMenuOpen.value = false
+        companyMenuOpen.value = false
     }
 }
 
