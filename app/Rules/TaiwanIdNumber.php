@@ -14,7 +14,7 @@ class TaiwanIdNumber implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!$this->isValidTaiwanId($value)) {
+        if (! $this->isValidTaiwanId($value)) {
             $fail('身分證字號格式不正確');
         }
     }
@@ -25,7 +25,7 @@ class TaiwanIdNumber implements ValidationRule
     private function isValidTaiwanId(string $id): bool
     {
         // 基本格式檢查：第一個字母，後面9個數字
-        if (!preg_match('/^[A-Z][0-9]{9}$/', $id)) {
+        if (! preg_match('/^[A-Z][0-9]{9}$/', $id)) {
             return false;
         }
 
@@ -35,7 +35,7 @@ class TaiwanIdNumber implements ValidationRule
             'G' => 16, 'H' => 17, 'I' => 34, 'J' => 18, 'K' => 19, 'L' => 20,
             'M' => 21, 'N' => 22, 'O' => 35, 'P' => 23, 'Q' => 24, 'R' => 25,
             'S' => 26, 'T' => 27, 'U' => 28, 'V' => 29, 'W' => 32, 'X' => 30,
-            'Y' => 31, 'Z' => 33
+            'Y' => 31, 'Z' => 33,
         ];
 
         $letter = $id[0];

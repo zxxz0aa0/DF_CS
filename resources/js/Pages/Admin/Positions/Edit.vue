@@ -149,7 +149,7 @@
                                         class="form-check-input"
                                     >
                                     <label :for="'perm-' + permission.id" class="form-check-label">
-                                        {{ permission.name }}
+                                        {{ label(permission.name) }}
                                     </label>
                                 </div>
                             </div>
@@ -176,6 +176,7 @@
 import { ref } from 'vue'
 import { Link, useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+import { usePermissionLabels } from '@/Composables/usePermissionLabels'
 
 const props = defineProps({
     position: {
@@ -209,6 +210,8 @@ const form = useForm({
     sort_order: props.position.sort_order,
     permissions: props.positionPermissions
 })
+
+const { label } = usePermissionLabels()
 
 const updatePosition = () => {
     form.put(route('admin.positions.update', props.position.id), {

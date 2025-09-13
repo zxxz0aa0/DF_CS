@@ -211,7 +211,7 @@
                                             class="badge bg-success me-1 mb-1"
                                             style="font-size: 0.75em;"
                                         >
-                                            {{ permission }}
+                                            {{ label(permission) }}
                                         </span>
                                         <button 
                                             v-if="userPermissions.length > 6"
@@ -242,10 +242,11 @@
                                 <i class="bi bi-arrow-left"></i> 返回列表
                             </Link>
                             <div>
-                                <Link :href="route('admin.users.edit', user.id)" class="btn btn-warning me-2">
+                                <Link v-if="can('edit users')" :href="route('admin.users.edit', user.id)" class="btn btn-warning me-2">
                                     <i class="bi bi-pencil"></i> 編輯使用者
                                 </Link>
                                 <button
+                                    v-if="can('delete users')"
                                     @click="confirmDelete"
                                     class="btn btn-danger"
                                     :disabled="user.id === $page.props.auth.user.id"
@@ -291,6 +292,8 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
+import { usePermissionLabels } from '@/Composables/usePermissionLabels'
+import { usePermissions } from '@/Composables/usePermissions'
 
 const props = defineProps({
     user: {
@@ -302,6 +305,8 @@ const props = defineProps({
 const showDeleteModal = ref(false)
 const showAllPermissions = ref(false)
 const showFullIdNumber = ref(false)
+const { can } = usePermissions()
+const { label } = usePermissionLabels()
 
 
 const userPermissions = computed(() => {

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('position_id')->constrained()->onDelete('cascade')->comment('職務ID');
             $table->foreignId('permission_id')->constrained()->onDelete('cascade')->comment('權限ID');
             $table->timestamps();
-            
+
             $table->unique(['position_id', 'permission_id']);
             $table->index('position_id');
             $table->index('permission_id');

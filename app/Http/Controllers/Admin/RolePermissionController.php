@@ -3,16 +3,21 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Role;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Validation\Rule;
 
 class RolePermissionController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:manage roles');
+    }
+
     /**
      * 顯示角色列表
      */
@@ -114,10 +119,11 @@ class RolePermissionController extends Controller
     public function permissions(): Response
     {
         $permissions = Permission::withCount('roles')->get();
-        
+
         // 按模組分組權限
         $groupedPermissions = $permissions->groupBy(function ($permission) {
             $parts = explode(' ', $permission->name);
+
             return end($parts);
         });
 
@@ -187,7 +193,7 @@ class RolePermissionController extends Controller
     public function getRoleStats()
     {
         $roles = Role::withCount(['users', 'permissions'])->get();
-        
+
         $stats = [
             'totalRoles' => $roles->count(),
             'totalUsers' => \App\Models\User::count(),

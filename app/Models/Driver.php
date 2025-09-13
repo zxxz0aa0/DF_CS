@@ -57,31 +57,33 @@ class Driver extends Model
 
     public function getLicenseDaysRemainingAttribute(): ?int
     {
-        if (!$this->license_expire_date) {
+        if (! $this->license_expire_date) {
             return null;
         }
-        
+
         return now()->diffInDays($this->license_expire_date, false);
     }
 
     public function getProfessionalLicenseDaysRemainingAttribute(): ?int
     {
-        if (!$this->professional_license_expire_date) {
+        if (! $this->professional_license_expire_date) {
             return null;
         }
-        
+
         return now()->diffInDays($this->professional_license_expire_date, false);
     }
 
     public function isLicenseExpiringSoon(int $days = 30): bool
     {
         $remaining = $this->license_days_remaining;
+
         return $remaining !== null && $remaining <= $days && $remaining >= 0;
     }
 
     public function isProfessionalLicenseExpiringSoon(int $days = 30): bool
     {
         $remaining = $this->professional_license_days_remaining;
+
         return $remaining !== null && $remaining <= $days && $remaining >= 0;
     }
 
@@ -97,19 +99,19 @@ class Driver extends Model
 
     public function scopeSearch($query, $term)
     {
-        return $query->where(function($q) use ($term) {
+        return $query->where(function ($q) use ($term) {
             $q->where('name', 'like', "%{$term}%")
-              ->orWhere('id_number', 'like', "%{$term}%")
-              ->orWhere('mobile_phone1', 'like', "%{$term}%")
-              ->orWhere('mobile_phone2', 'like', "%{$term}%");
+                ->orWhere('id_number', 'like', "%{$term}%")
+                ->orWhere('mobile_phone1', 'like', "%{$term}%")
+                ->orWhere('mobile_phone2', 'like', "%{$term}%");
         });
     }
 
     public function scopeExpiringLicenses($query, int $days = 30)
     {
-        return $query->where(function($q) use ($days) {
+        return $query->where(function ($q) use ($days) {
             $q->whereBetween('license_expire_date', [now(), now()->addDays($days)])
-              ->orWhereBetween('professional_license_expire_date', [now(), now()->addDays($days)]);
+                ->orWhereBetween('professional_license_expire_date', [now(), now()->addDays($days)]);
         });
     }
 }

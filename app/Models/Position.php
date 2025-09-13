@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Spatie\Permission\Models\Role;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class Position extends Model
 {
@@ -62,7 +62,7 @@ class Position extends Model
     public function givePermissionTo($permissions): self
     {
         $permissions = collect($permissions)->flatten();
-        
+
         foreach ($permissions as $permission) {
             $permissionModel = Permission::where('name', $permission)->first();
             if ($permissionModel) {
@@ -79,7 +79,7 @@ class Position extends Model
     public function revokePermissionTo($permissions): self
     {
         $permissions = collect($permissions)->flatten();
-        
+
         foreach ($permissions as $permission) {
             $permissionModel = Permission::where('name', $permission)->first();
             if ($permissionModel) {
@@ -99,6 +99,7 @@ class Position extends Model
             if (is_numeric($permission)) {
                 return $permission;
             }
+
             return Permission::where('name', $permission)->first()?->id;
         })->filter()->values()->toArray();
 

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->foreignId('position_id')->nullable()->after('remember_token')->constrained()->onDelete('set null')->comment('職務ID');
-            
+
             $table->index('position_id');
         });
     }

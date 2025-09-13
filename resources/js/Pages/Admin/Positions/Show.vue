@@ -107,7 +107,7 @@
                     <div class="card-body">
                         <div v-if="position.permissions && position.permissions.length > 0">
                             <div class="mb-2" v-for="permission in position.permissions" :key="permission.id">
-                                <span class="badge bg-light text-dark">{{ permission.name }}</span>
+                                <span class="badge bg-light text-dark">{{ label(permission.name) }}</span>
                             </div>
                         </div>
                         <div v-else class="text-center text-muted py-3">
@@ -145,6 +145,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+import { usePermissionLabels } from '@/Composables/usePermissionLabels'
 
 const props = defineProps({
     position: {
@@ -152,6 +153,8 @@ const props = defineProps({
         required: true
     }
 })
+
+const { label } = usePermissionLabels()
 </script>
 
 <style scoped>

@@ -393,10 +393,6 @@ const props = defineProps({
         type: Array,
         required: true,
     },
-    positions: {
-        type: Array,
-        required: true,
-    },
     departmentOptions: {
         type: Array,
         required: true,

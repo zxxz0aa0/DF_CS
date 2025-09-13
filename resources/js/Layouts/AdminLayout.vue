@@ -21,7 +21,7 @@
                             {{ user.name }}
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
-                            <template v-if="hasRole('admin')">
+                            <template v-if="can('view admin dashboard')">
                                 <Link :href="route('dashboard')" class="dropdown-item">
                                     <i class="bi bi-house me-2"></i>前台
                                 </Link>
@@ -236,25 +236,24 @@ const perms = computed(() => page.props.auth?.permissions ?? [])
 const hasRole = (name) => roles.value?.includes?.(name)
 const can = (name) => perms.value?.includes?.(name)
 
-// 控制側欄顯示：
-// - 只有 admin 或具備相關權限者才看得到「使用者管理」「權限管理」
+// 控制側欄顯示：僅依權限決定顯示（不因為 admin 角色而全部顯示）
 const canSeeUserManagement = computed(() => {
-    return hasRole('admin') ||
-        can('view users') || can('create users') || can('edit users') || can('delete users')
+    return can('view users') || can('create users') || can('edit users') || can('delete users')
 })
 
 const canSeeRolePermission = computed(() => {
-    return hasRole('admin') || can('manage roles')
+    return can('manage roles') || 
+        can('view positions') || can('create positions') || can('edit positions') || can('delete positions')
 })
 
 const canSeeCompanyManagement = computed(() => {
-    // 目前公司管理路由仍僅開放 admin 使用
-    return hasRole('admin')
+    return can('view companies') || can('create companies') || can('edit companies') || can('delete companies') ||
+        can('view company categories') || can('create company categories') || can('edit company categories') || can('delete company categories')
 })
 
 const canSeeDriverManagement = computed(() => {
-    // 駕駛管理路由僅開放 admin 使用
-    return hasRole('admin')
+    return can('view drivers') || can('create drivers') || can('edit drivers') || can('delete drivers') ||
+        can('export drivers') || can('import drivers') || can('view expiring licenses')
 })
 
 const isUserManagementActive = computed(() => {

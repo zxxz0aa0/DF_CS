@@ -104,7 +104,8 @@
                                         <tr v-for="permission in groupPermissions" :key="permission.id">
                                             <td>{{ permission.id }}</td>
                                             <td>
-                                                <code>{{ permission.name }}</code>
+                                                <span>{{ label(permission.name) }}</span>
+                                                <small class="text-muted ms-2"><code>{{ permission.name }}</code></small>
                                             </td>
                                             <td>
                                                 <span class="badge bg-info">{{ permission.roles_count || 0 }}</span>
@@ -264,6 +265,7 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
+import { usePermissionLabels } from '@/Composables/usePermissionLabels'
 
 const props = defineProps({
     permissions: {
@@ -284,6 +286,7 @@ const showCreateModal = ref(false)
 const showDeleteModal = ref(false)
 const deletePermission = ref(null)
 const collapsedGroups = ref({})
+const { label } = usePermissionLabels()
 
 const usedPermissions = computed(() => {
     return props.permissions.filter(p => p.roles_count > 0).length

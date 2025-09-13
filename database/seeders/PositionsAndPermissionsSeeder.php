@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Models\Position;
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class PositionsAndPermissionsSeeder extends Seeder
 {
@@ -24,30 +23,30 @@ class PositionsAndPermissionsSeeder extends Seeder
             'delete drivers',
             'export drivers',
             'import drivers',
-            
+
             // 公司管理權限
             'view companies',
             'create companies',
             'edit companies',
             'delete companies',
-            
+
             // 職務管理權限
             'view positions',
             'create positions',
             'edit positions',
             'delete positions',
-            
+
             // 報表權限
             'view reports',
             'create reports',
             'export reports',
-            
+
             // 系統設定權限
             'manage system settings',
             'view system logs',
             'backup database',
             'restore database',
-            
+
             // 財務權限
             'view financial reports',
             'manage billing',
@@ -73,7 +72,7 @@ class PositionsAndPermissionsSeeder extends Seeder
                     'view users', 'create users', 'edit users', 'delete users',
                     'manage roles',
                     'view positions', 'create positions', 'edit positions', 'delete positions',
-                    'manage system settings', 'view system logs', 'backup database', 'restore database'
+                    'manage system settings', 'view system logs', 'backup database', 'restore database',
                 ],
             ],
             [
@@ -85,7 +84,7 @@ class PositionsAndPermissionsSeeder extends Seeder
                     'view users',
                     'view drivers', 'create drivers', 'edit drivers',
                     'view companies', 'create companies', 'edit companies',
-                    'view reports'
+                    'view reports',
                 ],
             ],
             [
@@ -98,7 +97,7 @@ class PositionsAndPermissionsSeeder extends Seeder
                     'manage billing',
                     'view statistics',
                     'view reports', 'create reports', 'export reports',
-                    'view drivers', 'export drivers'
+                    'view drivers', 'export drivers',
                 ],
             ],
             [
@@ -110,14 +109,14 @@ class PositionsAndPermissionsSeeder extends Seeder
                     'view users', 'create users', 'edit users',
                     'view positions',
                     'view drivers', 'create drivers', 'edit drivers', 'export drivers',
-                    'view reports'
+                    'view reports',
                 ],
             ],
         ];
 
         foreach ($adminPositions as $positionData) {
             $position = Position::firstOrCreate([
-                'code' => $positionData['code']
+                'code' => $positionData['code'],
             ], [
                 'name' => $positionData['name'],
                 'description' => $positionData['description'],
@@ -134,7 +133,7 @@ class PositionsAndPermissionsSeeder extends Seeder
                     $permissionIds[] = $permission->id;
                 }
             }
-            
+
             $position->permissions()->sync($permissionIds);
         }
 
@@ -162,7 +161,7 @@ class PositionsAndPermissionsSeeder extends Seeder
 
         foreach ($userPositions as $positionData) {
             $position = Position::firstOrCreate([
-                'code' => $positionData['code']
+                'code' => $positionData['code'],
             ], [
                 'name' => $positionData['name'],
                 'description' => $positionData['description'],
@@ -179,8 +178,8 @@ class PositionsAndPermissionsSeeder extends Seeder
                     $permissionIds[] = $permission->id;
                 }
             }
-            
-            if (!empty($permissionIds)) {
+
+            if (! empty($permissionIds)) {
                 $position->permissions()->sync($permissionIds);
             }
         }

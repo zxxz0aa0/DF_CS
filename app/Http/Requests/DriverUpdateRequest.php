@@ -14,10 +14,10 @@ class DriverUpdateRequest extends FormRequest
     public function rules(): array
     {
         $driverId = $this->route('driver')->id;
-        
+
         return [
             'name' => 'required|string|max:100',
-            'id_number' => 'required|string|size:10|unique:drivers,id_number,' . $driverId . '|regex:/^[A-Z][0-9]{9}$/',
+            'id_number' => 'required|string|size:10|unique:drivers,id_number,'.$driverId.'|regex:/^[A-Z][0-9]{9}$/',
             'company_category_id' => 'nullable|exists:company_categories,id',
             'birthday' => 'nullable|date|before:today',
             'contact_address' => 'nullable|string|max:1000',

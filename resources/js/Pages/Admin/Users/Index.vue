@@ -20,7 +20,11 @@
                     <div class="card-header">
                         <h3 class="card-title">使用者列表</h3>
                         <div class="card-tools">
-                            <Link :href="route('admin.users.create')" class="btn btn-primary btn-sm">
+                            <Link 
+                                v-if="can('create users')"
+                                :href="route('admin.users.create')" 
+                                class="btn btn-primary btn-sm"
+                            >
                                 <i class="bi bi-plus"></i> 新增使用者
                             </Link>
                         </div>
@@ -81,13 +85,22 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <Link :href="route('admin.users.show', user.id)" class="btn btn-info btn-sm">
+                                                <Link 
+                                                    v-if="can('view users')"
+                                                    :href="route('admin.users.show', user.id)" 
+                                                    class="btn btn-info btn-sm"
+                                                >
                                                     <i class="bi bi-eye"></i>
                                                 </Link>
-                                                <Link :href="route('admin.users.edit', user.id)" class="btn btn-warning btn-sm">
+                                                <Link 
+                                                    v-if="can('edit users')"
+                                                    :href="route('admin.users.edit', user.id)" 
+                                                    class="btn btn-warning btn-sm"
+                                                >
                                                     <i class="bi bi-pencil"></i>
                                                 </Link>
                                                 <button
+                                                    v-if="can('delete users')"
                                                     @click="confirmDelete(user)"
                                                     class="btn btn-danger btn-sm"
                                                     :disabled="user.id === $page.props.auth.user.id"
@@ -164,6 +177,9 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
+import { usePermissions } from '@/Composables/usePermissions'
+
+const { can } = usePermissions()
 
 const props = defineProps({
     users: {

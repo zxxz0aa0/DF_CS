@@ -184,7 +184,7 @@
                                                             :for="`permission_${permission.id}`" 
                                                             class="form-check-label"
                                                         >
-                                                            {{ permission.name }}
+                                                            {{ label(permission.name) }}
                                                         </label>
                                                     </div>
                                                 </div>
@@ -214,6 +214,7 @@
 <script setup>
 import { Link, useForm, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+import { usePermissionLabels } from '@/Composables/usePermissionLabels'
 
 const props = defineProps({
     roles: Array,
@@ -232,6 +233,8 @@ const form = useForm({
     sort_order: 0,
     permissions: []
 })
+
+const { label } = usePermissionLabels()
 
 const submit = () => {
     form.post(route('admin.positions.store'))

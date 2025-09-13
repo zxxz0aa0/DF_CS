@@ -9,6 +9,13 @@ use Inertia\Inertia;
 
 class CompanyCategoryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view company categories')->only(['index', 'show']);
+        $this->middleware('permission:create company categories')->only(['create', 'store']);
+        $this->middleware('permission:edit company categories')->only(['edit', 'update']);
+        $this->middleware('permission:delete company categories')->only(['destroy']);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -17,14 +24,14 @@ class CompanyCategoryController extends Controller
         $query = CompanyCategory::query();
 
         if ($request->search) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%')
+                ->orWhere('description', 'like', '%'.$request->search.'%');
         }
 
         $categories = $query->withCount('companies')
-                           ->orderBy('name')
-                           ->paginate(10)
-                           ->withQueryString();
+            ->orderBy('name')
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('Admin/CompanyCategories/Index', [
             'categories' => $categories,
@@ -53,7 +60,7 @@ class CompanyCategoryController extends Controller
         CompanyCategory::create($request->only(['name', 'description']));
 
         return redirect()->route('admin.company-categories.index')
-                         ->with('success', '公司類別已成功建立');
+            ->with('success', '公司類別已成功建立');
     }
 
     /**
@@ -72,14 +79,14 @@ class CompanyCategoryController extends Controller
     public function update(Request $request, CompanyCategory $companyCategory)
     {
         $request->validate([
-            'name' => 'required|string|max:100|unique:company_categories,name,' . $companyCategory->id,
+            'name' => 'required|string|max:100|unique:company_categories,name,'.$companyCategory->id,
             'description' => 'nullable|string',
         ]);
 
         $companyCategory->update($request->only(['name', 'description']));
 
         return redirect()->route('admin.company-categories.index')
-                         ->with('success', '公司類別已成功更新');
+            ->with('success', '公司類別已成功更新');
     }
 
     /**

@@ -115,7 +115,11 @@
                     <div class="card-header">
                         <h3 class="card-title">職務列表</h3>
                         <div class="card-tools">
-                            <Link :href="route('admin.positions.create')" class="btn btn-primary btn-sm">
+                            <Link 
+                                v-if="can('create positions')"
+                                :href="route('admin.positions.create')" 
+                                class="btn btn-primary btn-sm"
+                            >
                                 <i class="bi bi-plus"></i> 新增職務
                             </Link>
                         </div>
@@ -162,6 +166,7 @@
                                     <td>
                                         <div class="btn-group btn-group-sm">
                                             <Link 
+                                                v-if="can('view positions')"
                                                 :href="route('admin.positions.show', position.id)" 
                                                 class="btn btn-info"
                                                 title="檢視"
@@ -169,6 +174,7 @@
                                                 <i class="bi bi-eye"></i>
                                             </Link>
                                             <Link 
+                                                v-if="can('edit positions')"
                                                 :href="route('admin.positions.edit', position.id)" 
                                                 class="btn btn-warning"
                                                 title="編輯"
@@ -176,6 +182,7 @@
                                                 <i class="bi bi-pencil"></i>
                                             </Link>
                                             <button 
+                                                v-if="can('delete positions')"
                                                 @click="confirmDelete(position)" 
                                                 class="btn btn-danger"
                                                 :disabled="position.users_count > 0"
@@ -236,6 +243,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+import { usePermissions } from '@/Composables/usePermissions'
+
+const { can } = usePermissions()
 
 const props = defineProps({
     positions: Object,

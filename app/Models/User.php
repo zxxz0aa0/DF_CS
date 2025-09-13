@@ -4,15 +4,18 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles {
+        hasPermissionTo as spatieHasPermissionTo;
+        hasAnyPermission as spatieHasAnyPermission;
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -31,19 +34,41 @@ class User extends Authenticatable
         'emergency_contact',
         'emergency_phone',
         'department',
-        'position',
+        'position', // 保持原有欄位名稱
         'gender',
         'address',
         'position_id',
     ];
-    
+
+
+    /**
+     * 覆寫 getAttribute 方法來處理 position 屬性衝突
+     */
+    public function getAttribute($key)
+    {
+        if ($key === 'position' && func_num_args() === 1) {
+            // 當直接存取 position 屬性時，返回關聯
+            return $this->getRelationValue('position');
+        }
+        
+        return parent::getAttribute($key);
+    }
+
+    /**
+     * 取得職務名稱字串（舊的 position 欄位值）
+     */
+    public function getPositionTitleAttribute()
+    {
+        return $this->getAttributeFromArray('position');
+    }
+
     /**
      * 取得職務名稱（字符串）
      */
     public function getPositionNameAttribute()
     {
         if ($this->position_id) {
-            if (!$this->relationLoaded('position')) {
+            if (! $this->relationLoaded('position')) {
                 $this->load('position');
             }
             $positionModel = $this->getRelation('position');
@@ -51,8 +76,8 @@ class User extends Authenticatable
                 return $positionModel->name;
             }
         }
-        
-        return $this->attributes['position'] ?? null;
+
+        return $this->getAttributeFromArray('position');
     }
 
     /**
@@ -95,12 +120,12 @@ class User extends Authenticatable
     public function hasPositionPermission(string $permission): bool
     {
         // 確保載入 position 關聯
-        if ($this->position_id && !$this->relationLoaded('position')) {
+        if ($this->position_id && ! $this->relationLoaded('position')) {
             $this->load('position');
         }
-        
+
         $positionModel = $this->getRelation('position');
-        if (!$positionModel) {
+        if (! $positionModel) {
             return false;
         }
 
@@ -108,12 +133,17 @@ class User extends Authenticatable
     }
 
     /**
-     * 檢查使用者是否有職務權限（職務優先架構）
+     * 檢查是否擁有任一給定權限（職務優先，回退 Spatie）
      */
-    public function hasAnyPermission(string $permission): bool
+    public function hasAnyPermission(...$permissions): bool
     {
-        // 只檢查職務權限，不再檢查角色權限
-        return $this->hasPositionPermission($permission);
+        $flat = collect($permissions)->flatten()->all();
+        foreach ($flat as $permission) {
+            if ($this->hasPositionPermission($permission)) {
+                return true;
+            }
+        }
+        return $this->spatieHasAnyPermission(...$permissions);
     }
 
     /**
@@ -122,26 +152,24 @@ class User extends Authenticatable
     public function getAllPermissions()
     {
         // 確保載入 position 關聯及其權限
-        if ($this->position_id && !$this->relationLoaded('position')) {
+        if ($this->position_id && ! $this->relationLoaded('position')) {
             $this->load('position.permissions');
         }
-        
+
         $positionModel = $this->getRelation('position');
+
         return $positionModel?->permissions ?? collect([]);
     }
 
     /**
-     * 檢查是否有指定權限（覆蓋 Spatie 的預設方法）
+     * 檢查是否有指定權限（職務優先，回退 Spatie）
      */
     public function hasPermissionTo($permission, $guardName = null): bool
     {
-        // 優先使用職務權限檢查
         if ($this->hasPositionPermission($permission)) {
             return true;
         }
-
-        // 如果沒有職務或職務沒有權限，則檢查角色權限（向後相容）
-        return parent::hasPermissionTo($permission, $guardName);
+        return $this->spatieHasPermissionTo($permission, $guardName);
     }
 
     /**

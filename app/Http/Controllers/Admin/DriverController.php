@@ -3,16 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Driver;
-use App\Models\CompanyCategory;
 use App\Http\Requests\DriverStoreRequest;
 use App\Http\Requests\DriverUpdateRequest;
+use App\Models\CompanyCategory;
+use App\Models\Driver;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Carbon\Carbon;
 
 class DriverController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view drivers')->only(['index', 'show']);
+        $this->middleware('permission:create drivers')->only(['create', 'store']);
+        $this->middleware('permission:edit drivers')->only(['edit', 'update']);
+        $this->middleware('permission:delete drivers')->only(['destroy']);
+        $this->middleware('permission:export drivers')->only(['export']);
+        $this->middleware('permission:import drivers')->only(['import']);
+        $this->middleware('permission:view expiring licenses')->only(['expiringLicenses']);
+    }
     public function index(Request $request)
     {
         $query = Driver::with(['companyCategory']);
@@ -100,7 +109,7 @@ class DriverController extends Controller
     public function expiringLicenses(Request $request)
     {
         $days = $request->get('days', 30);
-        
+
         $drivers = Driver::with(['companyCategory'])
             ->expiringLicenses($days)
             ->active()

@@ -10,6 +10,13 @@ use Inertia\Inertia;
 
 class CompanyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view companies')->only(['index', 'show']);
+        $this->middleware('permission:create companies')->only(['create', 'store']);
+        $this->middleware('permission:edit companies')->only(['edit', 'update']);
+        $this->middleware('permission:delete companies')->only(['destroy']);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -18,9 +25,9 @@ class CompanyController extends Controller
         $query = Company::with('category');
 
         if ($request->search) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('tax_id', 'like', '%' . $request->search . '%')
-                  ->orWhere('representative', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%')
+                ->orWhere('tax_id', 'like', '%'.$request->search.'%')
+                ->orWhere('representative', 'like', '%'.$request->search.'%');
         }
 
         if ($request->category_id) {
@@ -32,8 +39,8 @@ class CompanyController extends Controller
         }
 
         $companies = $query->orderBy('name')
-                          ->paginate(10)
-                          ->withQueryString();
+            ->paginate(10)
+            ->withQueryString();
 
         $categories = CompanyCategory::orderBy('name')->get();
 
@@ -76,7 +83,7 @@ class CompanyController extends Controller
         Company::create($request->all());
 
         return redirect()->route('admin.companies.index')
-                         ->with('success', '公司已成功建立');
+            ->with('success', '公司已成功建立');
     }
 
     /**
@@ -111,9 +118,9 @@ class CompanyController extends Controller
     {
         $request->validate([
             'category_id' => 'required|exists:company_categories,id',
-            'name' => 'required|string|max:200|unique:companies,name,' . $company->id,
+            'name' => 'required|string|max:200|unique:companies,name,'.$company->id,
             'address' => 'nullable|string',
-            'tax_id' => 'nullable|string|max:20|unique:companies,tax_id,' . $company->id,
+            'tax_id' => 'nullable|string|max:20|unique:companies,tax_id,'.$company->id,
             'phone' => 'nullable|string|max:50',
             'representative' => 'nullable|string|max:100',
             'email' => 'nullable|email',
@@ -124,7 +131,7 @@ class CompanyController extends Controller
         $company->update($request->all());
 
         return redirect()->route('admin.companies.index')
-                         ->with('success', '公司已成功更新');
+            ->with('success', '公司已成功更新');
     }
 
     /**

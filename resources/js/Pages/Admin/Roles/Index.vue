@@ -154,7 +154,7 @@
                     <div class="card-body">
                         <div class="permission-list">
                             <div v-for="permission in permissions" :key="permission.id" class="mb-2">
-                                <span class="badge bg-light text-dark">{{ permission.name }}</span>
+                                <span class="badge bg-light text-dark">{{ label(permission.name) }}</span>
                             </div>
                         </div>
                     </div>
@@ -199,7 +199,7 @@
                                                 class="form-check-input"
                                             >
                                             <label :for="'perm-' + permission.id" class="form-check-label">
-                                                {{ permission.name }}
+                                                {{ label(permission.name) }}
                                             </label>
                                         </div>
                                     </div>
@@ -246,6 +246,7 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import { usePermissionLabels } from '@/Composables/usePermissionLabels'
 
 const props = defineProps({
     roles: {
@@ -269,6 +270,7 @@ const props = defineProps({
 const showCreateModal = ref(false)
 const showDeleteModal = ref(false)
 const deleteRole = ref(null)
+const { label } = usePermissionLabels()
 
 const createForm = useForm({
     name: '',

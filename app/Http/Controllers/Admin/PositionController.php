@@ -4,16 +4,24 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Position;
-use Illuminate\Http\Request;
+use App\Models\Role;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Validation\Rule;
 
 class PositionController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view positions')->only(['index', 'show', 'getStats']);
+        $this->middleware('permission:create positions')->only(['create', 'store']);
+        $this->middleware('permission:edit positions')->only(['edit', 'update', 'syncPermissions']);
+        $this->middleware('permission:delete positions')->only(['destroy']);
+    }
+
     /**
      * 顯示職務列表
      */
@@ -27,8 +35,8 @@ class PositionController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -63,6 +71,7 @@ class PositionController extends Controller
         // 按模組分組權限
         $groupedPermissions = $permissions->groupBy(function ($permission) {
             $parts = explode(' ', $permission->name);
+
             return end($parts);
         });
 
@@ -137,6 +146,7 @@ class PositionController extends Controller
         // 按模組分組權限
         $groupedPermissions = $permissions->groupBy(function ($permission) {
             $parts = explode(' ', $permission->name);
+
             return end($parts);
         });
 
@@ -234,7 +244,7 @@ class PositionController extends Controller
     public function getStats()
     {
         $positions = Position::withCount(['users', 'permissions'])->get();
-        
+
         $stats = [
             'totalPositions' => $positions->count(),
             'activePositions' => $positions->where('is_active', true)->count(),

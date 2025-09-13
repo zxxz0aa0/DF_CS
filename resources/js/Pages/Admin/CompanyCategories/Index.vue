@@ -22,7 +22,11 @@
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <h3 class="card-title">公司類別列表</h3>
-                            <Link :href="route('admin.company-categories.create')" class="btn btn-primary">
+                            <Link 
+                                v-if="can('create company categories')"
+                                :href="route('admin.company-categories.create')" 
+                                class="btn btn-primary"
+                            >
                                 <i class="bi bi-plus-circle me-1"></i>新增類別
                             </Link>
                         </div>
@@ -75,6 +79,7 @@
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <Link
+                                                    v-if="can('edit company categories')"
                                                     :href="route('admin.company-categories.edit', category.id)"
                                                     class="btn btn-sm btn-outline-primary"
                                                     title="編輯"
@@ -82,6 +87,7 @@
                                                     <i class="bi bi-pencil"></i>
                                                 </Link>
                                                 <button
+                                                    v-if="can('delete company categories')"
                                                     @click="confirmDelete(category)"
                                                     class="btn btn-sm btn-outline-danger"
                                                     title="刪除"
@@ -174,11 +180,15 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+import { usePermissions } from '@/Composables/usePermissions'
 
 const props = defineProps({
     categories: Object,
     filters: Object,
 })
+
+// 權限檢查
+const { can } = usePermissions()
 
 const searchQuery = ref(props.filters.search || '')
 const deleteTarget = ref(null)

@@ -36,7 +36,32 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
                 // 供前端根據角色/權限決定側邊欄可見性
                 'roles' => fn () => $request->user()?->getRoleNames() ?? [],
-                'permissions' => fn () => $request->user()?->getAllPermissions()->pluck('name') ?? [],
+                // 修正權限取得邏輯：同時包含職務權限和角色權限
+                'permissions' => function () use ($request) {
+                    $user = $request->user();
+                    if (!$user) {
+                        return [];
+                    }
+                    
+                    // 收集所有權限名稱
+                    $permissions = collect();
+                    
+                    // 1. 從職務獲取權限（主要權限來源）
+                    if ($user->position_id && $user->position) {
+                        $positionPermissions = $user->position->permissions ?? collect();
+                        $permissions = $permissions->merge($positionPermissions->pluck('name'));
+                    }
+                    
+                    // 2. 從角色獲取權限（向後相容）
+                    $rolePermissions = $user->getPermissionsViaRoles();
+                    $permissions = $permissions->merge($rolePermissions->pluck('name'));
+                    
+                    // 3. 直接分配給用戶的權限
+                    $directPermissions = $user->getDirectPermissions();
+                    $permissions = $permissions->merge($directPermissions->pluck('name'));
+                    
+                    return $permissions->unique()->values()->all();
+                },
             ],
             'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true)->comment('是否啟用');
             $table->integer('sort_order')->default(0)->comment('排序順序');
             $table->timestamps();
-            
+
             $table->index(['role_id', 'is_active']);
         });
     }
