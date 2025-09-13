@@ -21,7 +21,7 @@
                             {{ user.name }}
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
-                            <template v-if="can('view admin dashboard')">
+                            <!--<template v-if="can('view admin dashboard')">
                                 <Link :href="route('dashboard')" class="dropdown-item">
                                     <i class="bi bi-house me-2"></i>前台
                                 </Link>
@@ -29,7 +29,7 @@
                                     <i class="bi bi-speedometer2 me-2"></i>後台
                                 </Link>
                                 <div class="dropdown-divider"></div>
-                            </template>
+                            </template>-->
                             <Link :href="route('profile.edit')" class="dropdown-item">
                                 <i class="bi bi-gear me-2"></i>個人設定
                             </Link>
@@ -58,89 +58,16 @@
             <div class="sidebar-wrapper">
 
                 <!-- 側邊欄選單 -->
-                <nav class="mt-2">
+                <nav class="mt-1">
                     <ul class="nav sidebar-menu flex-column" role="navigation" data-accordion="false">
+                        <!-- 主要功能 -->
+                        <li class="nav-header text-center text-white" style="background-color: #013A63;">主要功能</li>
                         <!-- 儀表板 -->
                         <li class="nav-item">
                             <Link :href="route('admin.dashboard')" class="nav-link" :class="{ active: route().current('admin.dashboard') }" @click="closeSidebar">
                                 <i class="nav-icon bi bi-speedometer2"></i>
                                 <p>儀表板</p>
                             </Link>
-                        </li>
-
-                        <!-- 使用者管理 -->
-                        <li v-if="canSeeUserManagement" class="nav-item" :class="{ 'menu-open': isUserManagementActive || userMenuOpen }">
-                            <a href="#" class="nav-link" :class="{ active: isUserManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleUserMenu">
-                                <i class="nav-icon bi bi-people"></i>
-                                <p>
-                                    使用者管理
-                                    <i class="nav-arrow bi bi-chevron-right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <Link :href="route('admin.users.index')" class="nav-link" :class="{ active: route().current('admin.users.*') }" @click="closeSidebar">
-                                        <i class="nav-icon bi bi-circle"></i>
-                                        <p>所有使用者</p>
-                                    </Link>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <!-- 權限管理 -->
-                        <li v-if="canSeeRolePermission" class="nav-item" :class="{ 'menu-open': isPermissionManagementActive || permissionMenuOpen }">
-                            <a href="#" class="nav-link" :class="{ active: isPermissionManagementActive }" data-lte-toggle="treeview" @click.prevent="togglePermissionMenu">
-                                <i class="nav-icon bi bi-shield-lock"></i>
-                                <p>
-                                    權限管理
-                                    <i class="nav-arrow bi bi-chevron-right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <Link :href="route('admin.roles.index')" class="nav-link" :class="{ active: route().current('admin.roles.*') }" @click="closeSidebar">
-                                        <i class="nav-icon bi bi-circle"></i>
-                                        <p>角色管理</p>
-                                    </Link>
-                                </li>
-                                <li class="nav-item">
-                                    <Link :href="route('admin.permissions.index')" class="nav-link" :class="{ active: route().current('admin.permissions.*') }" @click="closeSidebar">
-                                        <i class="nav-icon bi bi-circle"></i>
-                                        <p>權限管理</p>
-                                    </Link>
-                                </li>
-                                <li class="nav-item">
-                                    <Link :href="route('admin.positions.index')" class="nav-link" :class="{ active: route().current('admin.positions.*') }" @click="closeSidebar">
-                                        <i class="nav-icon bi bi-circle"></i>
-                                        <p>職務管理</p>
-                                    </Link>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <!-- 公司管理 -->
-                        <li v-if="canSeeCompanyManagement" class="nav-item" :class="{ 'menu-open': isCompanyManagementActive || companyMenuOpen }">
-                            <a href="#" class="nav-link" :class="{ active: isCompanyManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleCompanyMenu">
-                                <i class="nav-icon bi bi-buildings"></i>
-                                <p>
-                                    公司管理
-                                    <i class="nav-arrow bi bi-chevron-right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <Link :href="route('admin.company-categories.index')" class="nav-link" :class="{ active: route().current('admin.company-categories.*') }" @click="closeSidebar">
-                                        <i class="nav-icon bi bi-circle"></i>
-                                        <p>公司類別管理</p>
-                                    </Link>
-                                </li>
-                                <li class="nav-item">
-                                    <Link :href="route('admin.companies.index')" class="nav-link" :class="{ active: route().current('admin.companies.*') }" @click="closeSidebar">
-                                        <i class="nav-icon bi bi-circle"></i>
-                                        <p>公司資料管理</p>
-                                    </Link>
-                                </li>
-                            </ul>
                         </li>
 
                         <!-- 駕駛管理 -->
@@ -153,15 +80,15 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview">
-                                <li class="nav-item">
+                                <li class="nav-item ps-4">
                                     <Link :href="route('admin.drivers.index')" class="nav-link" :class="{ active: route().current('admin.drivers.*') }" @click="closeSidebar">
-                                        <i class="nav-icon bi bi-circle"></i>
+                                        <i class="nav-icon bi bi-person-lines-fill"></i>
                                         <p>駕駛資料管理</p>
                                     </Link>
                                 </li>
-                                <li class="nav-item">
+                                <li class="nav-item ps-4">
                                     <a :href="route('admin.drivers.expiring-licenses')" class="nav-link" @click="closeSidebar">
-                                        <i class="nav-icon bi bi-circle"></i>
+                                        <i class="nav-icon bi bi-check2-square"></i>
                                         <p>證照到期提醒</p>
                                     </a>
                                 </li>
@@ -169,13 +96,84 @@
                         </li>
 
                         <!-- 系統設定 -->
-                        <li class="nav-header">系統設定</li>
-                        <li class="nav-item">
+                        <li class="nav-header text-center text-white" style="background-color: #013A63;">系統設定</li>
+                        <!-- 公司管理 -->
+                        <li v-if="canSeeCompanyManagement" class="nav-item" :class="{ 'menu-open': isCompanyManagementActive || companyMenuOpen }">
+                            <a href="#" class="nav-link" :class="{ active: isCompanyManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleCompanyMenu">
+                                <i class="nav-icon bi bi-buildings"></i>
+                                <p>
+                                    公司管理
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item ps-4">
+                                    <Link :href="route('admin.company-categories.index')" class="nav-link" :class="{ active: route().current('admin.company-categories.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-building"></i>
+                                        <p>公司類別管理</p>
+                                    </Link>
+                                </li>
+                                <li class="nav-item ps-4">
+                                    <Link :href="route('admin.companies.index')" class="nav-link" :class="{ active: route().current('admin.companies.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-building-add"></i>
+                                        <p>公司資料管理</p>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </li>
+                        <!-- 使用者管理 -->
+                        <li v-if="canSeeUserManagement" class="nav-item" :class="{ 'menu-open': isUserManagementActive || userMenuOpen }">
+                            <a href="#" class="nav-link" :class="{ active: isUserManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleUserMenu">
+                                <i class="nav-icon bi bi-people"></i>
+                                <p>
+                                    使用者管理
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item ps-4">
+                                    <Link :href="route('admin.users.index')" class="nav-link" :class="{ active: route().current('admin.users.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-person-fill-add"></i>
+                                        <p>所有使用者</p>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </li>
+                        <li v-if="canSeeRolePermission" class="nav-item" :class="{ 'menu-open': isPermissionManagementActive || permissionMenuOpen }">
+                            <a href="#" class="nav-link" :class="{ active: isPermissionManagementActive }" data-lte-toggle="treeview" @click.prevent="togglePermissionMenu">
+                                <i class="nav-icon bi bi-shield-lock"></i>
+                                <p>
+                                    權限管理
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item ps-4">
+                                    <Link :href="route('admin.roles.index')" class="nav-link" :class="{ active: route().current('admin.roles.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-people"></i>
+                                        <p>角色管理</p>
+                                    </Link>
+                                </li>
+                                <li class="nav-item ps-4">
+                                    <Link :href="route('admin.permissions.index')" class="nav-link" :class="{ active: route().current('admin.permissions.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-key-fill"></i>
+                                        <p>權限管理</p>
+                                    </Link>
+                                </li>
+                                <li class="nav-item ps-4">
+                                    <Link :href="route('admin.positions.index')" class="nav-link" :class="{ active: route().current('admin.positions.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-person-vcard-fill"></i>
+                                        <p>職務管理</p>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </li>
+                        <!--<li class="nav-item">
                             <Link :href="route('dashboard')" class="nav-link">
                                 <i class="nav-icon bi bi-house"></i>
                                 <p>回到前台</p>
                             </Link>
-                        </li>
+                        </li>-->
                     </ul>
                 </nav>
             </div>
@@ -203,8 +201,8 @@
             <div class="float-end d-none d-sm-inline">
                 <b>版本</b> 1.0.0
             </div>
-            <strong>版權所有 &copy; {{ new Date().getFullYear() }} DF管理系統</strong>
-            保留所有權利。
+            <strong>大豐交通企業 &copy; {{ new Date().getFullYear() }} 車行管理系統</strong>
+
         </footer>
 
         <!-- Overlay：行動裝置開啟側欄時點擊可關閉 -->
@@ -242,7 +240,7 @@ const canSeeUserManagement = computed(() => {
 })
 
 const canSeeRolePermission = computed(() => {
-    return can('manage roles') || 
+    return can('manage roles') ||
         can('view positions') || can('create positions') || can('edit positions') || can('delete positions')
 })
 
@@ -314,7 +312,7 @@ const bodyClasses = ['layout-fixed', 'sidebar-expand-lg']
 // 處理窗口大小變化
 const handleResize = () => {
     const isLargeScreen = window.innerWidth >= 992
-    
+
     if (isLargeScreen) {
         // 大螢幕：移除小螢幕的 sidebar-open 狀態
         document.body.classList.remove('sidebar-open')
@@ -336,15 +334,15 @@ onMounted(async () => {
     document.body.classList.add(...bodyClasses)
     // 載入 CSS
     import('../../css/admin.css')
-    
+
     // 載入 AdminLTE JS（只載入一次，讓其自動處理樹狀選單）
     if (!window.AdminLTE) {
         await import('admin-lte/dist/js/adminlte.min.js')
     }
-    
+
     // 添加窗口大小變化監聽器
     window.addEventListener('resize', handleResize)
-    
+
     // 初始化時執行一次
     handleResize()
 })
@@ -352,7 +350,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
     document.body.classList.remove(...bodyClasses)
     sidebarOpen.value = false
-    
+
     // 移除事件監聽器
     window.removeEventListener('resize', handleResize)
 })
@@ -360,7 +358,7 @@ onBeforeUnmount(() => {
 const toggleSidebar = () => {
     // 檢查當前螢幕是否為大螢幕（桌面模式）
     const isLargeScreen = window.innerWidth >= 992 // Bootstrap lg 斷點
-    
+
     if (isLargeScreen) {
         // 大螢幕：使用 sidebar-collapse 來控制收合
         const isCollapsed = document.body.classList.contains('sidebar-collapse')
@@ -384,10 +382,10 @@ const toggleSidebar = () => {
 
 const closeSidebar = () => {
     sidebarOpen.value = false
-    
+
     // 移除所有可能的側邊欄狀態類別
     document.body.classList.remove('sidebar-open')
-    
+
     // 在大螢幕上，如果需要完全隱藏側邊欄，可以加上 sidebar-collapse
     const isLargeScreen = window.innerWidth >= 992
     if (isLargeScreen) {

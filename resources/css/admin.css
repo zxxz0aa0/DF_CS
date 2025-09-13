@@ -65,12 +65,20 @@
     color: #fff;
 }
 
+/* nav-header 樣式修正 - 讓背景色延伸到側邊欄完整寬度 */
+.app-sidebar .nav-header {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
 /* 響應式調整 */
 @media (max-width: 767.98px) {
     .app-content {
         padding: 15px;
     }
-    
+
     .navbar-nav .dropdown-menu {
         position: static;
         float: none;
