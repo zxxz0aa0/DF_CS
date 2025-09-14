@@ -95,6 +95,25 @@
                             </ul>
                         </li>
 
+                        <!-- 車輛牌照管理 -->
+                        <li v-if="canSeeVehicleLicenseManagement" class="nav-item" :class="{ 'menu-open': isVehicleLicenseManagementActive || vehicleLicenseMenuOpen }">
+                            <a href="#" class="nav-link" :class="{ active: isVehicleLicenseManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleVehicleLicenseMenu">
+                                <i class="nav-icon bi bi-car-front-fill"></i>
+                                <p>
+                                    車輛牌照管理
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item ps-4">
+                                    <Link :href="route('admin.vehicle-licenses.index')" class="nav-link" :class="{ active: route().current('admin.vehicle-licenses.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-list-ul"></i>
+                                        <p>牌照資料管理</p>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </li>
+
                         <!-- 系統設定 -->
                         <li class="nav-header text-center text-white" style="background-color: #013A63;">系統設定</li>
                         <!-- 公司管理 -->
@@ -182,7 +201,7 @@
         <!-- 主內容區 -->
         <main class="app-main">
             <!-- 內容標題 -->
-            <div class="app-content-header" v-if="$slots.header">
+            <div class="app-content-header"  v-if="$slots.header">
                 <div class="container-fluid">
                     <slot name="header" />
                 </div>
@@ -225,6 +244,7 @@ const userMenuOpen = ref(false)
 const permissionMenuOpen = ref(false)
 const companyMenuOpen = ref(false)
 const driverMenuOpen = ref(false)
+const vehicleLicenseMenuOpen = ref(false)
 const sidebarOpen = ref(false)
 
 // 取得前端共享的角色/權限（在 <script setup> 需用 usePage 取得 $page）
@@ -254,6 +274,10 @@ const canSeeDriverManagement = computed(() => {
         can('export drivers') || can('import drivers') || can('view expiring licenses')
 })
 
+const canSeeVehicleLicenseManagement = computed(() => {
+    return can('view vehicle licenses') || can('create vehicle licenses') || can('edit vehicle licenses') || can('delete vehicle licenses')
+})
+
 const isUserManagementActive = computed(() => {
     return route().current('admin.users.*')
 })
@@ -270,12 +294,17 @@ const isDriverManagementActive = computed(() => {
     return route().current('admin.drivers.*')
 })
 
+const isVehicleLicenseManagementActive = computed(() => {
+    return route().current('admin.vehicle-licenses.*')
+})
+
 const toggleUserMenu = () => {
     userMenuOpen.value = !userMenuOpen.value
     if (userMenuOpen.value) {
         permissionMenuOpen.value = false
         companyMenuOpen.value = false
         driverMenuOpen.value = false
+        vehicleLicenseMenuOpen.value = false
     }
 }
 
@@ -285,6 +314,7 @@ const togglePermissionMenu = () => {
         userMenuOpen.value = false
         companyMenuOpen.value = false
         driverMenuOpen.value = false
+        vehicleLicenseMenuOpen.value = false
     }
 }
 
@@ -294,6 +324,7 @@ const toggleCompanyMenu = () => {
         userMenuOpen.value = false
         permissionMenuOpen.value = false
         driverMenuOpen.value = false
+        vehicleLicenseMenuOpen.value = false
     }
 }
 
@@ -303,6 +334,17 @@ const toggleDriverMenu = () => {
         userMenuOpen.value = false
         permissionMenuOpen.value = false
         companyMenuOpen.value = false
+        vehicleLicenseMenuOpen.value = false
+    }
+}
+
+const toggleVehicleLicenseMenu = () => {
+    vehicleLicenseMenuOpen.value = !vehicleLicenseMenuOpen.value
+    if (vehicleLicenseMenuOpen.value) {
+        userMenuOpen.value = false
+        permissionMenuOpen.value = false
+        companyMenuOpen.value = false
+        driverMenuOpen.value = false
     }
 }
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DriverController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\VehicleLicenseController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -65,6 +66,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
     Route::post('drivers/import', [DriverController::class, 'import'])->name('drivers.import');
     Route::get('drivers/expiring-licenses', [DriverController::class, 'expiringLicenses'])->name('drivers.expiring-licenses');
     Route::resource('drivers', DriverController::class);
+
+    // 車輛牌照管理路由 (靜態路由要放在 resource 之前)
+    Route::post('vehicle-licenses/{vehicle_license}/revoke', [VehicleLicenseController::class, 'revoke'])->name('vehicle-licenses.revoke');
+    Route::post('vehicle-licenses/{vehicle_license}/replace', [VehicleLicenseController::class, 'replace'])->name('vehicle-licenses.replace');
+    Route::resource('vehicle-licenses', VehicleLicenseController::class);
 });
 
 require __DIR__.'/auth.php';

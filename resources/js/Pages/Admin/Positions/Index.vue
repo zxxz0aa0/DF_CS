@@ -202,13 +202,13 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="card-footer" v-if="positions.links">
+                    <div class="card-footer" v-if="positions && positions.links && positions.links.length">
                         <nav>
                             <ul class="pagination pagination-sm m-0 float-right">
-                                <li v-for="link in positions.links" :key="link.label" 
-                                    :class="'page-item ' + (link.active ? 'active' : '') + (link.url ? '' : ' disabled')">
-                                    <Link v-if="link.url" :href="link.url" class="page-link" v-html="link.label"></Link>
-                                    <span v-else class="page-link" v-html="link.label"></span>
+                                <li v-for="(link, i) in positions.links" :key="i"
+                                    :class="'page-item ' + (link && link.active ? 'active' : '') + ((link && link.url) ? '' : ' disabled')">
+                                    <Link v-if="link && link.url" :href="link.url" class="page-link" v-html="link.label"></Link>
+                                    <span v-else class="page-link" v-html="link && link.label"></span>
                                 </li>
                             </ul>
                         </nav>

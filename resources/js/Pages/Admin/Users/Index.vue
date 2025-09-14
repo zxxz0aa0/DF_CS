@@ -68,15 +68,15 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="user in props.users.data" :key="user.id">
+                                    <tr v-for="user in (props.users?.data || [])" :key="user.id">
                                         <td>{{ user.id }}</td>
                                         <td>{{ user.name }}</td>
                                         <td>{{ user.email }}</td>
                                         <td>
-                                            <span v-for="role in user.roles" :key="role.id" class="badge bg-primary me-1">
+                                            <span v-for="role in (user.roles || [])" :key="role.id" class="badge bg-primary me-1">
                                                 {{ role.name }}
                                             </span>
-                                            <span v-if="!user.roles.length" class="text-muted">無角色</span>
+                                            <span v-if="!(user.roles && user.roles.length)" class="text-muted">無角色</span>
                                         </td>
                                         <td>{{ formatDate(user.created_at) }}</td>
                                         <td>
@@ -115,9 +115,9 @@
                         </div>
 
                         <!-- 分頁 -->
-                        <div class="d-flex justify-content-between align-items-center mt-3" v-if="props.users.last_page > 1">
+                        <div class="d-flex justify-content-between align-items-center mt-3" v-if="props.users && props.users.last_page > 1">
                             <div>
-                                顯示第 {{ props.users.from }} 到 {{ props.users.to }} 項，共 {{ props.users.total }} 項結果
+                                顯示第 {{ props.users.from || 0 }} 到 {{ props.users.to || 0 }} 項，共 {{ props.users.total || 0 }} 項結果
                             </div>
                             <nav>
                                 <ul class="pagination mb-0">
@@ -200,8 +200,8 @@ const deleteUser = ref(null)
 
 const paginationRange = computed(() => {
     const range = []
-    const current = props.users.current_page
-    const last = props.users.last_page
+    const current = props.users?.current_page || 1
+    const last = props.users?.last_page || 1
     
     // 簡單的分頁邏輯
     for (let i = Math.max(1, current - 2); i <= Math.min(last, current + 2); i++) {
@@ -244,10 +244,16 @@ const getPageUrl = (page) => {
 
 const confirmDelete = (user) => {
     deleteUser.value = user
-    // 這裡需要使用 Bootstrap 的 JavaScript 來顯示模態視窗
-    // 在實際實作中，您可能想使用 Vue 的模態元件
-    const modal = new bootstrap.Modal(document.getElementById('deleteModal'))
-    modal.show()
+    // 確保 Bootstrap 已載入再初始化模態視窗
+    if (window.bootstrap && window.bootstrap.Modal) {
+        const modal = new window.bootstrap.Modal(document.getElementById('deleteModal'))
+        modal.show()
+    } else {
+        // 備用方案：直接顯示確認對話框
+        if (confirm(`您確定要刪除使用者 "${user.name}" 嗎？此操作無法恢復！`)) {
+            deleteUserAction()
+        }
+    }
 }
 
 const deleteUserAction = () => {
@@ -256,8 +262,12 @@ const deleteUserAction = () => {
             onSuccess: () => {
                 deleteUser.value = null
                 // 關閉模態視窗
-                const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'))
-                modal.hide()
+                if (window.bootstrap && window.bootstrap.Modal) {
+                    const modal = window.bootstrap.Modal.getInstance(document.getElementById('deleteModal'))
+                    if (modal) {
+                        modal.hide()
+                    }
+                }
             }
         })
     }

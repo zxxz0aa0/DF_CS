@@ -54,6 +54,17 @@ class RolesAndPermissionsSeeder extends Seeder
             'import drivers',
             'view expiring licenses',
             
+            // 車輛牌照管理權限
+            'view vehicle licenses',
+            'create vehicle licenses',
+            'edit vehicle licenses',
+            'delete vehicle licenses',
+            'revoke vehicle licenses',
+            'transfer vehicle licenses',
+            'import vehicle licenses',
+            'export vehicle licenses',
+            'view vehicle license audit logs',
+            
             // 系統管理權限
             'view admin dashboard',
         ];
