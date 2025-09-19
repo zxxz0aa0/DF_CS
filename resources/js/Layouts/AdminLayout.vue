@@ -95,10 +95,29 @@
                             </ul>
                         </li>
 
+                        <!-- 車輛管理 -->
+                        <li v-if="canSeeVehicleManagement" class="nav-item" :class="{ 'menu-open': isVehicleManagementActive || vehicleMenuOpen }">
+                            <a href="#" class="nav-link" :class="{ active: isVehicleManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleVehicleMenu">
+                                <i class="nav-icon bi bi-taxi-front-fill"></i>
+                                <p>
+                                    車輛管理
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item ps-4">
+                                    <Link :href="route('admin.vehicles.index')" class="nav-link" :class="{ active: route().current('admin.vehicles.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-list-ul"></i>
+                                        <p>車輛資料管理</p>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </li>
+
                         <!-- 車輛牌照管理 -->
                         <li v-if="canSeeVehicleLicenseManagement" class="nav-item" :class="{ 'menu-open': isVehicleLicenseManagementActive || vehicleLicenseMenuOpen }">
                             <a href="#" class="nav-link" :class="{ active: isVehicleLicenseManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleVehicleLicenseMenu">
-                                <i class="nav-icon bi bi-car-front-fill"></i>
+                                <i class="nav-icon bi bi-tag-fill"></i>
                                 <p>
                                     車輛牌照管理
                                     <i class="nav-arrow bi bi-chevron-right"></i>
@@ -244,15 +263,20 @@ const userMenuOpen = ref(false)
 const permissionMenuOpen = ref(false)
 const companyMenuOpen = ref(false)
 const driverMenuOpen = ref(false)
+const vehicleMenuOpen = ref(false)
 const vehicleLicenseMenuOpen = ref(false)
 const sidebarOpen = ref(false)
 
 // 取得前端共享的角色/權限（在 <script setup> 需用 usePage 取得 $page）
 const page = usePage()
-const roles = computed(() => page.props.auth?.roles ?? [])
-const perms = computed(() => page.props.auth?.permissions ?? [])
-const hasRole = (name) => roles.value?.includes?.(name)
-const can = (name) => perms.value?.includes?.(name)
+const perms = computed(() => {
+    const authPerms = page.props.auth?.permissions
+    return Array.isArray(authPerms) ? authPerms : []
+})
+const can = (name) => {
+    if (!name || typeof name !== 'string') return false
+    return perms.value.includes(name)
+}
 
 // 控制側欄顯示：僅依權限決定顯示（不因為 admin 角色而全部顯示）
 const canSeeUserManagement = computed(() => {
@@ -272,6 +296,10 @@ const canSeeCompanyManagement = computed(() => {
 const canSeeDriverManagement = computed(() => {
     return can('view drivers') || can('create drivers') || can('edit drivers') || can('delete drivers') ||
         can('export drivers') || can('import drivers') || can('view expiring licenses')
+})
+
+const canSeeVehicleManagement = computed(() => {
+    return can('view vehicles') || can('create vehicles') || can('edit vehicles') || can('delete vehicles') || can('manage vehicle status')
 })
 
 const canSeeVehicleLicenseManagement = computed(() => {
@@ -294,6 +322,10 @@ const isDriverManagementActive = computed(() => {
     return route().current('admin.drivers.*')
 })
 
+const isVehicleManagementActive = computed(() => {
+    return route().current('admin.vehicles.*')
+})
+
 const isVehicleLicenseManagementActive = computed(() => {
     return route().current('admin.vehicle-licenses.*')
 })
@@ -304,6 +336,7 @@ const toggleUserMenu = () => {
         permissionMenuOpen.value = false
         companyMenuOpen.value = false
         driverMenuOpen.value = false
+        vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
     }
 }
@@ -314,6 +347,7 @@ const togglePermissionMenu = () => {
         userMenuOpen.value = false
         companyMenuOpen.value = false
         driverMenuOpen.value = false
+        vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
     }
 }
@@ -324,6 +358,7 @@ const toggleCompanyMenu = () => {
         userMenuOpen.value = false
         permissionMenuOpen.value = false
         driverMenuOpen.value = false
+        vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
     }
 }
@@ -334,6 +369,18 @@ const toggleDriverMenu = () => {
         userMenuOpen.value = false
         permissionMenuOpen.value = false
         companyMenuOpen.value = false
+        vehicleMenuOpen.value = false
+        vehicleLicenseMenuOpen.value = false
+    }
+}
+
+const toggleVehicleMenu = () => {
+    vehicleMenuOpen.value = !vehicleMenuOpen.value
+    if (vehicleMenuOpen.value) {
+        userMenuOpen.value = false
+        permissionMenuOpen.value = false
+        companyMenuOpen.value = false
+        driverMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
     }
 }
@@ -345,6 +392,7 @@ const toggleVehicleLicenseMenu = () => {
         permissionMenuOpen.value = false
         companyMenuOpen.value = false
         driverMenuOpen.value = false
+        vehicleMenuOpen.value = false
     }
 }
 

@@ -61,7 +61,7 @@ class Driver extends Model
             return null;
         }
 
-        return now()->diffInDays($this->license_expire_date, false);
+        return (int) now()->diffInDays($this->license_expire_date, false);
     }
 
     public function getProfessionalLicenseDaysRemainingAttribute(): ?int
@@ -70,7 +70,7 @@ class Driver extends Model
             return null;
         }
 
-        return now()->diffInDays($this->professional_license_expire_date, false);
+        return (int) now()->diffInDays($this->professional_license_expire_date, false);
     }
 
     public function isLicenseExpiringSoon(int $days = 30): bool

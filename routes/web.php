@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DriverController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\Admin\VehicleLicenseController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -71,6 +72,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
     Route::post('vehicle-licenses/{vehicle_license}/revoke', [VehicleLicenseController::class, 'revoke'])->name('vehicle-licenses.revoke');
     Route::post('vehicle-licenses/{vehicle_license}/replace', [VehicleLicenseController::class, 'replace'])->name('vehicle-licenses.replace');
     Route::resource('vehicle-licenses', VehicleLicenseController::class);
+
+    // 車輛管理路由 (靜態路由要放在 resource 之前)
+    Route::get('vehicles/export', [VehicleController::class, 'export'])->name('vehicles.export');
+    Route::post('vehicles/import', [VehicleController::class, 'import'])->name('vehicles.import');
+    Route::get('vehicles/template', [VehicleController::class, 'template'])->name('vehicles.template');
+    Route::post('vehicles/{vehicle}/deregister', [VehicleController::class, 'deregister'])->name('vehicles.deregister');
+    Route::post('vehicles/{vehicle}/reactivate', [VehicleController::class, 'reactivate'])->name('vehicles.reactivate');
+    Route::get('vehicles/{vehicle}/audit-logs', [VehicleController::class, 'auditLogs'])->name('vehicles.audit-logs');
+    Route::get('api/vehicles/replacement-licenses', [VehicleController::class, 'getReplacementLicenses'])->name('api.vehicles.replacement-licenses');
+    Route::get('api/vehicles/company-owners', [VehicleController::class, 'getCompanyOwners'])->name('api.vehicles.company-owners');
+    Route::resource('vehicles', VehicleController::class);
 });
 
 require __DIR__.'/auth.php';

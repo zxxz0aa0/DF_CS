@@ -120,6 +120,8 @@ class DriverController extends Controller
                     'name' => $driver->name,
                     'id_number' => $driver->id_number,
                     'company_category' => $driver->companyCategory?->name,
+                    'mobile_phone1' => $driver->mobile_phone1,
+                    'home_phone' => $driver->home_phone,
                     'license_expire_date' => $driver->license_expire_date,
                     'professional_license_expire_date' => $driver->professional_license_expire_date,
                     'license_days_remaining' => $driver->license_days_remaining,
@@ -127,9 +129,10 @@ class DriverController extends Controller
                 ];
             });
 
-        return response()->json([
+        return Inertia::render('Admin/Drivers/ExpiringLicenses', [
             'drivers' => $drivers,
             'total' => $drivers->count(),
+            'filters' => $request->only(['days', 'licenseType', 'status', 'company']),
         ]);
     }
 
