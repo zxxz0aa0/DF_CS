@@ -6,7 +6,7 @@
       </h2>
     </template>
 
-    <div class="py-12">
+    <div class="py-8">
       <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <!-- 基本資訊 -->
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
@@ -68,10 +68,6 @@
                 <p class="mt-1 text-sm text-gray-900">{{ license.replacement_date }}</p>
               </div>
 
-              <div v-if="license.revocation_date">
-                <label class="block text-sm font-medium text-gray-700">繳銷日期</label>
-                <p class="mt-1 text-sm text-gray-900">{{ license.revocation_date }}</p>
-              </div>
 
               <div v-if="license.notes" class="col-span-2">
                 <label class="block text-sm font-medium text-gray-700">備註</label>
@@ -99,6 +95,10 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700">前車牌日期</label>
                 <p class="mt-1 text-sm text-gray-900">{{ license.previous_license_info.date || '未指定' }}</p>
+              </div>
+              <div v-if="license.revocation_date">
+                <label class="block text-sm font-medium text-gray-700">繳銷日期</label>
+                <p class="mt-1 text-sm text-gray-900">{{ license.revocation_date }}</p>
               </div>
             </div>
           </div>
@@ -190,6 +190,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import StatusBadge from './Components/StatusBadge.vue'
@@ -200,15 +201,17 @@ const props = defineProps({
   can: Object
 })
 
+const license = computed(() => props.license?.data ?? props.license ?? {})
+
 // 繳銷牌照
 const revokeLicense = () => {
-  if (!props.license.id) {
+  if (!license.value?.id) {
     console.error('License ID is missing')
     return
   }
-  
-  if (confirm(`確定要繳銷牌照 "${props.license.license_number || '未知'}" 嗎？此操作無法復原。`)) {
-    router.post(route('admin.vehicle-licenses.revoke', { vehicle_license: props.license.id }))
+
+  if (confirm(`確定要繳銷牌照 "${license.value?.license_number || '未知'}" 嗎？此操作無法復原。`)) {
+    router.post(route('admin.vehicle-licenses.revoke', { vehicle_license: license.value.id }))
   }
 }
 </script>

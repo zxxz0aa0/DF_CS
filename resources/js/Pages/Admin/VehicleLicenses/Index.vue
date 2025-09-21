@@ -131,7 +131,7 @@
             <!-- 表格顯示 -->
             <div class="overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="bg-blue-200">
                   <tr>
                     <th class="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">縣市</th>
                     <th class="px-6 py-3 text-left text-base font-medium text-gray-500 uppercase tracking-wider">公司/合作社</th>
@@ -203,7 +203,7 @@
                         <div v-if="license.status === 'active'" class="mb-1">
                           <span class="font-medium">替補日期：</span>{{ license.replacement_date }}
                         </div>
-                         <div v-if="license.revocation_date" class="text-red-500">
+                         <div v-if="license.status === 'revoked'" class="text-red-500">
                           <span >繳銷日期：</span>{{ license.revocation_date }}
                          </div>
                     </td>

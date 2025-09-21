@@ -104,14 +104,27 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="vehicle_type">車輛類型</label>
-                            <input
+                            <select
                                 id="vehicle_type"
                                 v-model="form.vehicle_type"
-                                type="text"
                                 class="form-control"
                                 :class="{ 'is-invalid': errors.vehicle_type }"
-                                placeholder="例：小客車"
-                            />
+                            >
+                                <option value="">請選擇車輛類型</option>
+                                <option
+                                    v-for="type in vehicleTypeOptions"
+                                    :key="type"
+                                    :value="type"
+                                >
+                                    {{ type }}
+                                </option>
+                                <option
+                                    v-if="form.vehicle_type && !vehicleTypeOptions.includes(form.vehicle_type)"
+                                    :value="form.vehicle_type"
+                                >
+                                    {{ form.vehicle_type }}
+                                </option>
+                            </select>
                             <div v-if="errors.vehicle_type" class="invalid-feedback">
                                 {{ errors.vehicle_type }}
                             </div>
@@ -162,8 +175,8 @@
                                 v-model="form.address"
                                 class="form-control"
                                 :class="{ 'is-invalid': errors.address }"
-                                rows="2"
-                            />
+                                rows="1"
+                            ></textarea>
                             <div v-if="errors.address" class="invalid-feedback">
                                 {{ errors.address }}
                             </div>
@@ -183,11 +196,30 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="brand">車輛廠牌</label>
-                            <input
+                            <select
                                 id="brand"
+                                v-model="selectedBrand"
+                                class="form-control"
+                                :class="{ 'is-invalid': errors.brand }"
+                            >
+                                <option value="">請選擇廠牌</option>
+                                <option
+                                    v-for="brand in brandOptions"
+                                    :key="brand"
+                                    :value="brand"
+                                >
+                                    {{ brand }}
+                                </option>
+                                <option :value="customBrandOptionValue">
+                                    其他，請手動輸入
+                                </option>
+                            </select>
+                            <input
+                                v-if="useCustomBrand"
+                                id="brand_custom"
                                 v-model="form.brand"
                                 type="text"
-                                class="form-control"
+                                class="form-control mt-2"
                                 :class="{ 'is-invalid': errors.brand }"
                                 placeholder="例：Toyota"
                             />
@@ -206,6 +238,7 @@
                                 type="number"
                                 class="form-control"
                                 :class="{ 'is-invalid': errors.manufacture_year }"
+                                placeholder="輸入西元年"
                                 :min="1900"
                                 :max="new Date().getFullYear() + 1"
                             />
@@ -246,6 +279,7 @@
                                 type="text"
                                 class="form-control"
                                 :class="{ 'is-invalid': errors.vehicle_form }"
+                                placeholder="依行照輸入"
                             />
                             <div v-if="errors.vehicle_form" class="invalid-feedback">
                                 {{ errors.vehicle_form }}
@@ -260,7 +294,7 @@
                                 id="engine_displacement"
                                 v-model="form.engine_displacement"
                                 type="number"
-                                step="0.01"
+                                step="1"
                                 class="form-control"
                                 :class="{ 'is-invalid': errors.engine_displacement }"
                                 min="0"
@@ -304,6 +338,7 @@
                                 type="text"
                                 class="form-control"
                                 :class="{ 'is-invalid': errors.vehicle_model }"
+                                placeholder="例：Altis、Camry、RAV4"
                             />
                             <div v-if="errors.vehicle_model" class="invalid-feedback">
                                 {{ errors.vehicle_model }}
@@ -314,13 +349,17 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="vehicle_style">車輛樣式</label>
-                            <input
+                            <select
                                 id="vehicle_style"
                                 v-model="form.vehicle_style"
-                                type="text"
                                 class="form-control"
                                 :class="{ 'is-invalid': errors.vehicle_style }"
-                            />
+                            >
+                                <option value="">請選擇</option>
+                                <option value="轎式">轎式</option>
+                                <option value="休旅式">休旅式</option>
+                                <option value="廂式">廂式</option>
+                            </select>
                             <div v-if="errors.vehicle_style" class="invalid-feedback">
                                 {{ errors.vehicle_style }}
                             </div>
@@ -388,7 +427,7 @@
                                 type="number"
                                 class="form-control"
                                 :class="{ 'is-invalid': errors.passenger_capacity }"
-                                min="0"
+                                min="4"
                             />
                             <div v-if="errors.passenger_capacity" class="invalid-feedback">
                                 {{ errors.passenger_capacity }}
@@ -399,13 +438,17 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="property_type">產權類別</label>
-                            <input
-                                id="property_type"
+                            <select
+                                iid="property_type"
                                 v-model="form.property_type"
-                                type="text"
                                 class="form-control"
                                 :class="{ 'is-invalid': errors.property_type }"
-                            />
+                            >
+                                <option value="">請選擇</option>
+                                <option value="轎式">公司資產</option>
+                                <option value="休旅式">靠行車</option>
+                                <option value="廂式">衛星派遣</option>
+                            </select>
                             <div v-if="errors.property_type" class="invalid-feedback">
                                 {{ errors.property_type }}
                             </div>
@@ -609,10 +652,10 @@
             </div>
         </div>
 
-        <!-- 備註 -->
+        <!-- 備註與車隊資訊 -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">備註</h3>
+                <h3 class="card-title">備註與車隊資訊</h3>
             </div>
             <div class="card-body">
                 <div class="form-group">
@@ -623,9 +666,71 @@
                         class="form-control"
                         :class="{ 'is-invalid': errors.notes }"
                         rows="4"
-                    />
+                    ></textarea>
                     <div v-if="errors.notes" class="invalid-feedback">
                         {{ errors.notes }}
+                    </div>
+                </div>
+
+                <!-- 車隊資訊 -->
+                <h5>車隊資訊</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="fleet_name">車隊名稱</label>
+                            <select
+                                id="fleet_name"
+                                v-model="form.fleet_name"
+                                class="form-control"
+                                :class="{ 'is-invalid': errors.fleet_name }"
+                            >
+                                <option value="">請選擇車隊</option>
+                                <option value="大豐衛星">大豐衛星</option>
+                                <option value="桃園大豐衛星">桃園大豐衛星</option>
+                                <option value="雙平台">雙平台</option>
+
+                            </select>
+                            <div v-if="errors.fleet_name" class="invalid-feedback">
+                                {{ errors.fleet_name }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="fleet_category">車隊類別</label>
+                            <select
+                                id="fleet_category"
+                                v-model="form.fleet_category"
+                                class="form-control"
+                                :class="{ 'is-invalid': errors.fleet_category }"
+                            >
+                                <option value="">請選擇車隊類別</option>
+                                <option value="一般計程車">一般計程車</option>
+                                <option value="多元計程車">多元計程車</option>
+                                <option value="無障礙計程車">無障礙計程車</option>
+                            </select>
+                            <div v-if="errors.fleet_category" class="invalid-feedback">
+                                {{ errors.fleet_category }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="fleet_number">車隊編號</label>
+                            <input
+                                id="fleet_number"
+                                v-model="form.fleet_number"
+                                type="text"
+                                class="form-control"
+                                :class="{ 'is-invalid': errors.fleet_number }"
+                                placeholder="例：8000"
+                            />
+                            <div v-if="errors.fleet_number" class="invalid-feedback">
+                                {{ errors.fleet_number }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -707,6 +812,9 @@ const form = reactive({
     registration_day: props.vehicle?.registration_day || '',
     property_type: props.vehicle?.property_type || '',
     notes: props.vehicle?.notes || '',
+    fleet_name: props.vehicle?.fleet_name || '',
+    fleet_category: props.vehicle?.fleet_category || '',
+    fleet_number: props.vehicle?.fleet_number || '',
 })
 
 // 動態選項
@@ -714,6 +822,63 @@ const replacementLicenses = ref([])
 const companyOwners = ref({})
 const showReplacementLicense = ref(false)
 const showOwnerDropdown = ref(false)
+const vehicleTypeOptions = ['營業小客車', '租賃小客車', '自用小客車']
+const brandOptions = ['Toyota_豐田', 'Audi_奧迪', 'BMW_寶馬', 'Citroën_雪鐵龍', 'Ford_福特', 'Honda_本田', 'Hyundai_現代', 'Infiniti_英菲尼迪', 'Jaguar_捷豹', 'Kia_起亞', 'Land Rover_路虎', 'Lexus_凌志', 'Luxgen_納智捷', 'Mazda_馬自達', 'Mercedes-Benz_賓士', 'Mini_迷你', 'Mitsubishi_三菱', 'Nissan_日產', 'Peugeot_標緻', 'Porsche_保時捷', 'Renault_雷諾', 'Subaru_速霸陸', 'Suzuki_鈴木', 'Tesla_特斯拉', 'Volkswagen_福斯', 'Volvo_富豪']
+const customBrandOptionValue = '__custom__'
+const selectedBrand = ref('')
+const useCustomBrand = ref(false)
+
+watch(
+    () => form.brand,
+    (value) => {
+        if (!value) {
+            if (selectedBrand.value !== customBrandOptionValue) {
+                selectedBrand.value = ''
+                useCustomBrand.value = false
+            }
+            return
+        }
+
+        if (brandOptions.includes(value)) {
+            if (selectedBrand.value !== value) {
+                selectedBrand.value = value
+            }
+            useCustomBrand.value = false
+        } else {
+            useCustomBrand.value = true
+            if (selectedBrand.value !== customBrandOptionValue) {
+                selectedBrand.value = customBrandOptionValue
+            }
+        }
+    },
+    { immediate: true }
+)
+
+watch(selectedBrand, (value) => {
+    if (!value) {
+        if (!useCustomBrand.value) {
+            form.brand = ''
+        }
+        return
+    }
+
+    if (value === customBrandOptionValue) {
+        if (!useCustomBrand.value) {
+            useCustomBrand.value = true
+        }
+
+        if (brandOptions.includes(form.brand)) {
+            form.brand = ''
+        }
+        return
+    }
+
+    if (form.brand !== value) {
+        form.brand = value
+    }
+
+    useCustomBrand.value = false
+})
 
 const formatReplacementLicenseLabel = (license) => {
     return license.holder_name
@@ -792,6 +957,7 @@ const fetchReplacementLicenses = async (companyId) => {
         form.replacement_license = ''
         replacementLicenses.value = []
         showReplacementLicense.value = false
+        showOwnerDropdown.value = Object.keys(companyOwners.value).length > 0
         return
     }
 
@@ -803,6 +969,20 @@ const fetchReplacementLicenses = async (companyId) => {
         const data = await response.json()
         replacementLicenses.value = data
         showReplacementLicense.value = data.length > 0
+
+        if (showReplacementLicense.value) {
+            const company = props.companies.find(
+                (item) => Number(item.id) === Number(form.company_id)
+            )
+
+            if (company) {
+                form.owner_name = company.name
+            }
+
+            showOwnerDropdown.value = false
+        } else {
+            showOwnerDropdown.value = Object.keys(companyOwners.value).length > 0
+        }
 
         const hasCurrentSelection = data.some(
             (item) => item.id === form.replacement_license
@@ -816,6 +996,7 @@ const fetchReplacementLicenses = async (companyId) => {
         form.replacement_license = ''
         replacementLicenses.value = []
         showReplacementLicense.value = false
+        showOwnerDropdown.value = Object.keys(companyOwners.value).length > 0
     }
 }
 

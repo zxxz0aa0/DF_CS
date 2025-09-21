@@ -45,6 +45,9 @@ class Vehicle extends Model
         'deregistration_day',
         'property_type',
         'notes',
+        'fleet_name',
+        'fleet_category',
+        'fleet_number',
         'vehicle_status',
         'created_by',
         'updated_by',
@@ -170,7 +173,9 @@ class Vehicle extends Model
             $q->where('license_number', 'like', "%{$term}%")
                 ->orWhere('owner_name', 'like', "%{$term}%")
                 ->orWhere('chassis_number', 'like', "%{$term}%")
-                ->orWhere('engine_number', 'like', "%{$term}%");
+                ->orWhere('engine_number', 'like', "%{$term}%")
+                ->orWhere('fleet_name', 'like', "%{$term}%")
+                ->orWhere('fleet_number', 'like', "%{$term}%");
         });
     }
 

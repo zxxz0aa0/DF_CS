@@ -16,6 +16,7 @@ class VehicleLicenseResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'company_id' => $this->company_id,
             'company' => [
                 'id' => $this->company?->id,
                 'name' => $this->company?->name,

@@ -272,6 +272,7 @@
 </template>
 
 <script setup>
+import { computed, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
@@ -282,30 +283,39 @@ const props = defineProps({
   errors: Object
 })
 
-const form = useForm({
-  company_id: props.license.company_id || '',
-  county: props.license.county || '',
-  license_number: props.license.license_number || '',
-  holder_name: props.license.holder_name || '',
-  license_year: props.license.license_year || '',
-  license_month: props.license.license_month || '',
-  previous_license_number: props.license.previous_license_info?.number || '',
-  previous_holder_name: props.license.previous_license_info?.holder || '',
-  previous_license_year: props.license.previous_license_info?.year || '',
-  previous_license_month: props.license.previous_license_info?.month || '',
-  notes: props.license.notes || '',
-  replacement_date: props.license.replacement_date || '',
-  revocation_date: props.license.revocation_date || '',
-  status: props.license.status || 'active'
+const license = computed(() => props.license?.data ?? props.license ?? {})
+
+const getDefaults = (data) => ({
+  company_id: data?.company_id ?? data?.company?.id ?? '',
+  county: data?.county ?? '',
+  license_number: data?.license_number ?? '',
+  holder_name: data?.holder_name ?? '',
+  license_year: data?.license_year ?? '',
+  license_month: data?.license_month ?? '',
+  previous_license_number: data?.previous_license_number ?? data?.previous_license_info?.number ?? '',
+  previous_holder_name: data?.previous_holder_name ?? data?.previous_license_info?.holder ?? '',
+  previous_license_year: data?.previous_license_year ?? data?.previous_license_info?.year ?? '',
+  previous_license_month: data?.previous_license_month ?? data?.previous_license_info?.month ?? '',
+  notes: data?.notes ?? '',
+  replacement_date: data?.replacement_date ?? '',
+  revocation_date: data?.revocation_date ?? '',
+  status: data?.status ?? 'active'
 })
 
+const form = useForm(getDefaults(license.value))
+
+watch(license, (value) => {
+  form.defaults(getDefaults(value))
+  form.reset(getDefaults(value))
+}, { immediate: false })
+
 const submit = () => {
-  if (!props.license.id) {
+  if (!license.value?.id) {
     console.error('License ID is missing')
     return
   }
-  
-  form.put(route('admin.vehicle-licenses.update', { vehicle_license: props.license.id }))
+
+  form.put(route('admin.vehicle-licenses.update', { vehicle_license: license.value.id }))
 }
 
 const { processing } = form
