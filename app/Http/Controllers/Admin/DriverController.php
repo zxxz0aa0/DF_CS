@@ -21,6 +21,7 @@ class DriverController extends Controller
         $this->middleware('permission:export drivers')->only(['export']);
         $this->middleware('permission:import drivers')->only(['import']);
         $this->middleware('permission:view expiring licenses')->only(['expiringLicenses']);
+        $this->middleware('permission:edit drivers')->only(['toggleStatus']);
     }
     public function index(Request $request)
     {
@@ -104,6 +105,22 @@ class DriverController extends Controller
 
         return redirect()->route('admin.drivers.index')
             ->with('success', '駕駛資料刪除成功！');
+    }
+
+    public function toggleStatus(Request $request, Driver $driver)
+    {
+        $request->validate([
+            'status' => 'required|in:open,close'
+        ]);
+
+        $driver->update([
+            'status' => $request->status
+        ]);
+
+        $statusText = $request->status === 'open' ? '復籍' : '退籍';
+
+        return redirect()->route('admin.drivers.index')
+            ->with('success', "駕駛 {$driver->name} 已成功{$statusText}！");
     }
 
     public function expiringLicenses(Request $request)

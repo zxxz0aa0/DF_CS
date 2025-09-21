@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\Admin\VehicleLicenseController;
+use App\Http\Controllers\Admin\VendorController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -66,6 +67,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
     Route::get('drivers/export', [DriverController::class, 'export'])->name('drivers.export');
     Route::post('drivers/import', [DriverController::class, 'import'])->name('drivers.import');
     Route::get('drivers/expiring-licenses', [DriverController::class, 'expiringLicenses'])->name('drivers.expiring-licenses');
+    Route::put('drivers/{driver}/toggle-status', [DriverController::class, 'toggleStatus'])->name('drivers.toggle-status');
     Route::resource('drivers', DriverController::class);
 
     // 車輛牌照管理路由 (靜態路由要放在 resource 之前)
@@ -83,6 +85,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
     Route::get('api/vehicles/replacement-licenses', [VehicleController::class, 'getReplacementLicenses'])->name('api.vehicles.replacement-licenses');
     Route::get('api/vehicles/company-owners', [VehicleController::class, 'getCompanyOwners'])->name('api.vehicles.company-owners');
     Route::resource('vehicles', VehicleController::class);
+
+    // 廠商管理路由
+    Route::resource('vendors', VendorController::class);
 });
 
 require __DIR__.'/auth.php';

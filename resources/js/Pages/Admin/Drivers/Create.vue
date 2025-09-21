@@ -32,7 +32,27 @@
                                 <!-- 基本資料 -->
                                 <div class="col-md-6">
                                     <h5 class="border-bottom pb-2 mb-3">基本資料</h5>
-                                    
+
+                                    <div class="mb-3">
+                                        <label for="company_category_id" class="form-label">公司類別</label>
+                                        <select
+                                            id="company_category_id"
+                                            v-model="form.company_category_id"
+                                            class="form-control"
+                                            :class="{ 'is-invalid': errors.company_category_id }"
+                                        >
+                                            <option :value="null">請選擇公司類別</option>
+                                            <option v-for="category in companyCategories"
+                                                    :key="category.id"
+                                                    :value="category.id">
+                                                {{ category.name }}
+                                            </option>
+                                        </select>
+                                        <div v-if="errors.company_category_id" class="invalid-feedback">
+                                            {{ errors.company_category_id }}
+                                        </div>
+                                    </div>
+
                                     <div class="mb-3">
                                         <label for="name" class="form-label">
                                             姓名 <span class="text-danger">*</span>
@@ -70,25 +90,6 @@
                                         </div>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label for="company_category_id" class="form-label">公司類別</label>
-                                        <select
-                                            id="company_category_id"
-                                            v-model="form.company_category_id"
-                                            class="form-control"
-                                            :class="{ 'is-invalid': errors.company_category_id }"
-                                        >
-                                            <option :value="null">請選擇公司類別</option>
-                                            <option v-for="category in companyCategories" 
-                                                    :key="category.id" 
-                                                    :value="category.id">
-                                                {{ category.name }}
-                                            </option>
-                                        </select>
-                                        <div v-if="errors.company_category_id" class="invalid-feedback">
-                                            {{ errors.company_category_id }}
-                                        </div>
-                                    </div>
 
                                     <div class="mb-3">
                                         <label for="birthday" class="form-label">生日</label>
@@ -107,7 +108,7 @@
                                 <!-- 聯絡資訊 -->
                                 <div class="col-md-6">
                                     <h5 class="border-bottom pb-2 mb-3">聯絡資訊</h5>
-                                    
+
                                     <div class="mb-3">
                                         <label for="contact_address" class="form-label">通訊地址</label>
                                         <textarea
@@ -115,7 +116,7 @@
                                             v-model="form.contact_address"
                                             class="form-control"
                                             :class="{ 'is-invalid': errors.contact_address }"
-                                            rows="2"
+                                            rows="1"
                                         ></textarea>
                                         <div v-if="errors.contact_address" class="invalid-feedback">
                                             {{ errors.contact_address }}
@@ -129,7 +130,7 @@
                                             v-model="form.residence_address"
                                             class="form-control"
                                             :class="{ 'is-invalid': errors.residence_address }"
-                                            rows="2"
+                                            rows="1"
                                         ></textarea>
                                         <div v-if="errors.residence_address" class="invalid-feedback">
                                             {{ errors.residence_address }}
@@ -185,7 +186,7 @@
                                 <!-- 緊急聯絡人 -->
                                 <div class="col-md-6">
                                     <h5 class="border-bottom pb-2 mb-3">緊急聯絡人</h5>
-                                    
+
                                     <div class="mb-3">
                                         <label for="emergency_contact" class="form-label">緊急聯絡人</label>
                                         <input
@@ -218,7 +219,7 @@
                                 <!-- 日期與狀態資訊 -->
                                 <div class="col-md-6">
                                     <h5 class="border-bottom pb-2 mb-3">日期與狀態</h5>
-                                    
+
                                     <div class="mb-3">
                                         <label for="registration_date" class="form-label">
                                             入籍日期 <span class="text-danger">*</span>
@@ -318,7 +319,7 @@
                                 <!-- 備註 -->
                                 <div class="col-md-12">
                                     <h5 class="border-bottom pb-2 mb-3">備註</h5>
-                                    
+
                                     <div class="mb-3">
                                         <label for="notes" class="form-label">備註</label>
                                         <textarea
@@ -394,7 +395,7 @@ const form = useForm({
 const submit = () => {
     console.log('提交表單...')
     console.log('表單資料:', form.data())
-    
+
     form.post(route('admin.drivers.store'), {
         onBefore: () => {
             console.log('開始提交')

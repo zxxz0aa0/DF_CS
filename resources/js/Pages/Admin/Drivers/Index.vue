@@ -131,15 +131,23 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <Link :href="route('admin.drivers.show', driver.id)" 
+                                                <Link :href="route('admin.drivers.show', driver.id)"
                                                       class="btn btn-info btn-sm">
                                                     <i class="bi bi-eye"></i>
                                                 </Link>
-                                                <Link :href="route('admin.drivers.edit', driver.id)" 
+                                                <Link :href="route('admin.drivers.edit', driver.id)"
                                                       class="btn btn-warning btn-sm">
                                                     <i class="bi bi-pencil"></i>
                                                 </Link>
-                                                <button @click="confirmDelete(driver)" 
+                                                <button
+                                                    @click="confirmToggleStatus(driver)"
+                                                    class="btn btn-sm"
+                                                    :class="driver.status === 'open' ? 'btn-outline-secondary' : 'btn-outline-success'"
+                                                    :title="driver.status === 'open' ? '退籍' : '復籍'"
+                                                >
+                                                    <i :class="driver.status === 'open' ? 'bi bi-person-dash' : 'bi bi-person-check'"></i>
+                                                </button>
+                                                <button @click="confirmDelete(driver)"
                                                         class="btn btn-danger btn-sm">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
@@ -207,6 +215,37 @@
                 </div>
             </div>
         </div>
+
+        <!-- 狀態切換確認 Modal -->
+        <div class="modal fade" id="statusModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            {{ driverToToggle?.status === 'open' ? '確認退籍' : '確認復籍' }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            確定要將駕駛 <strong>{{ driverToToggle?.name }}</strong>
+                            {{ driverToToggle?.status === 'open' ? '設為退籍狀態' : '恢復為在籍狀態' }}嗎？
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button
+                            type="button"
+                            class="btn"
+                            :class="driverToToggle?.status === 'open' ? 'btn-warning' : 'btn-success'"
+                            @click="toggleDriverStatus"
+                        >
+                            {{ driverToToggle?.status === 'open' ? '確認退籍' : '確認復籍' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </AdminLayout>
 </template>
 
@@ -229,7 +268,9 @@ const searchForm = ref({
 })
 
 const driverToDelete = ref(null)
+const driverToToggle = ref(null)
 let deleteModal = null
+let statusModal = null
 
 const hasFilters = computed(() => {
     return searchForm.value.search || 
@@ -319,15 +360,43 @@ const deleteDriver = () => {
     }
 }
 
+const confirmToggleStatus = (driver) => {
+    driverToToggle.value = driver
+    statusModal.show()
+}
+
+const toggleDriverStatus = () => {
+    if (driverToToggle.value) {
+        const newStatus = driverToToggle.value.status === 'open' ? 'close' : 'open'
+
+        router.put(route('admin.drivers.toggle-status', driverToToggle.value.id), {
+            status: newStatus
+        }, {
+            onSuccess: () => {
+                statusModal.hide()
+                driverToToggle.value = null
+            },
+            onError: (errors) => {
+                console.error('狀態切換失敗:', errors)
+            }
+        })
+    }
+}
+
 const exportDrivers = () => {
     window.open(route('admin.drivers.export', searchForm.value))
 }
 
 onMounted(() => {
     setTimeout(() => {
-        const modalElement = document.getElementById('deleteModal')
-        if (modalElement && window.bootstrap) {
-            deleteModal = new window.bootstrap.Modal(modalElement)
+        const deleteModalElement = document.getElementById('deleteModal')
+        if (deleteModalElement && window.bootstrap) {
+            deleteModal = new window.bootstrap.Modal(deleteModalElement)
+        }
+
+        const statusModalElement = document.getElementById('statusModal')
+        if (statusModalElement && window.bootstrap) {
+            statusModal = new window.bootstrap.Modal(statusModalElement)
         }
     }, 100)
 })

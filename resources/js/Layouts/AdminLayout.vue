@@ -111,11 +111,17 @@
                                         <p>車輛資料管理</p>
                                     </Link>
                                 </li>
+                                <li class="nav-item ps-4">
+                                    <Link :href="route('admin.vehicle-licenses.index')" class="nav-link" :class="{ active: route().current('admin.vehicle-licenses.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-tag-fill"></i>
+                                        <p>牌照資料管理</p>
+                                    </Link>
+                                </li>
                             </ul>
                         </li>
 
                         <!-- 車輛牌照管理 -->
-                        <li v-if="canSeeVehicleLicenseManagement" class="nav-item" :class="{ 'menu-open': isVehicleLicenseManagementActive || vehicleLicenseMenuOpen }">
+                        <!--<li v-if="canSeeVehicleLicenseManagement" class="nav-item" :class="{ 'menu-open': isVehicleLicenseManagementActive || vehicleLicenseMenuOpen }">
                             <a href="#" class="nav-link" :class="{ active: isVehicleLicenseManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleVehicleLicenseMenu">
                                 <i class="nav-icon bi bi-tag-fill"></i>
                                 <p>
@@ -131,10 +137,19 @@
                                     </Link>
                                 </li>
                             </ul>
+                        </li>-->
+
+                        <!-- 廠商管理 -->
+                        <li v-if="canSeeVendorManagement" class="nav-item">
+                            <Link :href="route('admin.vendors.index')" class="nav-link" :class="{ active: route().current('admin.vendors.*') }" @click="closeSidebar">
+                                <i class="nav-icon bi bi-shop"></i>
+                                <p>廠商管理</p>
+                            </Link>
                         </li>
 
                         <!-- 系統設定 -->
                         <li class="nav-header text-center text-white" style="background-color: #013A63;">系統設定</li>
+
                         <!-- 公司管理 -->
                         <li v-if="canSeeCompanyManagement" class="nav-item" :class="{ 'menu-open': isCompanyManagementActive || companyMenuOpen }">
                             <a href="#" class="nav-link" :class="{ active: isCompanyManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleCompanyMenu">
@@ -304,6 +319,10 @@ const canSeeVehicleManagement = computed(() => {
 
 const canSeeVehicleLicenseManagement = computed(() => {
     return can('view vehicle licenses') || can('create vehicle licenses') || can('edit vehicle licenses') || can('delete vehicle licenses')
+})
+
+const canSeeVendorManagement = computed(() => {
+    return can('vendor.view') || can('vendor.create') || can('vendor.edit') || can('vendor.delete') || can('vendor.export')
 })
 
 const isUserManagementActive = computed(() => {
