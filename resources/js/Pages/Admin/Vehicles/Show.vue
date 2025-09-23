@@ -73,7 +73,7 @@
                     <div class="row">
                         <!-- 基本資訊 -->
                         <div class="col-md-6">
-                            <div class="card">
+                            <div class="card h-100">
                                 <div class="card-header">
                                     <h3 class="card-title">基本資訊</h3>
                                     <div class="card-tools">
@@ -167,7 +167,7 @@
                         </div>
                     </div>
 
-                    <div class="row">
+                    <div class="row mt-2">
                         <!-- 車輛識別資訊 -->
                         <div class="col-md-6">
                             <div class="card">
@@ -199,7 +199,7 @@
 
                         <!-- 重要日期 -->
                         <div class="col-md-6">
-                            <div class="card">
+                            <div class="card h-100">
                                 <div class="card-header">
                                     <h3 class="card-title">重要日期</h3>
                                 </div>
@@ -251,7 +251,7 @@
                     </div>
 
                     <!-- 系統資訊 -->
-                    <div class="row">
+                    <div class="row mt-3">
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">

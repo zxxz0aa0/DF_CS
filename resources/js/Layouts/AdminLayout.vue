@@ -120,24 +120,13 @@
                             </ul>
                         </li>
 
-                        <!-- 車輛牌照管理 -->
-                        <!--<li v-if="canSeeVehicleLicenseManagement" class="nav-item" :class="{ 'menu-open': isVehicleLicenseManagementActive || vehicleLicenseMenuOpen }">
-                            <a href="#" class="nav-link" :class="{ active: isVehicleLicenseManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleVehicleLicenseMenu">
-                                <i class="nav-icon bi bi-tag-fill"></i>
-                                <p>
-                                    車輛牌照管理
-                                    <i class="nav-arrow bi bi-chevron-right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item ps-4">
-                                    <Link :href="route('admin.vehicle-licenses.index')" class="nav-link" :class="{ active: route().current('admin.vehicle-licenses.*') }" @click="closeSidebar">
-                                        <i class="nav-icon bi bi-list-ul"></i>
-                                        <p>牌照資料管理</p>
-                                    </Link>
-                                </li>
-                            </ul>
-                        </li>-->
+                        <!-- 駕駛車輛綁定管理 -->
+                        <li v-if="canSeeAssignmentManagement" class="nav-item">
+                            <Link :href="route('admin.driver-vehicle-assignments.index')" class="nav-link" :class="{ active: route().current('admin.driver-vehicle-assignments.*') }" @click="closeSidebar">
+                                <i class="nav-icon bi bi-link-45deg"></i>
+                                <p>駕駛車輛綁定</p>
+                            </Link>
+                        </li>
 
                         <!-- 廠商管理 -->
                         <li v-if="canSeeVendorManagement" class="nav-item">
@@ -146,6 +135,7 @@
                                 <p>廠商管理</p>
                             </Link>
                         </li>
+
 
                         <!-- 系統設定 -->
                         <li class="nav-header text-center text-white" style="background-color: #013A63;">系統設定</li>
@@ -323,6 +313,10 @@ const canSeeVehicleLicenseManagement = computed(() => {
 
 const canSeeVendorManagement = computed(() => {
     return can('vendor.view') || can('vendor.create') || can('vendor.edit') || can('vendor.delete') || can('vendor.export')
+})
+
+const canSeeAssignmentManagement = computed(() => {
+    return can('assignment.view') || can('assignment.create') || can('assignment.edit') || can('assignment.delete')
 })
 
 const isUserManagementActive = computed(() => {

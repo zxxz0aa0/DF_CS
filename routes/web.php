@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CompanyCategoryController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DriverController;
+use App\Http\Controllers\Admin\DriverVehicleAssignmentController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -88,6 +89,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
 
     // 廠商管理路由
     Route::resource('vendors', VendorController::class);
+
+    // 駕駛車輛綁定管理路由
+    Route::resource('driver-vehicle-assignments', DriverVehicleAssignmentController::class);
 });
 
 require __DIR__.'/auth.php';

@@ -50,6 +50,16 @@ class Driver extends Model
         return $this->belongsTo(CompanyCategory::class);
     }
 
+    public function vehicleAssignments()
+    {
+        return $this->hasMany(DriverVehicleAssignment::class);
+    }
+
+    public function vehicles()
+    {
+        return $this->belongsToMany(Vehicle::class, 'driver_vehicle_assignments');
+    }
+
     public function getStatusTextAttribute(): string
     {
         return $this->status === 'open' ? '在籍中' : '已退籍';

@@ -109,6 +109,16 @@ class Vehicle extends Model
         return $this->hasMany(VehicleAuditLog::class);
     }
 
+    public function driverAssignments()
+    {
+        return $this->hasMany(DriverVehicleAssignment::class);
+    }
+
+    public function drivers()
+    {
+        return $this->belongsToMany(Driver::class, 'driver_vehicle_assignments');
+    }
+
     // 存取器 (Accessors)
     public function getStatusTextAttribute(): string
     {
