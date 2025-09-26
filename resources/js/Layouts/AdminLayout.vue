@@ -140,6 +140,37 @@
                         <!-- 系統設定 -->
                         <li class="nav-header text-center text-white" style="background-color: #013A63;">系統設定</li>
 
+                        <!-- 會計科目管理 -->
+                        <li v-if="canSeeAccountManagement" class="nav-item" :class="{ 'menu-open': isAccountManagementActive || accountMenuOpen }">
+                            <a href="#" class="nav-link" :class="{ active: isAccountManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleAccountMenu">
+                                <i class="nav-icon bi bi-receipt"></i>
+                                <p>
+                                    會計科目管理
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item ps-4">
+                                    <Link :href="route('admin.accounts.main-categories.index')" class="nav-link" :class="{ active: route().current('admin.accounts.main-categories.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-folder"></i>
+                                        <p>總類管理</p>
+                                    </Link>
+                                </li>
+                                <li class="nav-item ps-4">
+                                    <Link :href="route('admin.accounts.sub-categories.index')" class="nav-link" :class="{ active: route().current('admin.accounts.sub-categories.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-folder-plus"></i>
+                                        <p>子分類管理</p>
+                                    </Link>
+                                </li>
+                                <li class="nav-item ps-4">
+                                    <Link :href="route('admin.accounts.account.details.index')" class="nav-link" :class="{ active: route().current('admin.accounts.account.details.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-list-ul"></i>
+                                        <p>科目明細管理</p>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </li>
+
                         <!-- 公司管理 -->
                         <li v-if="canSeeCompanyManagement" class="nav-item" :class="{ 'menu-open': isCompanyManagementActive || companyMenuOpen }">
                             <a href="#" class="nav-link" :class="{ active: isCompanyManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleCompanyMenu">
@@ -270,6 +301,7 @@ const companyMenuOpen = ref(false)
 const driverMenuOpen = ref(false)
 const vehicleMenuOpen = ref(false)
 const vehicleLicenseMenuOpen = ref(false)
+const accountMenuOpen = ref(false)
 const sidebarOpen = ref(false)
 
 // 取得前端共享的角色/權限（在 <script setup> 需用 usePage 取得 $page）
@@ -319,6 +351,10 @@ const canSeeAssignmentManagement = computed(() => {
     return can('assignment.view') || can('assignment.create') || can('assignment.edit') || can('assignment.delete')
 })
 
+const canSeeAccountManagement = computed(() => {
+    return can('view accounts') || can('create accounts') || can('edit accounts') || can('delete accounts') || can('manage accounts')
+})
+
 const isUserManagementActive = computed(() => {
     return route().current('admin.users.*')
 })
@@ -343,6 +379,10 @@ const isVehicleLicenseManagementActive = computed(() => {
     return route().current('admin.vehicle-licenses.*')
 })
 
+const isAccountManagementActive = computed(() => {
+    return route().current('admin.accounts.*')
+})
+
 const toggleUserMenu = () => {
     userMenuOpen.value = !userMenuOpen.value
     if (userMenuOpen.value) {
@@ -351,6 +391,7 @@ const toggleUserMenu = () => {
         driverMenuOpen.value = false
         vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
+        accountMenuOpen.value = false
     }
 }
 
@@ -362,6 +403,7 @@ const togglePermissionMenu = () => {
         driverMenuOpen.value = false
         vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
+        accountMenuOpen.value = false
     }
 }
 
@@ -373,6 +415,7 @@ const toggleCompanyMenu = () => {
         driverMenuOpen.value = false
         vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
+        accountMenuOpen.value = false
     }
 }
 
@@ -384,6 +427,7 @@ const toggleDriverMenu = () => {
         companyMenuOpen.value = false
         vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
+        accountMenuOpen.value = false
     }
 }
 
@@ -395,6 +439,7 @@ const toggleVehicleMenu = () => {
         companyMenuOpen.value = false
         driverMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
+        accountMenuOpen.value = false
     }
 }
 
@@ -406,6 +451,19 @@ const toggleVehicleLicenseMenu = () => {
         companyMenuOpen.value = false
         driverMenuOpen.value = false
         vehicleMenuOpen.value = false
+        accountMenuOpen.value = false
+    }
+}
+
+const toggleAccountMenu = () => {
+    accountMenuOpen.value = !accountMenuOpen.value
+    if (accountMenuOpen.value) {
+        userMenuOpen.value = false
+        permissionMenuOpen.value = false
+        companyMenuOpen.value = false
+        driverMenuOpen.value = false
+        vehicleMenuOpen.value = false
+        vehicleLicenseMenuOpen.value = false
     }
 }
 

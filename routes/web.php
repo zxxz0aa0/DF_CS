@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\AccountDetailController;
+use App\Http\Controllers\Admin\AccountMainCategoryController;
+use App\Http\Controllers\Admin\AccountSubCategoryController;
 use App\Http\Controllers\Admin\CompanyCategoryController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -92,6 +95,86 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
 
     // 駕駛車輛綁定管理路由
     Route::resource('driver-vehicle-assignments', DriverVehicleAssignmentController::class);
+
+    // 會計科目管理路由
+    Route::prefix('accounts')->name('accounts.')->middleware('permission:view accounts')->group(function () {
+
+        // 會計總類管理
+        Route::put('main-categories/{mainCategory}/toggle-status', [AccountMainCategoryController::class, 'toggleStatus'])
+            ->name('main-categories.toggle-status')
+            ->middleware('permission:edit accounts');
+        Route::get('main-categories/export', [AccountMainCategoryController::class, 'export'])
+            ->name('main-categories.export')
+            ->middleware('permission:export accounts');
+        Route::resource('main-categories', AccountMainCategoryController::class);
+
+        // 會計子分類管理
+        Route::put('sub-categories/{subCategory}/toggle-status', [AccountSubCategoryController::class, 'toggleStatus'])
+            ->name('sub-categories.toggle-status')
+            ->middleware('permission:edit accounts');
+        Route::get('sub-categories/export', [AccountSubCategoryController::class, 'export'])
+            ->name('sub-categories.export')
+            ->middleware('permission:export accounts');
+        Route::resource('sub-categories', AccountSubCategoryController::class);
+
+        // 會計科目明細管理 (靜態路由要放在 resource 之前)
+        Route::get('details/export', [AccountDetailController::class, 'export'])
+            ->name('details.export')
+            ->middleware('permission:export accounts');
+
+        Route::post('details/import', [AccountDetailController::class, 'import'])
+            ->name('details.import')
+            ->middleware('permission:import accounts');
+
+        Route::get('details/template', [AccountDetailController::class, 'template'])
+            ->name('details.template')
+            ->middleware('permission:export accounts');
+
+        Route::put('details/{accountDetail}/toggle-status', [AccountDetailController::class, 'toggleStatus'])
+            ->name('details.toggle-status')
+            ->middleware('permission:edit accounts');
+
+        // 會計科目明細 CRUD 路由
+        Route::get('details', [AccountDetailController::class, 'index'])
+            ->name('account.details.index');
+
+        Route::get('details/create', [AccountDetailController::class, 'create'])
+            ->name('account.details.create')
+            ->middleware('permission:create accounts');
+
+        Route::post('details', [AccountDetailController::class, 'store'])
+            ->name('account.details.store')
+            ->middleware('permission:create accounts');
+
+        Route::get('details/{detail}', [AccountDetailController::class, 'show'])
+            ->name('account.details.show');
+
+        Route::get('details/{detail}/edit', [AccountDetailController::class, 'edit'])
+            ->name('account.details.edit')
+            ->middleware('permission:edit accounts');
+
+        Route::put('details/{detail}', [AccountDetailController::class, 'update'])
+            ->name('account.details.update')
+            ->middleware('permission:edit accounts');
+
+        Route::delete('details/{detail}', [AccountDetailController::class, 'destroy'])
+            ->name('account.details.destroy')
+            ->middleware('permission:delete accounts');
+
+        // API 路由
+        Route::prefix('api')->name('api.')->group(function () {
+            Route::get('sub-categories/by-main/{mainId}', [AccountDetailController::class, 'getSubCategories'])
+                ->name('sub-categories.by-main');
+
+            Route::get('details/validate-code', [AccountDetailController::class, 'validateCode'])
+                ->name('details.validate-code')
+                ->middleware('permission:create accounts|edit accounts');
+
+            Route::get('details/next-code', [AccountDetailController::class, 'getNextCode'])
+                ->name('details.next-code')
+                ->middleware('permission:create accounts|edit accounts');
+        });
+    });
 });
 
 require __DIR__.'/auth.php';
