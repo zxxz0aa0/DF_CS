@@ -76,6 +76,16 @@ class AccountDetailController extends Controller
     }
 
     /**
+     * 顯示匯入科目的頁面
+     */
+    public function importForm()
+    {
+        return Inertia::render('Admin/Accounts/Details/Import', [
+            'importSummary' => session('importSummary'),
+        ]);
+    }
+
+    /**
      * 儲存新的會計科目
      */
     public function store(AccountDetailRequest $request)
@@ -86,9 +96,13 @@ class AccountDetailController extends Controller
         $validated['updated_by'] = auth()->id();
 
         // 如果有父級科目，自動設置層級
-        if ($validated['parent_id']) {
-            $parent = AccountDetail::find($validated['parent_id']);
-            $validated['level'] = $parent->level + 1;
+        $parentId = $validated['parent_id'] ?? null;
+        if ($parentId) {
+            $parent = AccountDetail::find($parentId);
+            $validated['level'] = ($parent->level ?? 0) + 1;
+        } else {
+            $validated['parent_id'] = null;
+            $validated['level'] = $validated['level'] ?? 1;
         }
 
         $account = AccountDetail::create($validated);
@@ -96,37 +110,37 @@ class AccountDetailController extends Controller
         // 記錄審計日誌
         AccountAuditLog::log($account, 'created', null, $validated);
 
-        return redirect()->route('admin.account-details.index')
+        return redirect()->route('admin.accounts.account.details.index')
             ->with('success', '會計科目建立成功');
     }
 
     /**
      * 顯示會計科目詳細資訊
      */
-    public function show(AccountDetail $accountDetail)
+    public function show(AccountDetail $detail)
     {
-        $accountDetail->load(['mainCategory', 'subCategory', 'parent', 'children', 'createdBy', 'updatedBy']);
+        $detail->load(['mainCategory', 'subCategory', 'parent', 'children', 'createdBy', 'updatedBy']);
 
         return Inertia::render('Admin/Accounts/Details/Show', [
-            'account' => $accountDetail,
+            'account' => $detail,
         ]);
     }
 
     /**
      * 顯示編輯會計科目表單
      */
-    public function edit(AccountDetail $accountDetail)
+    public function edit(AccountDetail $detail)
     {
-        $accountDetail->load(['mainCategory', 'subCategory', 'parent']);
+        $detail->load(['mainCategory', 'subCategory', 'parent']);
 
         $mainCategories = AccountMainCategory::active()->ordered()->get();
-        $subCategories = AccountSubCategory::byMainCategory($accountDetail->main_category_id)
+        $subCategories = AccountSubCategory::byMainCategory($detail->main_category_id)
             ->active()
             ->ordered()
             ->get();
 
         return Inertia::render('Admin/Accounts/Details/Edit', [
-            'account' => $accountDetail,
+            'account' => $detail,
             'mainCategories' => $mainCategories,
             'subCategories' => $subCategories,
         ]);
@@ -135,67 +149,141 @@ class AccountDetailController extends Controller
     /**
      * 更新會計科目
      */
-    public function update(AccountDetailRequest $request, AccountDetail $accountDetail)
+    public function update(AccountDetailRequest $request, AccountDetail $detail)
     {
         $validated = $request->validated();
 
-        $oldValues = $accountDetail->toArray();
+        $oldValues = $detail->toArray();
         $validated['updated_by'] = auth()->id();
 
         // 如果有父級科目，自動設置層級
-        if ($validated['parent_id']) {
-            $parent = AccountDetail::find($validated['parent_id']);
-            $validated['level'] = $parent->level + 1;
+        $parentId = $validated['parent_id'] ?? null;
+        if ($parentId) {
+            $parent = AccountDetail::find($parentId);
+            $validated['level'] = ($parent->level ?? 0) + 1;
+        } else {
+            $validated['parent_id'] = null;
+            $validated['level'] = $validated['level'] ?? 1;
         }
 
-        $accountDetail->update($validated);
+        $detail->update($validated);
 
         // 記錄審計日誌
-        AccountAuditLog::log($accountDetail, 'updated', $oldValues, $validated);
+        AccountAuditLog::log($detail, 'updated', $oldValues, $validated);
 
-        return redirect()->route('admin.account-details.index')
+        return redirect()->route('admin.accounts.account.details.index')
             ->with('success', '會計科目更新成功');
     }
 
     /**
      * 刪除會計科目
      */
-    public function destroy(AccountDetail $accountDetail)
+    public function destroy(AccountDetail $detail)
     {
         // 檢查是否有子科目
-        if ($accountDetail->hasChildren()) {
+        if ($detail->hasChildren()) {
             return back()->with('error', '此科目底下還有子科目，無法刪除');
         }
 
-        $oldValues = $accountDetail->toArray();
+        $oldValues = $detail->toArray();
 
         // 記錄審計日誌
-        AccountAuditLog::log($accountDetail, 'deleted', $oldValues, null);
+        AccountAuditLog::log($detail, 'deleted', $oldValues, null);
 
-        $accountDetail->delete();
+        $detail->delete();
 
-        return redirect()->route('admin.account-details.index')
+        return redirect()->route('admin.accounts.account.details.index')
             ->with('success', '會計科目刪除成功');
+    }
+
+    /**
+     * 匯出會計科目 (尚未實作)
+     */
+    public function export()
+    {
+        return redirect()
+            ->route('admin.accounts.account.details.index')
+            ->with('error', '匯出功能尚未實作');
+    }
+
+    /**
+     * 匯入會計科目檔案 (暫時僅驗證檔案)
+     */
+    public function import(Request $request)
+    {
+        $validated = $request->validate([
+            'import_file' => ['required', 'file', 'mimes:xlsx,xls,csv'],
+            'overwrite_existing' => ['nullable', 'boolean'],
+            'skip_inactive' => ['nullable', 'boolean'],
+        ]);
+
+        $file = $request->file('import_file');
+
+        $summary = [
+            'success' => false,
+            'message' => '匯入功能尚未完成，已驗證檔案格式。',
+            'details' => [
+                '檔案名稱：' . $file->getClientOriginalName(),
+                '覆寫既有資料：' . ($request->boolean('overwrite_existing') ? '是' : '否'),
+                '略過停用資料：' . ($request->boolean('skip_inactive') ? '是' : '否'),
+            ],
+        ];
+
+        return redirect()
+            ->route('admin.accounts.account.details.import')
+            ->with('importSummary', $summary);
+    }
+
+    /**
+     * 下載匯入範本
+     */
+    public function template()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="account_details_template.csv"',
+        ];
+
+        $columns = [
+            'main_category_code',
+            'sub_category_code',
+            'account_code',
+            'account_name',
+            'account_name_en',
+            'account_type',
+            'debit_credit',
+            'description',
+            'notes',
+            'is_active',
+        ];
+
+        $callback = static function () use ($columns) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, $columns);
+            fclose($handle);
+        };
+
+        return response()->streamDownload($callback, 'account_details_template.csv', $headers);
     }
 
     /**
      * 切換科目狀態
      */
-    public function toggleStatus(AccountDetail $accountDetail)
+    public function toggleStatus(AccountDetail $detail)
     {
-        $oldValues = $accountDetail->toArray();
+        $oldValues = $detail->toArray();
 
-        $accountDetail->update([
-            'is_active' => !$accountDetail->is_active,
+        $detail->update([
+            'is_active' => !$detail->is_active,
             'updated_by' => auth()->id(),
         ]);
 
-        $newValues = $accountDetail->toArray();
+        $newValues = $detail->toArray();
 
         // 記錄審計日誌
-        AccountAuditLog::log($accountDetail, 'updated', $oldValues, $newValues);
+        AccountAuditLog::log($detail, 'updated', $oldValues, $newValues);
 
-        $status = $accountDetail->is_active ? '啟用' : '停用';
+        $status = $detail->is_active ? '啟用' : '停用';
 
         return back()->with('success', "科目已{$status}");
     }

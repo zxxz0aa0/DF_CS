@@ -262,12 +262,386 @@ class AccountSubCategoryController extends Controller
     }
 
     /**
+     * 顯示匯入表單
+     */
+    public function import()
+    {
+        $mainCategories = AccountMainCategory::active()->ordered()->get();
+
+        return Inertia::render('Admin/Accounts/SubCategories/Import', [
+            'mainCategories' => $mainCategories,
+        ]);
+    }
+
+    /**
+     * 處理匯入邏輯
+     */
+    public function importStore(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240', // 10MB
+            'update_existing' => 'boolean',
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $updateExisting = $request->boolean('update_existing', false);
+
+            // 讀取檔案內容
+            $data = $this->parseImportFile($file);
+
+            $results = [
+                'total' => count($data),
+                'success' => 0,
+                'errors' => 0,
+                'skipped' => 0,
+                'error_details' => [],
+            ];
+
+            foreach ($data as $index => $row) {
+                try {
+                    $rowNumber = $index + 2; // 從第2行開始（第1行是標題）
+
+                    // 驗證必要欄位
+                    if (empty($row['main_category_code']) || empty($row['sub_category_code']) || empty($row['sub_category_name'])) {
+                        $results['errors']++;
+                        $results['error_details'][] = "第 {$rowNumber} 行：缺少必要欄位";
+                        continue;
+                    }
+
+                    // 檢查主分類是否存在
+                    $mainCategory = AccountMainCategory::where('category_code', $row['main_category_code'])->first();
+                    if (!$mainCategory) {
+                        $results['errors']++;
+                        $results['error_details'][] = "第 {$rowNumber} 行：主分類代碼 '{$row['main_category_code']}' 不存在";
+                        continue;
+                    }
+
+                    // 檢查子分類是否已存在
+                    $existingSubCategory = AccountSubCategory::where('sub_category_code', $row['sub_category_code'])
+                        ->where('main_category_id', $mainCategory->id)
+                        ->first();
+
+                    if ($existingSubCategory) {
+                        if ($updateExisting) {
+                            // 更新現有記錄
+                            $oldValues = $existingSubCategory->toArray();
+
+                            $existingSubCategory->update([
+                                'sub_category_name' => $row['sub_category_name'],
+                                'description' => $row['description'] ?? '',
+                                'sort_order' => $row['sort_order'] ?? 0,
+                                'is_active' => $this->parseBooleanValue($row['is_active'] ?? 'true'),
+                                'updated_by' => auth()->id(),
+                            ]);
+
+                            // 記錄審計日誌
+                            AccountAuditLog::create([
+                                'auditable_type' => AccountSubCategory::class,
+                                'auditable_id' => $existingSubCategory->id,
+                                'event' => 'updated',
+                                'old_values' => json_encode($oldValues),
+                                'new_values' => json_encode($existingSubCategory->toArray()),
+                                'user_id' => auth()->id(),
+                                'ip_address' => request()->ip(),
+                                'user_agent' => request()->header('User-Agent'),
+                                'url' => request()->fullUrl(),
+                            ]);
+
+                            $results['success']++;
+                        } else {
+                            $results['skipped']++;
+                            $results['error_details'][] = "第 {$rowNumber} 行：子分類代碼 '{$row['sub_category_code']}' 已存在（跳過）";
+                        }
+                    } else {
+                        // 創建新記錄
+                        $subCategory = AccountSubCategory::create([
+                            'main_category_id' => $mainCategory->id,
+                            'sub_category_code' => $row['sub_category_code'],
+                            'sub_category_name' => $row['sub_category_name'],
+                            'description' => $row['description'] ?? '',
+                            'sort_order' => $row['sort_order'] ?? 0,
+                            'is_active' => $this->parseBooleanValue($row['is_active'] ?? 'true'),
+                            'created_by' => auth()->id(),
+                            'updated_by' => auth()->id(),
+                        ]);
+
+                        // 記錄審計日誌
+                        AccountAuditLog::create([
+                            'auditable_type' => AccountSubCategory::class,
+                            'auditable_id' => $subCategory->id,
+                            'event' => 'created',
+                            'old_values' => null,
+                            'new_values' => json_encode($subCategory->toArray()),
+                            'user_id' => auth()->id(),
+                            'ip_address' => request()->ip(),
+                            'user_agent' => request()->header('User-Agent'),
+                            'url' => request()->fullUrl(),
+                        ]);
+
+                        $results['success']++;
+                    }
+                } catch (\Exception $e) {
+                    $results['errors']++;
+                    $results['error_details'][] = "第 " . ($index + 2) . " 行：" . $e->getMessage();
+                }
+            }
+
+            $message = "匯入完成！成功：{$results['success']} 筆，錯誤：{$results['errors']} 筆，跳過：{$results['skipped']} 筆";
+
+            return redirect()->route('admin.accounts.sub-categories.index')
+                ->with('success', $message)
+                ->with('import_results', $results);
+
+        } catch (\Exception $e) {
+            return back()->with('error', '匯入失敗：' . $e->getMessage());
+        }
+    }
+
+    /**
+     * 下載匯入模板
+     */
+    public function template()
+    {
+        $headers = [
+            'main_category_code' => '主分類代碼',
+            'sub_category_code' => '子分類代碼',
+            'sub_category_name' => '子分類名稱',
+            'description' => '說明',
+            'sort_order' => '排序',
+            'is_active' => '狀態',
+        ];
+
+        $sampleData = [
+            [
+                'main_category_code' => '1000',
+                'sub_category_code' => '1100',
+                'sub_category_name' => '流動資產',
+                'description' => '一年內可變現的資產',
+                'sort_order' => 1,
+                'is_active' => 'true',
+            ],
+            [
+                'main_category_code' => '1000',
+                'sub_category_code' => '1200',
+                'sub_category_name' => '非流動資產',
+                'description' => '超過一年才能變現的資產',
+                'sort_order' => 2,
+                'is_active' => 'true',
+            ],
+        ];
+
+        return $this->generateExcelTemplate($headers, $sampleData, '會計子分類匯入模板');
+    }
+
+    /**
      * 匯出會計子分類
      */
     public function export()
     {
-        // TODO: 實作匯出功能
-        return back()->with('info', '匯出功能開發中');
+        $subCategories = AccountSubCategory::with(['mainCategory'])
+            ->orderBy('main_category_id')
+            ->orderBy('sort_order')
+            ->orderBy('sub_category_code')
+            ->get();
+
+        $data = $subCategories->map(function ($subCategory) {
+            return [
+                'main_category_code' => $subCategory->mainCategory->category_code,
+                'main_category_name' => $subCategory->mainCategory->category_name,
+                'sub_category_code' => $subCategory->sub_category_code,
+                'sub_category_name' => $subCategory->sub_category_name,
+                'description' => $subCategory->description,
+                'sort_order' => $subCategory->sort_order,
+                'is_active' => $subCategory->is_active ? 'true' : 'false',
+                'created_at' => $subCategory->created_at?->format('Y-m-d H:i:s'),
+                'updated_at' => $subCategory->updated_at?->format('Y-m-d H:i:s'),
+            ];
+        });
+
+        $headers = [
+            'main_category_code' => '主分類代碼',
+            'main_category_name' => '主分類名稱',
+            'sub_category_code' => '子分類代碼',
+            'sub_category_name' => '子分類名稱',
+            'description' => '說明',
+            'sort_order' => '排序',
+            'is_active' => '狀態',
+            'created_at' => '建立時間',
+            'updated_at' => '更新時間',
+        ];
+
+        return $this->generateExcelExport($data, $headers, '會計子分類清單');
+    }
+
+    /**
+     * 解析匯入檔案
+     */
+    private function parseImportFile($file)
+    {
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        if ($extension === 'csv') {
+            return $this->parseCsvFile($file);
+        } else {
+            return $this->parseExcelFile($file);
+        }
+    }
+
+    /**
+     * 解析 CSV 檔案
+     */
+    private function parseCsvFile($file)
+    {
+        $data = [];
+        $handle = fopen($file->getRealPath(), 'r');
+
+        // 讀取標題行
+        $headers = fgetcsv($handle);
+        $headers = array_map('trim', $headers);
+
+        // 建立欄位對應
+        $fieldMapping = [
+            '主分類代碼' => 'main_category_code',
+            'main_category_code' => 'main_category_code',
+            '子分類代碼' => 'sub_category_code',
+            'sub_category_code' => 'sub_category_code',
+            '子分類名稱' => 'sub_category_name',
+            'sub_category_name' => 'sub_category_name',
+            '說明' => 'description',
+            'description' => 'description',
+            '排序' => 'sort_order',
+            'sort_order' => 'sort_order',
+            '狀態' => 'is_active',
+            'is_active' => 'is_active',
+        ];
+
+        while (($row = fgetcsv($handle)) !== false) {
+            $rowData = [];
+            foreach ($headers as $index => $header) {
+                $fieldName = $fieldMapping[$header] ?? $header;
+                $rowData[$fieldName] = isset($row[$index]) ? trim($row[$index]) : '';
+            }
+            $data[] = $rowData;
+        }
+
+        fclose($handle);
+        return $data;
+    }
+
+    /**
+     * 解析 Excel 檔案
+     */
+    private function parseExcelFile($file)
+    {
+        // 這裡需要安裝 PhpSpreadsheet 套件
+        // 暫時返回空陣列，實際實作需要使用 PhpSpreadsheet
+        return [];
+    }
+
+    /**
+     * 生成 Excel 匯出檔案
+     */
+    private function generateExcelExport($data, $headers, $filename)
+    {
+        // 暫時使用 CSV 格式
+        return $this->generateCsvExport($data, $headers, $filename);
+    }
+
+    /**
+     * 生成 Excel 模板
+     */
+    private function generateExcelTemplate($headers, $sampleData, $filename)
+    {
+        // 暫時使用 CSV 格式
+        return $this->generateCsvTemplate($headers, $sampleData, $filename);
+    }
+
+    /**
+     * 生成 CSV 匯出檔案
+     */
+    private function generateCsvExport($data, $headers, $filename)
+    {
+        $csvData = [];
+
+        // 添加標題行
+        $csvData[] = array_values($headers);
+
+        // 添加資料行
+        foreach ($data as $row) {
+            $csvRow = [];
+            foreach (array_keys($headers) as $key) {
+                $csvRow[] = $row[$key] ?? '';
+            }
+            $csvData[] = $csvRow;
+        }
+
+        $callback = function() use ($csvData) {
+            $file = fopen('php://output', 'w');
+
+            // 添加 BOM 以支援中文
+            fwrite($file, "\xEF\xBB\xBF");
+
+            foreach ($csvData as $row) {
+                fputcsv($file, $row);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '.csv"',
+        ]);
+    }
+
+    /**
+     * 生成 CSV 模板
+     */
+    private function generateCsvTemplate($headers, $sampleData, $filename)
+    {
+        $csvData = [];
+
+        // 添加標題行
+        $csvData[] = array_values($headers);
+
+        // 添加範例資料
+        foreach ($sampleData as $row) {
+            $csvRow = [];
+            foreach (array_keys($headers) as $key) {
+                $csvRow[] = $row[$key] ?? '';
+            }
+            $csvData[] = $csvRow;
+        }
+
+        $callback = function() use ($csvData) {
+            $file = fopen('php://output', 'w');
+
+            // 添加 BOM 以支援中文
+            fwrite($file, "\xEF\xBB\xBF");
+
+            foreach ($csvData as $row) {
+                fputcsv($file, $row);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '.csv"',
+        ]);
+    }
+
+    /**
+     * 解析布林值
+     */
+    private function parseBooleanValue($value)
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        $value = strtolower(trim($value));
+        return in_array($value, ['true', '1', 'yes', 'on', '是', '啟用', '真']);
     }
 
     /**

@@ -9,7 +9,11 @@
               <h1>會計科目管理</h1>
             </div>
             <div class="col-sm-6">
-              <div class="float-right">
+              <div class="float-right d-flex gap-2">
+                <Link :href="route('admin.accounts.account.details.import')"
+                      class="btn btn-success">
+                  <i class="bi bi-upload"></i> 匯入
+                </Link>
                 <Link :href="route('admin.accounts.account.details.create')"
                       class="btn btn-primary">
                   <i class="bi bi-plus"></i> 新增科目
@@ -63,14 +67,14 @@
                         </option>
                       </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                       <label>科目編號/名稱</label>
                       <input v-model="filters.search"
                              type="text"
                              class="form-control"
                              placeholder="輸入關鍵字">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                       <label>科目性質</label>
                       <select v-model="filters.account_type" class="form-select">
                         <option value="">全部性質</option>
@@ -81,9 +85,7 @@
                         <option value="expense">費用</option>
                       </select>
                     </div>
-                  </div>
-                  <div class="row mt-3">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                       <label>狀態</label>
                       <select v-model="filters.is_active" class="form-select">
                         <option value="">全部狀態</option>
@@ -91,7 +93,9 @@
                         <option value="0">停用</option>
                       </select>
                     </div>
-                    <div class="col-md-9">
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col-md-12">
                       <label>&nbsp;</label>
                       <div class="d-flex">
                         <button @click="applyFilters" class="btn btn-primary me-2">
@@ -171,12 +175,12 @@
                         </td>
                         <td>
                           <div class="btn-group">
-                            <Link :href="route('admin.accounts.account.details.show', account.id)"
+                            <Link :href="account?.id ? route('admin.accounts.account.details.show', { detail: account.id }) : '#'"
                                   class="btn btn-sm btn-info"
                                   title="查看">
                               <i class="bi bi-eye"></i>
                             </Link>
-                            <Link :href="route('admin.accounts.account.details.edit', account.id)"
+                            <Link :href="route('admin.accounts.account.details.edit', { detail: account.id })"
                                   class="btn btn-sm btn-warning"
                                   title="編輯">
                               <i class="bi bi-pencil"></i>
@@ -309,7 +313,7 @@ const deleteAccount = (account) => {
     return
   }
 
-  router.delete(route('admin.accounts.account.details.destroy', account.id), {
+  router.delete(route('admin.accounts.account.details.destroy', { detail: account.id }), {
     preserveState: true,
     onSuccess: () => {
       // 成功處理

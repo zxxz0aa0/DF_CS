@@ -9,7 +9,19 @@
               <h1>會計子分類管理</h1>
             </div>
             <div class="col-sm-6">
-              <div class="float-right">
+              <div class="float-right d-flex gap-2">
+                <Link :href="route('admin.accounts.sub-categories.template')"
+                      class="btn btn-outline-secondary">
+                  <i class="bi bi-download"></i> 下載模板
+                </Link>
+                <Link :href="route('admin.accounts.sub-categories.import')"
+                      class="btn btn-success">
+                  <i class="bi bi-upload"></i> 匯入
+                </Link>
+                <Link :href="route('admin.accounts.sub-categories.export')"
+                      class="btn btn-info">
+                  <i class="bi bi-file-earmark-excel"></i> 匯出
+                </Link>
                 <Link :href="route('admin.accounts.sub-categories.create')"
                       class="btn btn-primary">
                   <i class="bi bi-plus"></i> 新增子分類

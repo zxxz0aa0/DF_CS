@@ -115,19 +115,32 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
         Route::get('sub-categories/export', [AccountSubCategoryController::class, 'export'])
             ->name('sub-categories.export')
             ->middleware('permission:export accounts');
+        Route::get('sub-categories/import', [AccountSubCategoryController::class, 'import'])
+            ->name('sub-categories.import')
+            ->middleware('permission:import accounts');
+        Route::post('sub-categories/import', [AccountSubCategoryController::class, 'importStore'])
+            ->name('sub-categories.import.store')
+            ->middleware('permission:import accounts');
+        Route::get('sub-categories/template', [AccountSubCategoryController::class, 'template'])
+            ->name('sub-categories.template')
+            ->middleware('permission:export accounts');
         Route::resource('sub-categories', AccountSubCategoryController::class);
 
         // 會計科目明細管理 (靜態路由要放在 resource 之前)
         Route::get('details/export', [AccountDetailController::class, 'export'])
-            ->name('details.export')
+            ->name('account.details.export')
             ->middleware('permission:export accounts');
 
+        Route::get('details/import', [AccountDetailController::class, 'importForm'])
+            ->name('account.details.import')
+            ->middleware('permission:import accounts');
+
         Route::post('details/import', [AccountDetailController::class, 'import'])
-            ->name('details.import')
+            ->name('account.details.import.store')
             ->middleware('permission:import accounts');
 
         Route::get('details/template', [AccountDetailController::class, 'template'])
-            ->name('details.template')
+            ->name('account.details.template')
             ->middleware('permission:export accounts');
 
         Route::put('details/{accountDetail}/toggle-status', [AccountDetailController::class, 'toggleStatus'])
