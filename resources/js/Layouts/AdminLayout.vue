@@ -136,6 +136,13 @@
                             </Link>
                         </li>
 
+                        <!-- 帳務管理 -->
+                        <li v-if="canSeeAccountingManagement" class="nav-item">
+                            <Link :href="route('admin.accounting.records.index')" class="nav-link" :class="{ active: route().current('admin.accounting.*') }" @click="closeSidebar">
+                                <i class="nav-icon bi bi-calculator"></i>
+                                <p>帳務管理</p>
+                            </Link>
+                        </li>
 
                         <!-- 系統設定 -->
                         <li class="nav-header text-center text-white" style="background-color: #013A63;">系統設定</li>
@@ -353,6 +360,10 @@ const canSeeAssignmentManagement = computed(() => {
 
 const canSeeAccountManagement = computed(() => {
     return can('view accounts') || can('create accounts') || can('edit accounts') || can('delete accounts') || can('manage accounts')
+})
+
+const canSeeAccountingManagement = computed(() => {
+    return can('view accounting') || can('create accounting') || can('edit accounting') || can('delete accounting') || can('export accounting')
 })
 
 const isUserManagementActive = computed(() => {

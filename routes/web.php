@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AccountDetailController;
+use App\Http\Controllers\Admin\AccountingRecordController;
 use App\Http\Controllers\Admin\AccountMainCategoryController;
 use App\Http\Controllers\Admin\AccountSubCategoryController;
 use App\Http\Controllers\Admin\CompanyCategoryController;
@@ -186,6 +187,36 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
             Route::get('details/next-code', [AccountDetailController::class, 'getNextCode'])
                 ->name('details.next-code')
                 ->middleware('permission:create accounts|edit accounts');
+        });
+    });
+
+    // 帳務管理路由
+    Route::prefix('accounting')->name('accounting.')->middleware('permission:view accounting')->group(function () {
+
+        // 主頁面（搜尋、列表、新增）
+        Route::get('records', [AccountingRecordController::class, 'index'])
+            ->name('records.index');
+
+        // 批次新增
+        Route::post('records', [AccountingRecordController::class, 'store'])
+            ->name('records.store')
+            ->middleware('permission:create accounting');
+
+        // 單筆更新
+        Route::put('records/{accountingRecord}', [AccountingRecordController::class, 'update'])
+            ->name('records.update')
+            ->middleware('permission:edit accounting');
+
+        // 批次刪除
+        Route::delete('records/batch', [AccountingRecordController::class, 'batchDestroy'])
+            ->name('records.batch-destroy')
+            ->middleware('permission:delete accounting');
+
+        // API 路由
+        Route::prefix('api')->name('api.')->group(function () {
+            // 搜尋會計科目
+            Route::get('account-details/search', [AccountingRecordController::class, 'searchAccountDetails'])
+                ->name('account-details.search');
         });
     });
 });
