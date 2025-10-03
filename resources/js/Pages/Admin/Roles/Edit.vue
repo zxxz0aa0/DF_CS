@@ -197,6 +197,10 @@ const form = useForm({
     errors: {}
 })
 
+const currentPermissionCount = computed(() => {
+    return props.role.permissions?.length || 0
+})
+
 const updateRole = () => {
     form.put(route('admin.roles.update', props.role.id), {
         onError: (errors) => {

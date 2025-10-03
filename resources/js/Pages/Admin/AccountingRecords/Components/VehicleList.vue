@@ -8,10 +8,14 @@
         <table class="table table-hover">
           <thead>
             <tr>
-              <th style="width: 50px;">選擇</th>
-              <th>車牌號碼</th>
-              <th>車隊編號</th>
-              <th>車主名稱</th>
+              <th class="text-center" style="width: 4%;">選擇</th>
+              <th style="width: 10%;">車隊編號</th>
+              <th style="width: 10%;">車牌號碼</th>
+              <th style="width: 15%;">車主名稱</th>
+              <th style="width: 10%;">廠牌</th>
+              <th style="width: 11%;">款式</th>
+              <th style="width: 15%;">入籍日期</th>
+              <th style="width: 10%;">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -22,16 +26,28 @@
               @click="selectVehicle(vehicle.id)"
               style="cursor: pointer;"
             >
-              <td>
+              <td class="text-center">
                 <input
                   type="radio"
                   :checked="vehicle.id === selectedId"
                   @change="selectVehicle(vehicle.id)"
                 >
               </td>
-              <td>{{ vehicle.license_number }}</td>
               <td>{{ vehicle.fleet_number || '-' }}</td>
+              <td>{{ vehicle.license_number }}</td>
               <td>{{ vehicle.owner_name || '-' }}</td>
+              <td>{{ vehicle.brand || '-' }}</td>
+              <td>{{ vehicle.vehicle_model || '-' }}</td>
+              <td>{{ vehicle.registration_date || '-' }}</td>
+              <td>
+                <button
+                  @click.stop="viewDetail(vehicle)"
+                  class="btn btn-sm btn-info"
+                  title="檢視詳細資料"
+                >
+                  <i class="bi bi-eye"></i>
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -46,9 +62,13 @@ const props = defineProps({
   selectedId: { type: Number, default: null }
 })
 
-const emit = defineEmits(['select'])
+const emit = defineEmits(['select', 'view-detail'])
 
 const selectVehicle = (vehicleId) => {
   emit('select', vehicleId)
+}
+
+const viewDetail = (vehicle) => {
+  emit('view-detail', vehicle)
 }
 </script>

@@ -103,7 +103,9 @@ const props = defineProps({
   records: { type: Object, required: true },
   statistics: { type: Object, default: null },
   showDriverButton: { type: Boolean, default: false },
-  showVehicleButton: { type: Boolean, default: false }
+  showVehicleButton: { type: Boolean, default: false },
+  canEdit: { type: Boolean, default: false },
+  canDelete: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['edit', 'delete', 'switch-view'])
@@ -213,27 +215,54 @@ const columns = computed(() => [
     searchable: false,
     width: COLUMN_WIDTHS.actions,
     className: 'text-center align-middle',
-    render: () =>
-      '<div class="btn-group" role="group">' +
-        '<button type="button" class="btn btn-sm btn-warning record-edit"><i class="bi bi-pencil"></i></button>' +
-        '<button type="button" class="btn btn-sm btn-danger record-delete"><i class="bi bi-trash"></i></button>' +
-      '</div>'
+    render: () => {
+      const buttons = []
+
+      if (props.canEdit) {
+        buttons.push('<button type="button" class="btn btn-sm btn-warning record-edit"><i class="bi bi-pencil"></i></button>')
+      }
+
+      if (props.canDelete) {
+        buttons.push('<button type="button" class="btn btn-sm btn-danger record-delete"><i class="bi bi-trash"></i></button>')
+      }
+
+      if (buttons.length === 0) {
+        return '<span class="text-muted">無權限</span>'
+      }
+
+      return '<div class="btn-group" role="group">' + buttons.join('') + '</div>'
+    }
   }
 ])
 
 onMounted(async () => {
   await nextTick()
-  attachActionListener()
+  // 延遲綁定事件，確保 DataTable 已完全初始化
+  setTimeout(() => {
+    attachActionListener()
+  }, 500)
 })
 
 watch(
-  () => dataTableRef.value?.dt?.value,
-  () => nextTick(attachActionListener)
+  () => dataTableRef.value?.dt,
+  async (newVal) => {
+    if (newVal) {
+      await nextTick()
+      setTimeout(() => {
+        attachActionListener()
+      }, 100)
+    }
+  }
 )
 
 watch(
   () => props.records?.data,
-  () => nextTick(attachActionListener)
+  async () => {
+    await nextTick()
+    setTimeout(() => {
+      attachActionListener()
+    }, 100)
+  }
 )
 
 onBeforeUnmount(() => {
@@ -241,11 +270,10 @@ onBeforeUnmount(() => {
 })
 
 function attachActionListener() {
-  const dtInstance = dataTableRef.value?.dt?.value
+  const dtInstance = dataTableRef.value?.dt
   if (!dtInstance) return
 
   const node = dtInstance.table().node()
-
   if (tableElement.value === node) return
 
   detachActionListener()
@@ -262,13 +290,22 @@ function detachActionListener() {
 }
 
 function handleTableClick(event) {
-  const target = event.target
+  let target = event.target
   if (!(target instanceof HTMLElement)) return
+
+  // 如果點擊的是圖示，向上找到按鈕元素
+  if (target.tagName === 'I') {
+    target = target.parentElement
+  }
 
   const actionButton = target.closest(ACTION_BUTTON_SELECTOR)
   if (!actionButton) return
 
-  const dtInstance = dataTableRef.value?.dt?.value
+  // 防止事件冒泡
+  event.preventDefault()
+  event.stopPropagation()
+
+  const dtInstance = dataTableRef.value?.dt
   if (!dtInstance) return
 
   const rowElement = actionButton.closest('tr')
@@ -284,7 +321,9 @@ function handleTableClick(event) {
     return
   }
 
-  emit('edit', rowData)
+  if (actionButton.classList.contains('record-edit')) {
+    emit('edit', rowData)
+  }
 }
 
 function renderDate(value, type) {

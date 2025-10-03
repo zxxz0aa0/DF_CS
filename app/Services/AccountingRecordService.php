@@ -22,52 +22,52 @@ class AccountingRecordService
 
         switch ($searchType) {
             case 'name':
-                // 搜尋駕駛姓名
+                // 搜尋駕駛姓名（查詢所有欄位供詳細頁面使用）
                 $drivers = Driver::where('name', 'like', "%{$keyword}%")
-                    ->select('id', 'name', 'id_number', 'birthday')
+                    ->with('companyCategory')
                     ->get();
 
-                // 透過駕駛找車輛
+                // 透過駕駛找車輛（查詢所有欄位供詳細頁面使用）
                 if ($drivers->isNotEmpty()) {
                     $driverIds = $drivers->pluck('id');
                     $vehicleIds = DriverVehicleAssignment::whereIn('driver_id', $driverIds)
                         ->pluck('vehicle_id');
                     $vehicles = Vehicle::whereIn('id', $vehicleIds)
-                        ->select('id', 'license_number', 'fleet_number', 'owner_name')
+                        ->with(['companyCategory', 'company'])
                         ->get();
                 }
                 break;
 
             case 'license':
-                // 搜尋車牌號碼
+                // 搜尋車牌號碼（查詢所有欄位供詳細頁面使用）
                 $vehicles = Vehicle::where('license_number', 'like', "%{$keyword}%")
-                    ->select('id', 'license_number', 'fleet_number', 'owner_name')
+                    ->with(['companyCategory', 'company'])
                     ->get();
 
-                // 透過車輛找駕駛
+                // 透過車輛找駕駛（查詢所有欄位供詳細頁面使用）
                 if ($vehicles->isNotEmpty()) {
                     $vehicleIds = $vehicles->pluck('id');
                     $driverIds = DriverVehicleAssignment::whereIn('vehicle_id', $vehicleIds)
                         ->pluck('driver_id');
                     $drivers = Driver::whereIn('id', $driverIds)
-                        ->select('id', 'name', 'id_number', 'birthday')
+                        ->with('companyCategory')
                         ->get();
                 }
                 break;
 
             case 'fleet':
-                // 搜尋車隊編號
+                // 搜尋車隊編號（查詢所有欄位供詳細頁面使用）
                 $vehicles = Vehicle::where('fleet_number', 'like', "%{$keyword}%")
-                    ->select('id', 'license_number', 'fleet_number', 'owner_name')
+                    ->with(['companyCategory', 'company'])
                     ->get();
 
-                // 透過車輛找駕駛
+                // 透過車輛找駕駛（查詢所有欄位供詳細頁面使用）
                 if ($vehicles->isNotEmpty()) {
                     $vehicleIds = $vehicles->pluck('id');
                     $driverIds = DriverVehicleAssignment::whereIn('vehicle_id', $vehicleIds)
                         ->pluck('driver_id');
                     $drivers = Driver::whereIn('id', $driverIds)
-                        ->select('id', 'name', 'id_number', 'birthday')
+                        ->with('companyCategory')
                         ->get();
                 }
                 break;
@@ -113,9 +113,9 @@ class AccountingRecordService
         $balance = $debitTotal - $creditTotal;
 
         return [
-            'debit_total' => number_format($debitTotal, 2),
-            'credit_total' => number_format($creditTotal, 2),
-            'balance' => number_format($balance, 2),
+            'debit_total' => $debitTotal,
+            'credit_total' => $creditTotal,
+            'balance' => $balance,
             'balance_is_negative' => $balance < 0,
         ];
     }

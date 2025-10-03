@@ -8,10 +8,14 @@
         <table class="table table-hover">
           <thead>
             <tr>
-              <th style="width: 50px;">選擇</th>
-              <th>姓名</th>
-              <th>身分證字號</th>
-              <th>生日</th>
+              <th class="text-center" style="width: 4%;">選擇</th>
+              <th style="width: 10%;">姓名</th>
+              <th style="width: 15%;">身分證字號</th>
+              <th style="width: 12%;">生日</th>
+              <th style="width: 8%;">年齡</th>
+              <th style="width: 15%;">電話</th>
+              <th style="width: 12%;">入籍日期</th>
+              <th style="width: 10%;">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -22,7 +26,7 @@
               @click="selectDriver(driver.id)"
               style="cursor: pointer;"
             >
-              <td>
+              <td class="text-center">
                 <input
                   type="radio"
                   :checked="driver.id === selectedId"
@@ -32,6 +36,18 @@
               <td>{{ driver.name }}</td>
               <td>{{ driver.id_number }}</td>
               <td>{{ formatDate(driver.birthday) }}</td>
+              <td>{{ calculateAge(driver.birthday) }}</td>
+              <td>{{ driver.mobile_phone1 }}</td>
+              <td>{{ formatDate(driver.registration_date) }}</td>
+              <td>
+                <button
+                  @click.stop="viewDetail(driver)"
+                  class="btn btn-sm btn-info"
+                  title="檢視詳細資料"
+                >
+                  <i class="bi bi-eye"></i>
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -46,14 +62,30 @@ const props = defineProps({
   selectedId: { type: Number, default: null }
 })
 
-const emit = defineEmits(['select'])
+const emit = defineEmits(['select', 'view-detail'])
 
 const selectDriver = (driverId) => {
   emit('select', driverId)
 }
 
+const viewDetail = (driver) => {
+  emit('view-detail', driver)
+}
+
 const formatDate = (date) => {
   if (!date) return '-'
-  return new Date(date).toLocaleDateString('zh-TW')
+  const d = new Date(date)
+  if (isNaN(d)) return '-'
+  const rocYear = d.getFullYear() - 1911
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${rocYear}-${month}-${day}`
+}
+
+const calculateAge = (birthday) => {
+  if (!birthday) return '-'
+  const diff = Date.now() - new Date(birthday).getTime()
+  const ageDate = new Date(diff)
+  return Math.abs(ageDate.getUTCFullYear() - 1970)
 }
 </script>

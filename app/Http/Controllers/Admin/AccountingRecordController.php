@@ -46,10 +46,10 @@ class AccountingRecordController extends Controller
         // 如果有搜尋結果但沒有選擇，自動選擇第一個（駕駛和車輛都選）
         if (!$selectedDriverId && !$selectedVehicleId && $keyword) {
             // 同時選擇駕駛和車輛的第一個
-            if (!empty($drivers)) {
+            if (!empty($drivers) && count($drivers) > 0) {
                 $selectedDriverId = $drivers[0]->id;
             }
-            if (!empty($vehicles)) {
+            if (!empty($vehicles) && count($vehicles) > 0) {
                 $selectedVehicleId = $vehicles[0]->id;
             }
         }
@@ -86,6 +86,12 @@ class AccountingRecordController extends Controller
                 'keyword' => $keyword,
                 'driver_id' => $selectedDriverId,
                 'vehicle_id' => $selectedVehicleId,
+            ],
+            'permissions' => [
+                'canCreate' => auth()->user()->can('create accounting'),
+                'canEdit' => auth()->user()->can('edit accounting'),
+                'canDelete' => auth()->user()->can('delete accounting'),
+                'canExport' => auth()->user()->can('export accounting'),
             ]
         ]);
     }
@@ -157,6 +163,22 @@ class AccountingRecordController extends Controller
     {
         try {
             $this->accountingRecordService->update($accountingRecord, $request->validated());
+
+            // 重新載入更新後的記錄所屬的駕駛或車輛的所有帳務記錄
+            $driverId = $accountingRecord->driver_id;
+            $vehicleId = $accountingRecord->vehicle_id;
+
+            // 判斷要重新載入駕駛還是車輛的帳務記錄
+            if ($driverId) {
+                $records = $this->accountingRecordService->getRecords($driverId, null);
+            } elseif ($vehicleId) {
+                $records = $this->accountingRecordService->getRecords(null, $vehicleId);
+            } else {
+                $records = collect();
+            }
+
+            // 重新計算統計資料
+            $statistics = $this->accountingRecordService->calculateStatistics($records);
 
             return back()->with('success', '帳務記錄已更新');
 

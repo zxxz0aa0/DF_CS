@@ -223,6 +223,9 @@ const resetForm = () => {
   rows.value = [createNewRow()]
 }
 
+// 儲存事件監聽器的清理函數
+let removeSuccessListener = null
+
 // 監聽 Inertia 請求成功事件
 const handleSuccess = (event) => {
   // 檢查是否為新增帳務記錄的成功回應
@@ -233,11 +236,15 @@ const handleSuccess = (event) => {
 }
 
 onMounted(() => {
-  router.on('success', handleSuccess)
+  // router.on() 返回一個清理函數
+  removeSuccessListener = router.on('success', handleSuccess)
 })
 
 onUnmounted(() => {
-  router.off('success', handleSuccess)
+  // 呼叫清理函數移除監聽器
+  if (removeSuccessListener) {
+    removeSuccessListener()
+  }
 })
 
 // 暴露方法給父組件使用（如果需要）

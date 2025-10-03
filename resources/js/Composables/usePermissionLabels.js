@@ -50,6 +50,23 @@ export function usePermissionLabels() {
         'view financial reports': '檢視財務報表',
         'manage billing': '管理帳務',
         'view statistics': '檢視統計',
+
+        // 會計科目管理
+        'view accounts': '檢視會計科目',
+        'create accounts': '新增會計科目',
+        'edit accounts': '編輯會計科目',
+        'delete accounts': '刪除會計科目',
+        'manage accounts': '管理會計科目',
+        'import accounts': '匯入會計科目',
+        'export accounts': '匯出會計科目',
+
+        // 帳務管理
+        'view accounting': '檢視帳務',
+        'create accounting': '新增帳務',
+        'edit accounting': '編輯帳務',
+        'delete accounting': '刪除帳務',
+        'manage accounting': '管理帳務',
+        'export accounting': '匯出帳務',
     }
 
     const label = (permissionName) => map[permissionName] || permissionName

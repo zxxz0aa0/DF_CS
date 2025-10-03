@@ -180,7 +180,8 @@
                         <div class="list-group list-group-flush">
                             <div class="list-group-item px-0">
                                 <strong>基礎權限</strong>
-                                <div class="form-text">view dashboard, view users</div>
+                                <div class="form-text">檢視儀表板、檢視使用者</div>
+                                <small class="text-muted"><code>view dashboard, view users</code></small>
                             </div>
                             <div class="list-group-item px-0">
                                 <strong>管理員權限</strong>
@@ -188,7 +189,8 @@
                             </div>
                             <div class="list-group-item px-0">
                                 <strong>編輯者權限</strong>
-                                <div class="form-text">edit users, create users, view users</div>
+                                <div class="form-text">編輯使用者、新增使用者、檢視使用者</div>
+                                <small class="text-muted"><code>edit users, create users, view users</code></small>
                             </div>
                         </div>
                     </div>
@@ -214,14 +216,14 @@
                                     type="text"
                                     class="form-control"
                                     :class="{ 'is-invalid': createForm.errors.name }"
-                                    placeholder="例：edit users, view dashboard"
+                                    placeholder="例：edit users（編輯使用者）, view dashboard（檢視儀表板）"
                                     required
                                 >
                                 <div v-if="createForm.errors.name" class="invalid-feedback">
                                     {{ createForm.errors.name }}
                                 </div>
                                 <div class="form-text">
-                                    建議格式：動作 + 資源 (例：view users, edit posts)
+                                    建議格式：動作 + 資源（英文，例：view users 檢視使用者、edit posts 編輯文章）
                                 </div>
                             </div>
                         </div>

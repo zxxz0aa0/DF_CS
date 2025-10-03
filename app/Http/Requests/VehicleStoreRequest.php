@@ -55,6 +55,9 @@ class VehicleStoreRequest extends FormRequest
             'registration_day' => 'nullable|integer|min:1|max:31',
             'property_type' => 'nullable|string|max:50',
             'notes' => 'nullable|string|max:1000',
+            'fleet_name' => 'nullable|string|max:100',
+            'fleet_category' => 'nullable|string|max:50',
+            'fleet_number' => 'nullable|string|max:20',
         ];
     }
 
@@ -183,6 +186,9 @@ class VehicleStoreRequest extends FormRequest
             'registration_day' => '入籍日',
             'property_type' => '產權類別',
             'notes' => '備註',
+            'fleet_name' => '車隊名稱',
+            'fleet_category' => '車隊類別',
+            'fleet_number' => '車隊編號',
         ];
     }
 }

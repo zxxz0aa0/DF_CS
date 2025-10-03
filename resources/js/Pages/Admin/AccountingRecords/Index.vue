@@ -28,6 +28,7 @@
             :drivers="drivers"
             :selected-id="selectedDriverId"
             @select="handleDriverSelect"
+            @view-detail="showDriverDetail"
           />
 
           <!-- 3. 車輛列表卡片 -->
@@ -36,11 +37,12 @@
             :vehicles="vehicles"
             :selected-id="selectedVehicleId"
             @select="handleVehicleSelect"
+            @view-detail="showVehicleDetail"
           />
 
           <!-- 4. 帳務新增表格卡片 -->
           <AccountingForm
-            v-if="selectedDriverId || selectedVehicleId"
+            v-if="(selectedDriverId || selectedVehicleId) && permissions.canCreate"
             :selected-driver="selectedDriver"
             :selected-vehicle="selectedVehicle"
             @submit="handleSubmit"
@@ -51,11 +53,38 @@
             v-if="(selectedDriverId || selectedVehicleId) && records.data !== undefined"
             :records="records"
             :statistics="statistics"
-            :show-driver-button="drivers.length > 0 && selectedVehicleId"
-            :show-vehicle-button="vehicles.length > 0 && selectedDriverId"
+            :show-driver-button="!!(drivers.length > 0 && selectedVehicleId)"
+            :show-vehicle-button="!!(vehicles.length > 0 && selectedDriverId)"
+            :can-edit="permissions.canEdit"
+            :can-delete="permissions.canDelete"
             @edit="handleEdit"
             @delete="handleDelete"
             @switch-view="handleSwitchView"
+          />
+
+          <!-- 駕駛詳細資料 Modal -->
+          <DriverDetailModal
+            v-if="selectedDriverForView"
+            :show="showDriverModal"
+            :driver="selectedDriverForView"
+            @close="closeDriverModal"
+          />
+
+          <!-- 車輛詳細資料 Modal -->
+          <VehicleDetailModal
+            v-if="selectedVehicleForView"
+            :show="showVehicleModal"
+            :vehicle="selectedVehicleForView"
+            @close="closeVehicleModal"
+          />
+
+          <!-- 編輯帳務記錄 Modal -->
+          <AccountingRecordEditModal
+            v-if="selectedRecordForEdit"
+            :show="showEditModal"
+            :record="selectedRecordForEdit"
+            @close="closeEditModal"
+            @submit="handleEditSubmit"
           />
 
         </div>
@@ -65,7 +94,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import SearchPanel from './Components/SearchPanel.vue'
@@ -73,18 +102,28 @@ import DriverList from './Components/DriverList.vue'
 import VehicleList from './Components/VehicleList.vue'
 import AccountingForm from './Components/AccountingForm.vue'
 import AccountingRecordList from './Components/AccountingRecordList.vue'
+import DriverDetailModal from './Components/DriverDetailModal.vue'
+import VehicleDetailModal from './Components/VehicleDetailModal.vue'
+import AccountingRecordEditModal from './Components/AccountingRecordEditModal.vue'
 
 const props = defineProps({
   drivers: { type: Array, default: () => [] },
   vehicles: { type: Array, default: () => [] },
   records: { type: Object, default: () => ({ data: [] }) },
   statistics: { type: Object, default: null },
-  filters: { type: Object, default: () => ({}) }
+  filters: { type: Object, default: () => ({}) },
+  permissions: { type: Object, default: () => ({ canCreate: false, canEdit: false, canDelete: false, canExport: false }) }
 })
 
 // 選擇的駕駛和車輛（從後端傳來的 filters 取得，後端已處理自動選擇邏輯）
-const selectedDriverId = ref(props.filters.driver_id)
-const selectedVehicleId = ref(props.filters.vehicle_id)
+const selectedDriverId = ref(props.filters.driver_id ? Number(props.filters.driver_id) : null)
+const selectedVehicleId = ref(props.filters.vehicle_id ? Number(props.filters.vehicle_id) : null)
+
+// 監聽 props.filters 變化，當搜尋後更新選擇狀態
+watch(() => props.filters, (newFilters) => {
+  selectedDriverId.value = newFilters.driver_id ? Number(newFilters.driver_id) : null
+  selectedVehicleId.value = newFilters.vehicle_id ? Number(newFilters.vehicle_id) : null
+}, { deep: true })
 
 const selectedDriver = computed(() => {
   if (!selectedDriverId.value) return null
@@ -96,10 +135,48 @@ const selectedVehicle = computed(() => {
   return props.vehicles.find(v => v.id === selectedVehicleId.value)
 })
 
+// Modal 狀態管理
+const showDriverModal = ref(false)
+const showVehicleModal = ref(false)
+const showEditModal = ref(false)
+const selectedDriverForView = ref(null)
+const selectedVehicleForView = ref(null)
+const selectedRecordForEdit = ref(null)
+
+// 顯示駕駛詳細資料
+const showDriverDetail = (driver) => {
+  selectedDriverForView.value = driver
+  showDriverModal.value = true
+}
+
+// 關閉駕駛 Modal
+const closeDriverModal = () => {
+  showDriverModal.value = false
+  setTimeout(() => {
+    selectedDriverForView.value = null
+  }, 300) // 等待動畫完成
+}
+
+// 顯示車輛詳細資料
+const showVehicleDetail = (vehicle) => {
+  selectedVehicleForView.value = vehicle
+  showVehicleModal.value = true
+}
+
+// 關閉車輛 Modal
+const closeVehicleModal = () => {
+  showVehicleModal.value = false
+  setTimeout(() => {
+    selectedVehicleForView.value = null
+  }, 300) // 等待動畫完成
+}
+
 // 處理搜尋
 const handleSearch = (searchData) => {
   router.get(route('admin.accounting.records.index'), searchData, {
-    preserveState: false
+    preserveState: true,
+    preserveScroll: false,  // 搜尋後捲軸回到頂部是合理的
+    only: ['drivers', 'vehicles', 'records', 'statistics', 'filters']
   })
 }
 
@@ -158,18 +235,39 @@ const handleSubmit = (formData) => {
 
 // 處理編輯
 const handleEdit = (record) => {
-  // 簡化版本：直接使用 prompt 進行編輯
-  const note = prompt('編輯備註:', record.note || '')
-  if (note !== null) {
-    router.put(route('admin.accounting.records.update', record.id), {
-      ...record,
-      note: note
-    }, {
-      preserveState: true,
-      preserveScroll: true,
-      only: ['records', 'statistics']
-    })
-  }
+  // 先設定資料
+  selectedRecordForEdit.value = record
+
+  // 使用 nextTick 確保 DOM 更新後再打開 Modal
+  nextTick(() => {
+    showEditModal.value = true
+  })
+}
+
+// 關閉編輯 Modal
+const closeEditModal = () => {
+  showEditModal.value = false
+  setTimeout(() => {
+    selectedRecordForEdit.value = null
+  }, 300)
+}
+
+// 提交編輯
+const handleEditSubmit = (formData) => {
+  router.put(route('admin.accounting.records.update', formData.id), {
+    account_detail_id: selectedRecordForEdit.value.account_detail_id,
+    transaction_date: formData.transaction_date,
+    debit_amount: formData.debit_amount,
+    credit_amount: formData.credit_amount,
+    note: formData.note
+  }, {
+    preserveState: true,
+    preserveScroll: true,
+    only: ['records', 'statistics'],
+    onSuccess: () => {
+      closeEditModal()
+    }
+  })
 }
 
 // 處理刪除
