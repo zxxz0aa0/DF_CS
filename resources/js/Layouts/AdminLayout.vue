@@ -137,11 +137,28 @@
                         </li>
 
                         <!-- 帳務管理 -->
-                        <li v-if="canSeeAccountingManagement" class="nav-item">
-                            <Link :href="route('admin.accounting.records.index')" class="nav-link" :class="{ active: route().current('admin.accounting.*') }" @click="closeSidebar">
+                        <li v-if="canSeeAccountingMenu" class="nav-item" :class="{ 'menu-open': isAccountingMenuActive || accountingMenuOpen }">
+                            <a href="#" class="nav-link" :class="{ active: isAccountingMenuActive }" data-lte-toggle="treeview" @click.prevent="toggleAccountingMenu">
                                 <i class="nav-icon bi bi-calculator"></i>
-                                <p>帳務管理</p>
-                            </Link>
+                                <p>
+                                    帳務管理
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li v-if="canSeeAccountingManagement" class="nav-item ps-4">
+                                    <Link :href="route('admin.accounting.records.index')" class="nav-link" :class="{ active: route().current('admin.accounting.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-journal-text"></i>
+                                        <p>帳務記錄</p>
+                                    </Link>
+                                </li>
+                                <li v-if="canSeeExpensePaymentManagement" class="nav-item ps-4">
+                                    <Link :href="route('admin.expense-payments.index')" class="nav-link" :class="{ active: isExpensePaymentActive }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-wallet2"></i>
+                                        <p>支出款項管理</p>
+                                    </Link>
+                                </li>
+                            </ul>
                         </li>
 
                         <!-- 系統設定 -->
@@ -309,6 +326,7 @@ const driverMenuOpen = ref(false)
 const vehicleMenuOpen = ref(false)
 const vehicleLicenseMenuOpen = ref(false)
 const accountMenuOpen = ref(false)
+const accountingMenuOpen = ref(false)
 const sidebarOpen = ref(false)
 
 // 取得前端共享的角色/權限（在 <script setup> 需用 usePage 取得 $page）
@@ -351,11 +369,12 @@ const canSeeVehicleLicenseManagement = computed(() => {
 })
 
 const canSeeVendorManagement = computed(() => {
-    return can('vendor.view') || can('vendor.create') || can('vendor.edit') || can('vendor.delete') || can('vendor.export')
+    return can('view vendors') || can('create vendors') || can('edit vendors') || can('delete vendors') || can('export vendors')
 })
 
 const canSeeAssignmentManagement = computed(() => {
-    return can('assignment.view') || can('assignment.create') || can('assignment.edit') || can('assignment.delete')
+    return can('view driver vehicle assignments') || can('create driver vehicle assignments') ||
+           can('edit driver vehicle assignments') || can('delete driver vehicle assignments')
 })
 
 const canSeeAccountManagement = computed(() => {
@@ -364,6 +383,15 @@ const canSeeAccountManagement = computed(() => {
 
 const canSeeAccountingManagement = computed(() => {
     return can('view accounting') || can('create accounting') || can('edit accounting') || can('delete accounting') || can('export accounting')
+})
+
+const canSeeExpensePaymentManagement = computed(() => {
+    return can('view expense payments') || can('create expense payments') || can('edit expense payments') ||
+        can('delete expense payments') || can('export expense payments') || can('import expense payments')
+})
+
+const canSeeAccountingMenu = computed(() => {
+    return canSeeAccountingManagement.value || canSeeExpensePaymentManagement.value
 })
 
 const isUserManagementActive = computed(() => {
@@ -394,6 +422,14 @@ const isAccountManagementActive = computed(() => {
     return route().current('admin.accounts.*')
 })
 
+const isExpensePaymentActive = computed(() => {
+    return route().current('admin.expense-payments.*')
+})
+
+const isAccountingMenuActive = computed(() => {
+    return route().current('admin.accounting.*') || isExpensePaymentActive.value
+})
+
 const toggleUserMenu = () => {
     userMenuOpen.value = !userMenuOpen.value
     if (userMenuOpen.value) {
@@ -403,6 +439,7 @@ const toggleUserMenu = () => {
         vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
         accountMenuOpen.value = false
+        accountingMenuOpen.value = false
     }
 }
 
@@ -415,6 +452,7 @@ const togglePermissionMenu = () => {
         vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
         accountMenuOpen.value = false
+        accountingMenuOpen.value = false
     }
 }
 
@@ -427,6 +465,7 @@ const toggleCompanyMenu = () => {
         vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
         accountMenuOpen.value = false
+        accountingMenuOpen.value = false
     }
 }
 
@@ -439,6 +478,7 @@ const toggleDriverMenu = () => {
         vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
         accountMenuOpen.value = false
+        accountingMenuOpen.value = false
     }
 }
 
@@ -451,6 +491,7 @@ const toggleVehicleMenu = () => {
         driverMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
         accountMenuOpen.value = false
+        accountingMenuOpen.value = false
     }
 }
 
@@ -463,6 +504,7 @@ const toggleVehicleLicenseMenu = () => {
         driverMenuOpen.value = false
         vehicleMenuOpen.value = false
         accountMenuOpen.value = false
+        accountingMenuOpen.value = false
     }
 }
 
@@ -475,6 +517,20 @@ const toggleAccountMenu = () => {
         driverMenuOpen.value = false
         vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
+        accountingMenuOpen.value = false
+    }
+}
+
+const toggleAccountingMenu = () => {
+    accountingMenuOpen.value = !accountingMenuOpen.value
+    if (accountingMenuOpen.value) {
+        userMenuOpen.value = false
+        permissionMenuOpen.value = false
+        companyMenuOpen.value = false
+        driverMenuOpen.value = false
+        vehicleMenuOpen.value = false
+        vehicleLicenseMenuOpen.value = false
+        accountMenuOpen.value = false
     }
 }
 
@@ -557,6 +613,15 @@ const closeSidebar = () => {
 
     // 移除所有可能的側邊欄狀態類別
     document.body.classList.remove('sidebar-open')
+
+    userMenuOpen.value = false
+    permissionMenuOpen.value = false
+    companyMenuOpen.value = false
+    driverMenuOpen.value = false
+    vehicleMenuOpen.value = false
+    vehicleLicenseMenuOpen.value = false
+    accountMenuOpen.value = false
+    accountingMenuOpen.value = false
 
     // 在大螢幕上，如果需要完全隱藏側邊欄，可以加上 sidebar-collapse
     const isLargeScreen = window.innerWidth >= 992

@@ -14,24 +14,46 @@ class VendorPermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        $permissions = [
-            'vendor.view' => '查看廠商列表',
-            'vendor.create' => '新增廠商',
-            'vendor.edit' => '編輯廠商',
-            'vendor.delete' => '刪除廠商',
-            'vendor.export' => '匯出廠商資料',
+        // 舊的權限名稱（使用點號分隔）
+        $oldPermissions = [
+            'vendor.view',
+            'vendor.create',
+            'vendor.edit',
+            'vendor.delete',
+            'vendor.export',
         ];
 
-        foreach ($permissions as $name => $description) {
+        // 新的權限名稱（統一使用空格分隔）
+        $newPermissions = [
+            'view vendors',
+            'create vendors',
+            'edit vendors',
+            'delete vendors',
+            'export vendors',
+        ];
+
+        // 刪除舊的權限
+        foreach ($oldPermissions as $oldName) {
+            $oldPerm = Permission::where('name', $oldName)->first();
+            if ($oldPerm) {
+                $oldPerm->delete();
+            }
+        }
+
+        // 建立新的權限
+        foreach ($newPermissions as $name) {
             Permission::firstOrCreate(
                 ['name' => $name],
                 ['guard_name' => 'web']
             );
         }
 
+        // 將新權限分配給 admin 角色
         $adminRole = Role::where('name', 'admin')->first();
         if ($adminRole) {
-            $adminRole->givePermissionTo(array_keys($permissions));
+            $adminRole->givePermissionTo($newPermissions);
         }
+
+        $this->command->info('廠商管理權限已更新為統一格式');
     }
 }

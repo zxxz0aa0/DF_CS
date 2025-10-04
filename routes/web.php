@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DriverController;
 use App\Http\Controllers\Admin\DriverVehicleAssignmentController;
+use App\Http\Controllers\Admin\ExpensePaymentController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -219,6 +220,21 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
                 ->name('account-details.search');
         });
     });
+
+    // 支出款項管理路由
+    Route::prefix('expense-payments')->name('expense-payments.')
+        ->middleware('permission:view expense payments')
+        ->group(function () {
+            Route::get('/', [ExpensePaymentController::class, 'index'])->name('index');
+            Route::post('/', [ExpensePaymentController::class, 'store'])->name('store');
+            Route::put('{expense_payment}', [ExpensePaymentController::class, 'update'])->name('update');
+            Route::delete('{expense_payment}', [ExpensePaymentController::class, 'destroy'])->name('destroy');
+
+            Route::post('bulk-status', [ExpensePaymentController::class, 'bulkStatus'])->name('bulk-status');
+            Route::get('export', [ExpensePaymentController::class, 'export'])->name('export');
+            Route::get('template', [ExpensePaymentController::class, 'template'])->name('template');
+            Route::post('import', [ExpensePaymentController::class, 'import'])->name('import');
+        });
 });
 
 require __DIR__.'/auth.php';

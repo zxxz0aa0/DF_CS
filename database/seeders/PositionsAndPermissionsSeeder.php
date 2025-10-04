@@ -85,6 +85,7 @@ class PositionsAndPermissionsSeeder extends Seeder
                     'view drivers', 'create drivers', 'edit drivers',
                     'view companies', 'create companies', 'edit companies',
                     'view reports',
+                    'view expense payments',
                 ],
             ],
             [
@@ -98,6 +99,7 @@ class PositionsAndPermissionsSeeder extends Seeder
                     'view statistics',
                     'view reports', 'create reports', 'export reports',
                     'view drivers', 'export drivers',
+                    'view expense payments', 'create expense payments', 'edit expense payments', 'delete expense payments', 'export expense payments', 'import expense payments',
                 ],
             ],
             [

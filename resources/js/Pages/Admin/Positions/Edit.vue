@@ -139,7 +139,7 @@
                         </div>
                         <div class="card-body" style="max-height: 400px; overflow-y: auto;">
                             <div v-for="(permissionGroup, groupName) in groupedPermissions" :key="groupName" class="mb-3">
-                                <h6 class="text-uppercase text-muted">{{ groupName }}</h6>
+                                <h6 class="text-uppercase text-muted">{{ groupLabel(groupName) }}</h6>
                                 <div v-for="permission in permissionGroup" :key="permission.id" class="form-check">
                                     <input
                                         :id="'perm-' + permission.id"
@@ -211,7 +211,7 @@ const form = useForm({
     permissions: props.positionPermissions
 })
 
-const { label } = usePermissionLabels()
+const { label, groupLabel } = usePermissionLabels()
 
 const updatePosition = () => {
     form.put(route('admin.positions.update', props.position.id), {

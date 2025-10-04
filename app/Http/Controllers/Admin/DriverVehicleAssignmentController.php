@@ -13,10 +13,10 @@ class DriverVehicleAssignmentController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:assignment.view')->only(['index', 'show']);
-        $this->middleware('permission:assignment.create')->only(['create', 'store']);
-        $this->middleware('permission:assignment.edit')->only(['edit', 'update']);
-        $this->middleware('permission:assignment.delete')->only(['destroy']);
+        $this->middleware('permission:view driver vehicle assignments')->only(['index', 'show']);
+        $this->middleware('permission:create driver vehicle assignments')->only(['create', 'store']);
+        $this->middleware('permission:edit driver vehicle assignments')->only(['edit', 'update']);
+        $this->middleware('permission:delete driver vehicle assignments')->only(['destroy']);
     }
 
     /**

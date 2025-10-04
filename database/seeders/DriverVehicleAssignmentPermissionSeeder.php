@@ -14,24 +14,46 @@ class DriverVehicleAssignmentPermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        $permissions = [
-            'assignment.view' => '查看駕駛車輛綁定',
-            'assignment.create' => '新增駕駛車輛綁定',
-            'assignment.edit' => '編輯駕駛車輛綁定',
-            'assignment.delete' => '刪除駕駛車輛綁定',
-            'assignment.batch' => '批量綁定操作',
+        // 舊的權限名稱（使用點號分隔）
+        $oldPermissions = [
+            'assignment.view',
+            'assignment.create',
+            'assignment.edit',
+            'assignment.delete',
+            'assignment.batch',
         ];
 
-        foreach ($permissions as $name => $description) {
+        // 新的權限名稱（統一使用空格分隔）
+        $newPermissions = [
+            'view driver vehicle assignments',
+            'create driver vehicle assignments',
+            'edit driver vehicle assignments',
+            'delete driver vehicle assignments',
+            'batch driver vehicle assignments',
+        ];
+
+        // 刪除舊的權限
+        foreach ($oldPermissions as $oldName) {
+            $oldPerm = Permission::where('name', $oldName)->first();
+            if ($oldPerm) {
+                $oldPerm->delete();
+            }
+        }
+
+        // 建立新的權限
+        foreach ($newPermissions as $name) {
             Permission::firstOrCreate(
                 ['name' => $name],
                 ['guard_name' => 'web']
             );
         }
 
+        // 將新權限分配給 admin 角色
         $adminRole = Role::where('name', 'admin')->first();
         if ($adminRole) {
-            $adminRole->givePermissionTo(array_keys($permissions));
+            $adminRole->givePermissionTo($newPermissions);
         }
+
+        $this->command->info('駕駛車輛綁定管理權限已更新為統一格式');
     }
 }

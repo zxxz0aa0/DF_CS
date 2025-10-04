@@ -158,18 +158,18 @@
                                     </div>
                                     
                                     <div v-else class="row">
-                                        <div 
-                                            v-for="(permissions, group) in groupedPermissions" 
-                                            :key="group" 
+                                        <div
+                                            v-for="(permissions, group) in groupedPermissions"
+                                            :key="group"
                                             class="col-md-6 col-lg-4 mb-3"
                                         >
                                             <div class="card">
                                                 <div class="card-header py-2">
-                                                    <h6 class="card-title mb-0">{{ group }} 權限</h6>
+                                                    <h6 class="card-title mb-0">{{ groupLabel(group) }}</h6>
                                                 </div>
                                                 <div class="card-body">
-                                                    <div 
-                                                        v-for="permission in permissions" 
+                                                    <div
+                                                        v-for="permission in permissions"
                                                         :key="permission.id"
                                                         class="form-check mb-1"
                                                     >
@@ -180,8 +180,8 @@
                                                             type="checkbox"
                                                             class="form-check-input"
                                                         >
-                                                        <label 
-                                                            :for="`permission_${permission.id}`" 
+                                                        <label
+                                                            :for="`permission_${permission.id}`"
                                                             class="form-check-label"
                                                         >
                                                             {{ label(permission.name) }}
@@ -234,7 +234,7 @@ const form = useForm({
     permissions: []
 })
 
-const { label } = usePermissionLabels()
+const { label, groupLabel } = usePermissionLabels()
 
 const submit = () => {
     form.post(route('admin.positions.store'))

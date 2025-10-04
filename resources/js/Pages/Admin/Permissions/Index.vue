@@ -288,7 +288,7 @@ const showCreateModal = ref(false)
 const showDeleteModal = ref(false)
 const deletePermission = ref(null)
 const collapsedGroups = ref({})
-const { label } = usePermissionLabels()
+const { label, groupLabel } = usePermissionLabels()
 
 const usedPermissions = computed(() => {
     return props.permissions.filter(p => p.roles_count > 0).length
@@ -300,14 +300,7 @@ const createForm = useForm({
 })
 
 const formatGroupName = (group) => {
-    const groupNames = {
-        'users': '使用者管理',
-        'roles': '角色管理', 
-        'dashboard': '儀表板',
-        'permissions': '權限管理',
-        'admin': '系統管理'
-    }
-    return groupNames[group] || `${group} 相關`
+    return groupLabel(group)
 }
 
 const toggleGroup = (group) => {

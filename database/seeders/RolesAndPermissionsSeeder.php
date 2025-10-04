@@ -64,9 +64,17 @@ class RolesAndPermissionsSeeder extends Seeder
             'import vehicle licenses',
             'export vehicle licenses',
             'view vehicle license audit logs',
-            
+
             // 系統管理權限
             'view admin dashboard',
+
+            // 支出款項管理
+            'view expense payments',
+            'create expense payments',
+            'edit expense payments',
+            'delete expense payments',
+            'import expense payments',
+            'export expense payments',
         ];
 
         foreach ($permissions as $permission) {
