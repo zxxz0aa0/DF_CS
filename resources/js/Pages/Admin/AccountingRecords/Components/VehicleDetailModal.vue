@@ -40,17 +40,13 @@
                     <th>車隊編號:</th>
                     <td>{{ vehicle.fleet_number }}</td>
                   </tr>
-                  <tr>
-                    <th>車主名稱:</th>
-                    <td>{{ vehicle.owner_name || '-' }}</td>
-                  </tr>
                   <tr v-if="vehicle.company_category">
                     <th>公司類別:</th>
                     <td>{{ vehicle.company_category?.name || '-' }}</td>
                   </tr>
-                  <tr v-if="vehicle.company">
-                    <th>公司名稱:</th>
-                    <td>{{ vehicle.company?.name || '-' }}</td>
+                  <tr>
+                    <th>車主名稱:</th>
+                    <td>{{ vehicle.owner_name || '-' }}</td>
                   </tr>
                   <tr v-if="vehicle.vehicle_type">
                     <th>車輛類型:</th>
@@ -60,6 +56,10 @@
                     <th>地址:</th>
                     <td>{{ vehicle.address }}</td>
                   </tr>
+                  <tr v-if="vehicle.registration_date">
+                    <th>入籍日期:</th>
+                    <td>{{ vehicle.registration_date }}</td>
+                  </tr>
                   <tr v-if="vehicle.vehicle_status">
                     <th>狀態:</th>
                     <td>
@@ -67,6 +67,10 @@
                         {{ vehicle.status_text || (vehicle.vehicle_status === 'active' ? '在籍中' : '已退籍') }}
                       </span>
                     </td>
+                  </tr>
+                  <tr v-if="vehicle.deregistration_date">
+                    <th>退籍日期:</th>
+                    <td>{{ vehicle.deregistration_date }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -83,17 +87,17 @@
                     <th style="width: 40%">車輛廠牌:</th>
                     <td>{{ vehicle.brand }}</td>
                   </tr>
+                  <tr v-if="vehicle.vehicle_form">
+                    <th>車輛款式:</th>
+                    <td>{{ vehicle.vehicle_model}}</td>
+                  </tr>
                   <tr v-if="vehicle.manufacture_year || vehicle.manufacture_month">
                     <th>出廠年月:</th>
                     <td>{{ formatManufactureDate(vehicle.manufacture_year, vehicle.manufacture_month) }}</td>
                   </tr>
-                  <tr v-if="vehicle.vehicle_form">
-                    <th>車輛形式:</th>
-                    <td>{{ vehicle.vehicle_form }}</td>
-                  </tr>
                   <tr v-if="vehicle.engine_displacement">
                     <th>排氣量:</th>
-                    <td>{{ vehicle.engine_displacement }} cc</td>
+                    <td>{{ Math.round(Number(vehicle.engine_displacement)) }} cc</td>
                   </tr>
                   <tr v-if="vehicle.fuel_type">
                     <th>燃料種類:</th>
