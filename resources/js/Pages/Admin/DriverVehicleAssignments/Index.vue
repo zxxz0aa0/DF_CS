@@ -14,7 +14,7 @@
                         <div class="flex justify-between items-center mb-6">
                             <div class="flex space-x-2">
                                 <Link
-                                    v-if="can('assignment.create')"
+                                    v-if="can('create driver vehicle assignments')"
                                     :href="route('admin.driver-vehicle-assignments.create')"
                                     class="btn btn-primary"
                                 >
@@ -94,7 +94,7 @@
                                         <td>
                                             <div class="btn-group btn-group-sm">
                                                 <Link
-                                                    v-if="can('assignment.edit')"
+                                                    v-if="can('edit driver vehicle assignments')"
                                                     :href="route('admin.driver-vehicle-assignments.edit', assignment.id)"
                                                     class="btn btn-outline-primary"
                                                     title="編輯"
@@ -102,7 +102,7 @@
                                                     <i class="bi bi-pencil"></i>
                                                 </Link>
                                                 <button
-                                                    v-if="can('assignment.delete')"
+                                                    v-if="can('delete driver vehicle assignments')"
                                                     @click="confirmDelete(assignment)"
                                                     class="btn btn-outline-danger"
                                                     title="解除綁定"
@@ -194,7 +194,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
