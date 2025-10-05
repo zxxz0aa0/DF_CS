@@ -212,7 +212,7 @@
                           @change="toggleSelectAll($event)"
                         >
                       </th>
-                      <th>紀錄日期</th>
+                      <th>交易日期</th>
                       <th>時間</th>
                       <th>隊員編號</th>
                       <th>隊員姓名</th>
