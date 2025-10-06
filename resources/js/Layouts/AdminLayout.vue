@@ -128,11 +128,12 @@
                             </Link>
                         </li>
 
-                        <!-- 廠商管理 -->
-                        <li v-if="canSeeVendorManagement" class="nav-item">
-                            <Link :href="route('admin.vendors.index')" class="nav-link" :class="{ active: route().current('admin.vendors.*') }" @click="closeSidebar">
-                                <i class="nav-icon bi bi-shop"></i>
-                                <p>廠商管理</p>
+
+                        <!-- 文件管理 -->
+                        <li v-if="canSeeDocumentManagement" class="nav-item">
+                            <Link :href="route('admin.documents.index')" class="nav-link" :class="{ active: route().current('admin.documents.*') }" @click="closeSidebar">
+                                <i class="nav-icon bi bi-file-earmark-text"></i>
+                                <p>證件與保險管理</p>
                             </Link>
                         </li>
 
@@ -159,6 +160,14 @@
                                     </Link>
                                 </li>
                             </ul>
+                        </li>
+
+                        <!-- 廠商管理 -->
+                        <li v-if="canSeeVendorManagement" class="nav-item">
+                            <Link :href="route('admin.vendors.index')" class="nav-link" :class="{ active: route().current('admin.vendors.*') }" @click="closeSidebar">
+                                <i class="nav-icon bi bi-shop"></i>
+                                <p>廠商管理</p>
+                            </Link>
                         </li>
 
                         <!-- 系統設定 -->
@@ -370,6 +379,10 @@ const canSeeVehicleLicenseManagement = computed(() => {
 
 const canSeeVendorManagement = computed(() => {
     return can('view vendors') || can('create vendors') || can('edit vendors') || can('delete vendors') || can('export vendors')
+})
+
+const canSeeDocumentManagement = computed(() => {
+    return can('view documents') || can('create documents') || can('edit documents') || can('delete documents') || can('download documents')
 })
 
 const canSeeAssignmentManagement = computed(() => {

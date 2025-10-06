@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AccountSubCategoryController;
 use App\Http\Controllers\Admin\CompanyCategoryController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\DriverController;
 use App\Http\Controllers\Admin\DriverVehicleAssignmentController;
 use App\Http\Controllers\Admin\ExpensePaymentController;
@@ -97,6 +98,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
 
     // 駕駛車輛綁定管理路由
     Route::resource('driver-vehicle-assignments', DriverVehicleAssignmentController::class);
+
+    // 文件管理路由
+    Route::resource('documents', DocumentController::class)->middleware('permission:view documents');
+    Route::delete('document-files/{file}', [DocumentController::class, 'deleteFile'])
+        ->name('documents.files.delete')
+        ->middleware('permission:delete documents');
+    Route::get('document-files/{file}/download', [DocumentController::class, 'downloadFile'])
+        ->name('documents.files.download')
+        ->middleware('permission:download documents');
 
     // 會計科目管理路由
     Route::prefix('accounts')->name('accounts.')->middleware('permission:view accounts')->group(function () {
