@@ -45,6 +45,11 @@ class Driver extends Model
 
     protected $dates = ['deleted_at'];
 
+    protected $appends = [
+        'license_days_remaining',
+        'professional_license_days_remaining',
+    ];
+
     public function companyCategory(): BelongsTo
     {
         return $this->belongsTo(CompanyCategory::class);

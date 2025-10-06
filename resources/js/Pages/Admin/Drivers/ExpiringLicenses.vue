@@ -164,11 +164,11 @@
                                                           title="編輯資料">
                                                         <i class="bi bi-pencil"></i>
                                                     </Link>
-                                                    <button @click="callDriver(driver)"
+                                                    <!--<button @click="callDriver(driver)"
                                                             class="btn btn-success btn-sm"
                                                             title="撥打電話">
                                                         <i class="bi bi-telephone"></i>
-                                                    </button>
+                                                    </button>-->
                                                 </div>
                                             </td>
                                         </tr>
@@ -204,11 +204,11 @@
                                                           title="編輯資料">
                                                         <i class="bi bi-pencil"></i>
                                                     </Link>
-                                                    <button @click="callDriver(driver)"
+                                                    <!--<button @click="callDriver(driver)"
                                                             class="btn btn-success btn-sm"
                                                             title="撥打電話">
                                                         <i class="bi bi-telephone"></i>
-                                                    </button>
+                                                    </button>-->
                                                 </div>
                                             </td>
                                         </tr>

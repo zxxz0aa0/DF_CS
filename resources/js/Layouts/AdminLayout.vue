@@ -70,6 +70,31 @@
                             </Link>
                         </li>
 
+                        <!-- 帳務管理 -->
+                        <li v-if="canSeeAccountingMenu" class="nav-item" :class="{ 'menu-open': isAccountingMenuActive || accountingMenuOpen }">
+                            <a href="#" class="nav-link" :class="{ active: isAccountingMenuActive }" data-lte-toggle="treeview" @click.prevent="toggleAccountingMenu">
+                                <i class="nav-icon bi bi-calculator"></i>
+                                <p>
+                                    帳務管理
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li v-if="canSeeAccountingManagement" class="nav-item ps-4">
+                                    <Link :href="route('admin.accounting.records.index')" class="nav-link" :class="{ active: route().current('admin.accounting.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-journal-text"></i>
+                                        <p>帳務記錄</p>
+                                    </Link>
+                                </li>
+                                <li v-if="canSeeExpensePaymentManagement" class="nav-item ps-4">
+                                    <Link :href="route('admin.expense-payments.index')" class="nav-link" :class="{ active: isExpensePaymentActive }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-wallet2"></i>
+                                        <p>支出款項管理</p>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </li>
+
                         <!-- 駕駛管理 -->
                         <li v-if="canSeeDriverManagement" class="nav-item" :class="{ 'menu-open': isDriverManagementActive || driverMenuOpen }">
                             <a href="#" class="nav-link" :class="{ active: isDriverManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleDriverMenu">
@@ -135,31 +160,6 @@
                                 <i class="nav-icon bi bi-file-earmark-text"></i>
                                 <p>證件與保險管理</p>
                             </Link>
-                        </li>
-
-                        <!-- 帳務管理 -->
-                        <li v-if="canSeeAccountingMenu" class="nav-item" :class="{ 'menu-open': isAccountingMenuActive || accountingMenuOpen }">
-                            <a href="#" class="nav-link" :class="{ active: isAccountingMenuActive }" data-lte-toggle="treeview" @click.prevent="toggleAccountingMenu">
-                                <i class="nav-icon bi bi-calculator"></i>
-                                <p>
-                                    帳務管理
-                                    <i class="nav-arrow bi bi-chevron-right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li v-if="canSeeAccountingManagement" class="nav-item ps-4">
-                                    <Link :href="route('admin.accounting.records.index')" class="nav-link" :class="{ active: route().current('admin.accounting.*') }" @click="closeSidebar">
-                                        <i class="nav-icon bi bi-journal-text"></i>
-                                        <p>帳務記錄</p>
-                                    </Link>
-                                </li>
-                                <li v-if="canSeeExpensePaymentManagement" class="nav-item ps-4">
-                                    <Link :href="route('admin.expense-payments.index')" class="nav-link" :class="{ active: isExpensePaymentActive }" @click="closeSidebar">
-                                        <i class="nav-icon bi bi-wallet2"></i>
-                                        <p>支出款項管理</p>
-                                    </Link>
-                                </li>
-                            </ul>
                         </li>
 
                         <!-- 廠商管理 -->
