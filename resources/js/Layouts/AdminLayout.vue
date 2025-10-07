@@ -92,6 +92,12 @@
                                         <p>支出款項管理</p>
                                     </Link>
                                 </li>
+                                <li v-if="canSeeCollectionManagement" class="nav-item ps-4">
+                                    <Link :href="route('admin.collections.index')" class="nav-link" :class="{ active: route().current('admin.collections.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-exclamation-circle"></i>
+                                        <p>催帳管理</p>
+                                    </Link>
+                                </li>
                             </ul>
                         </li>
 
@@ -403,8 +409,12 @@ const canSeeExpensePaymentManagement = computed(() => {
         can('delete expense payments') || can('export expense payments') || can('import expense payments')
 })
 
+const canSeeCollectionManagement = computed(() => {
+    return can('view collections')
+})
+
 const canSeeAccountingMenu = computed(() => {
-    return canSeeAccountingManagement.value || canSeeExpensePaymentManagement.value
+    return canSeeAccountingManagement.value || canSeeExpensePaymentManagement.value || canSeeCollectionManagement.value
 })
 
 const isUserManagementActive = computed(() => {

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AccountDetailController;
 use App\Http\Controllers\Admin\AccountingRecordController;
 use App\Http\Controllers\Admin\AccountMainCategoryController;
 use App\Http\Controllers\Admin\AccountSubCategoryController;
+use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\CompanyCategoryController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -244,6 +245,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
             Route::get('export', [ExpensePaymentController::class, 'export'])->name('export');
             Route::get('template', [ExpensePaymentController::class, 'template'])->name('template');
             Route::post('import', [ExpensePaymentController::class, 'import'])->name('import');
+        });
+
+    // 催帳管理路由
+    Route::prefix('collections')->name('collections.')
+        ->middleware('permission:view collections')
+        ->group(function () {
+            Route::get('/', [CollectionController::class, 'index'])->name('index');
+            Route::get('/{driver}', [CollectionController::class, 'show'])->name('show');
         });
 });
 

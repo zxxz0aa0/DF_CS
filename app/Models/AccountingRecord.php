@@ -73,7 +73,7 @@ class AccountingRecord extends Model
     }
 
     /**
-     * 自動填入建立者
+     * 自動填入建立者與更新駕駛餘額彙總
      */
     protected static function boot()
     {
@@ -88,6 +88,40 @@ class AccountingRecord extends Model
         static::updating(function ($model) {
             if (auth()->check()) {
                 $model->updated_by = auth()->id();
+            }
+        });
+
+        // 新增帳務記錄時更新彙總
+        static::created(function ($record) {
+            if ($record->driver_id) {
+                DriverBalanceSummary::updateBalance($record->driver_id);
+            }
+        });
+
+        // 更新帳務記錄時重新計算
+        static::updated(function ($record) {
+            // 更新當前駕駛的彙總
+            if ($record->driver_id) {
+                DriverBalanceSummary::updateBalance($record->driver_id);
+            }
+
+            // 如果 driver_id 改變，舊駕駛也要更新
+            if ($record->isDirty('driver_id') && $record->getOriginal('driver_id')) {
+                DriverBalanceSummary::updateBalance($record->getOriginal('driver_id'));
+            }
+        });
+
+        // 刪除帳務記錄時更新（包含軟刪除）
+        static::deleted(function ($record) {
+            if ($record->driver_id) {
+                DriverBalanceSummary::updateBalance($record->driver_id);
+            }
+        });
+
+        // 恢復軟刪除的記錄時更新
+        static::restored(function ($record) {
+            if ($record->driver_id) {
+                DriverBalanceSummary::updateBalance($record->driver_id);
             }
         });
     }
