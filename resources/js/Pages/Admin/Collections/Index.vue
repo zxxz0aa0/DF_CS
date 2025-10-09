@@ -74,7 +74,7 @@
                 </div>
 
                 <!-- 表格 -->
-                <div class="table-responsive">
+                <div class="table-responsive h5">
                     <table class="table table-bordered table-hover">
                         <thead>
                             <tr>
@@ -110,7 +110,7 @@
                                         :href="route('admin.collections.show', debtor.driver_id)"
                                         class="btn btn-sm btn-info"
                                     >
-                                        <i class="bi bi-list"></i> 查看明細
+                                        <i class="bi bi-list"></i> 明細
                                     </Link>
                                 </td>
                             </tr>

@@ -29,6 +29,12 @@
                     </div>
 
                     <div class="card-body">
+                        <div v-if="flash.success" class="alert alert-success mb-3">
+                            {{ flash.success }}
+                        </div>
+                        <div v-if="flash.error" class="alert alert-danger mb-3">
+                            {{ flash.error }}
+                        </div>
                         <!-- 搜尋功能 -->
                         <div class="row mb-3">
                             <div class="col-md-4">
@@ -204,7 +210,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
 const props = defineProps({
@@ -212,6 +218,9 @@ const props = defineProps({
     categories: Array,
     filters: Object,
 })
+
+const page = usePage()
+const flash = computed(() => page.props.flash || {})
 
 const searchQuery = ref(props.filters.search || '')
 const categoryFilter = ref(props.filters.category_id || '')
@@ -284,10 +293,6 @@ const cleanupModalArtifacts = () => {
 const performDeleteCompany = () => {
     router.delete(route('admin.companies.destroy', deleteTarget.value.id), {
         preserveScroll: true,
-        onSuccess: () => {
-            // 局部重新抓取清單即可，避免整頁重整帶來的閃爍與狀態丟失
-            router.reload({ only: ['companies'], preserveScroll: true })
-        },
         onFinish: () => {
             cleanupModalArtifacts()
             deleteTarget.value = null

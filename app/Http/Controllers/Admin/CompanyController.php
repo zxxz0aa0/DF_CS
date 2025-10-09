@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\CompanyCategory;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -139,8 +140,16 @@ class CompanyController extends Controller
      */
     public function destroy(Company $company)
     {
-        $company->delete();
+        try {
+            $company->delete();
 
-        return back()->with('success', '公司已成功刪除');
+            return back()->with('success', '公司已成功刪除');
+        } catch (QueryException $exception) {
+            if ($exception->errorInfo[1] === 1451) {
+                return back()->with('error', '無法刪除公司：仍有牌照或車輛資料指向這家公司，請先處理相關資料。');
+            }
+
+            throw $exception;
+        }
     }
 }
