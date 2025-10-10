@@ -70,6 +70,14 @@
                             </Link>
                         </li>
 
+                        <!-- 快速搜尋 -->
+                        <li class="nav-item">
+                            <Link :href="route('admin.quick-search.index')" class="nav-link" :class="{ active: route().current('admin.quick-search.*') }" @click="closeSidebar">
+                                <i class="nav-icon bi bi-search"></i>
+                                <p>快速搜尋</p>
+                            </Link>
+                        </li>
+
                         <!-- 帳務管理 -->
                         <li v-if="canSeeAccountingMenu" class="nav-item" :class="{ 'menu-open': isAccountingMenuActive || accountingMenuOpen }">
                             <a href="#" class="nav-link" :class="{ active: isAccountingMenuActive }" data-lte-toggle="treeview" @click.prevent="toggleAccountingMenu">

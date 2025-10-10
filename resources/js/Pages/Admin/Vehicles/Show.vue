@@ -143,7 +143,7 @@
                                         </tr>
                                         <tr v-if="vehicle.engine_displacement">
                                             <td class="font-weight-bold">排氣量</td>
-                                            <td>{{ vehicle.engine_displacement }} cc</td>
+                                            <td>{{ Math.round(Number(vehicle.engine_displacement)) }} cc</td>
                                         </tr>
                                         <tr v-if="vehicle.fuel_type">
                                             <td class="font-weight-bold">燃料種類</td>

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\DriverController;
 use App\Http\Controllers\Admin\DriverVehicleAssignmentController;
 use App\Http\Controllers\Admin\ExpensePaymentController;
 use App\Http\Controllers\Admin\PositionController;
+use App\Http\Controllers\Admin\QuickSearchController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\VehicleController;
@@ -254,6 +255,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
             Route::get('/', [CollectionController::class, 'index'])->name('index');
             Route::get('/{driver}', [CollectionController::class, 'show'])->name('show');
         });
+
+    // 快速搜尋路由
+    Route::prefix('quick-search')->name('quick-search.')->group(function () {
+        Route::get('/', [QuickSearchController::class, 'index'])->name('index');
+        Route::get('/driver/{driver}', [QuickSearchController::class, 'showDriver'])->name('driver');
+        Route::get('/vehicle/{vehicle}', [QuickSearchController::class, 'showVehicle'])->name('vehicle');
+    });
 });
 
 require __DIR__.'/auth.php';
