@@ -78,6 +78,7 @@
                     <table class="table table-bordered table-hover">
                         <thead>
                             <tr>
+                                <th class="text-center">公司種類</th>
                                 <th class="text-center">姓名</th>
                                 <th class="text-center">身分證字號</th>
                                 <th class="text-center">聯絡電話</th>
@@ -90,6 +91,7 @@
                         </thead>
                         <tbody>
                             <tr v-for="debtor in debtors.data" :key="debtor.driver_id">
+                                <td class="text-center">{{ debtor.driver?.company_category?.name || '-' }}</td>
                                 <td class="text-center">{{ debtor.driver_name }}</td>
                                 <td class="text-center">{{ debtor.driver_id_number }}</td>
                                 <td class="text-center">{{ debtor.driver?.mobile_phone1 || '-' }}</td>

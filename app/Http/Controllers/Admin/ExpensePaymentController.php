@@ -50,7 +50,8 @@ class ExpensePaymentController extends Controller
         $payments = $this->expensePaymentService->paginate($filters, max(5, $perPage));
         $statistics = $this->expensePaymentService->statistics($filters);
 
-        $drivers = Driver::select('id', 'name', 'id_number')
+        $drivers = Driver::select('id', 'name', 'id_number', 'company_category_id')
+            ->with('companyCategory:id,name')
             ->orderBy('name')
             ->get();
 

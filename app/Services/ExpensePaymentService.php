@@ -16,7 +16,7 @@ class ExpensePaymentService
     public function paginate(array $filters = [], int $perPage = 20): LengthAwarePaginator
     {
         $query = ExpensePayment::query()
-            ->with(['driver', 'vehicle', 'creator', 'payer'])
+            ->with(['driver.companyCategory', 'vehicle', 'creator', 'payer'])
             ->orderByDesc('record_date')
             ->orderByDesc('record_time');
 

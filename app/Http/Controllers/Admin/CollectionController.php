@@ -21,7 +21,8 @@ class CollectionController extends Controller
     {
         $query = DriverBalanceSummary::query()
             ->debtors() // 只顯示有欠款的駕駛
-            ->with('driver:id,name,mobile_phone1,status');
+            ->with('driver:id,name,mobile_phone1,status,company_category_id')
+            ->with('driver.companyCategory:id,name');
 
         // 搜尋功能
         if ($request->has('search') && $request->search) {

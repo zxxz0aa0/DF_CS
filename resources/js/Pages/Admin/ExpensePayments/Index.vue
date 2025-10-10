@@ -216,6 +216,7 @@
                       </th>
                       <th>交易日期</th>
                       <th>時間</th>
+                      <th>公司種類</th>
                       <th>隊員編號</th>
                       <th>隊員姓名</th>
                       <th>車牌</th>
@@ -231,7 +232,7 @@
                   </thead>
                   <tbody>
                     <tr v-if="payments.data.length === 0">
-                      <td colspan="14" class="text-center text-muted">暫無資料</td>
+                      <td colspan="15" class="text-center text-muted">暫無資料</td>
                     </tr>
                     <tr v-for="payment in payments.data" :key="payment.id">
                       <td>
@@ -244,6 +245,7 @@
                       </td>
                       <td>{{ formatDate(payment.record_date) }}</td>
                       <td>{{ formatTime(payment.record_time) }}</td>
+                      <td>{{ payment.driver?.company_category?.name || '—' }}</td>
                       <td>{{ payment.member_code || '—' }}</td>
                       <td>{{ payment.member_name }}</td>
                       <td>{{ payment.vehicle_license_number || '—' }}</td>
