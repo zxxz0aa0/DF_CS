@@ -22,7 +22,7 @@
       <section class="content">
         <div class="container-fluid">
           <div class="card">
-            <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center" style="background-color:#B3D9D9;">
               <h3 class="card-title mb-2 mb-md-0">
                 <i class="bi bi-cash-coin me-2"></i>支出款項列表
               </h3>
@@ -40,7 +40,7 @@
                 <button
                   v-if="permissions.canExport"
                   type="button"
-                  class="btn btn-success"
+                  class="btn btn-outline-success"
                   :disabled="isExporting"
                   @click="exportData"
                 >
@@ -52,7 +52,7 @@
                 <a
                   v-if="permissions.canImport"
                   :href="route('admin.expense-payments.template')"
-                  class="btn btn-secondary"
+                  class="btn btn-outline-secondary"
                 >
                   <i class="bi bi-file-earmark-arrow-down"></i> 範本
                 </a>
@@ -60,7 +60,7 @@
                 <button
                   v-if="permissions.canImport"
                   type="button"
-                  class="btn btn-info"
+                  class="btn btn-outline-info"
                   @click="triggerImport"
                 >
                   <i class="bi bi-upload"></i> 匯入
@@ -170,33 +170,35 @@
               </form>
 
               <div class="row mb-3">
-                <div class="col-md-6">
-                  <div class="alert alert-info mb-0">
+                <div class="col-md-2">
+                    <div class="col-md-12 d-flex justify-content-center align-items-center">
+                        <div class="btn-group btn-group-lg" role="group">
+                            <button
+                            v-if="permissions.canEdit"
+                            type="button"
+                            class="btn btn-outline-success mt-1"
+                            :disabled="selectedIds.length === 0"
+                            @click="openBulkModal('paid')"
+                            >
+                            <i class="bi bi-check2-circle"></i> 標記已支付
+                            </button>
+                            <!--<button
+                            v-if="permissions.canEdit"
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            :disabled="selectedIds.length === 0"
+                            @click="openBulkModal('pending')"
+                            >
+                            <i class="bi bi-arrow-counterclockwise"></i> 改為未支付
+                            </button>-->
+                        </div>
+                     </div>
+                </div>
+                <div class="col-md-10">
+                  <div class="alert alert-info mb-0 h5">
                     <strong>統計：</strong>
                     未支付 {{ totals.pending.toLocaleString(undefined, currencyFormat) }} 元 ·
                     已支付 {{ totals.paid.toLocaleString(undefined, currencyFormat) }} 元
-                  </div>
-                </div>
-                <div class="col-md-6 text-md-end mt-2 mt-md-0">
-                  <div class="btn-group btn-group-sm" role="group">
-                    <button
-                      v-if="permissions.canEdit"
-                      type="button"
-                      class="btn btn-outline-success"
-                      :disabled="selectedIds.length === 0"
-                      @click="openBulkModal('paid')"
-                    >
-                      <i class="bi bi-check2-circle"></i> 標記已支付
-                    </button>
-                    <button
-                      v-if="permissions.canEdit"
-                      type="button"
-                      class="btn btn-outline-secondary"
-                      :disabled="selectedIds.length === 0"
-                      @click="openBulkModal('pending')"
-                    >
-                      <i class="bi bi-arrow-counterclockwise"></i> 改為未支付
-                    </button>
                   </div>
                 </div>
               </div>

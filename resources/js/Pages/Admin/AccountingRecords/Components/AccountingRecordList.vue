@@ -1,19 +1,19 @@
 <template>
-  <div class="card">
-    <div class="card-header">
+  <div class="card mt-2">
+    <div class="card-header" style="background-color:#B3D9D9;">
       <h3 class="card-title">帳務資訊列表</h3>
       <div class="card-tools">
         <button
           v-if="showDriverButton"
           @click="$emit('switch-view', 'driver')"
-          class="btn btn-sm btn-outline-secondary me-2"
+          class="btn btn-sm btn-outline-dark me-2"
         >
           <i class="bi bi-person"></i> 駕駛帳務
         </button>
         <button
           v-if="showVehicleButton"
           @click="$emit('switch-view', 'vehicle')"
-          class="btn btn-sm btn-outline-secondary"
+          class="btn btn-sm btn-outline-dark"
         >
           <i class="bi bi-car-front"></i> 車輛帳務
         </button>
@@ -68,12 +68,13 @@
   </div>
 </template>
 
-<style>
+<style scoped>
 /* 隱藏所有排序圖示，確保標題和內容對齊 */
-#accounting-records-table thead th span.dt-column-order,
-#accounting-records-table thead td span.dt-column-order {
+:deep(#accounting-records-table thead th span.dt-column-order),
+:deep(#accounting-records-table thead td span.dt-column-order) {
   display: none !important;
 }
+
 
 </style>
 
@@ -136,8 +137,8 @@ const tableOptions = computed(() => ({
     zeroRecords: '找不到符合的資料',
     emptyTable: '目前沒有帳務記錄',
     paginate: {
-      first: '第一頁',
-      last: '最後一頁',
+      first: '<<',
+      last: '>>',
       next: '下一頁',
       previous: '上一頁'
     }
