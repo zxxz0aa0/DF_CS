@@ -114,6 +114,7 @@ class QuickSearchController extends Controller
                 'vehicles' => function ($query) {
                     $query->with(['companyCategory', 'company']);
                 },
+                'recurringCostTemplate.items.accountDetail',
             ])
         );
     }

@@ -700,7 +700,7 @@ function submitFilters() {
 
 function resetFilters() {
   filterForm.keyword = ''
-  filterForm.status = ''
+  filterForm.status = 'pending'
   filterForm.record_date_from = ''
   filterForm.record_date_to = ''
   filterForm.payment_date_from = ''

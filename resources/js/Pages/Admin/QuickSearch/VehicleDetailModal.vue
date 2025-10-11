@@ -91,7 +91,7 @@ onMounted(() => {
                 <div v-if="vehicle" class="modal-body">
                     <!-- 基本資料 -->
                     <div class="card mb-3">
-                        <div class="card-header">
+                        <div class="card-header" style="background-color:#B3D9D9;">
                             <h6 class="mb-0">
                                 <i class="bi bi-card-text"></i> 基本資料
                             </h6>
@@ -141,7 +141,7 @@ onMounted(() => {
 
                     <!-- 製造資訊 -->
                     <div class="card mb-3">
-                        <div class="card-header">
+                        <div class="card-header" style="background-color:#B3D9D9;">
                             <h6 class="mb-0">
                                 <i class="bi bi-gear-fill"></i> 製造資訊
                             </h6>
@@ -192,7 +192,7 @@ onMounted(() => {
 
                     <!-- 車身資訊 -->
                     <div class="card mb-3">
-                        <div class="card-header">
+                        <div class="card-header" style="background-color:#B3D9D9;">
                             <h6 class="mb-0">
                                 <i class="bi bi-123"></i> 車身資訊
                             </h6>
@@ -223,7 +223,7 @@ onMounted(() => {
 
                     <!-- 日期資訊 -->
                     <div class="card mb-3">
-                        <div class="card-header">
+                        <div class="card-header" style="background-color:#B3D9D9;">
                             <h6 class="mb-0">
                                 <i class="bi bi-calendar-event"></i> 日期資訊
                             </h6>
@@ -264,7 +264,7 @@ onMounted(() => {
 
                     <!-- 綁定駕駛 -->
                     <div v-if="vehicle.drivers && vehicle.drivers.length > 0" class="card mb-3">
-                        <div class="card-header">
+                        <div class="card-header" style="background-color:#B3D9D9;">
                             <h6 class="mb-0">
                                 <i class="bi bi-person-fill"></i> 綁定駕駛
                             </h6>

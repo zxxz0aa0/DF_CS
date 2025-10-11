@@ -46,6 +46,11 @@ class ExpensePaymentController extends Controller
             'vehicle_id',
         ]);
 
+        // 首次載入時（沒有任何 status 參數），預設為 pending（未支付）
+        if (!$request->has('status')) {
+            $filters['status'] = 'pending';
+        }
+
         $perPage = (int) $request->input('per_page', 20);
         $payments = $this->expensePaymentService->paginate($filters, max(5, $perPage));
         $statistics = $this->expensePaymentService->statistics($filters);
@@ -64,7 +69,7 @@ class ExpensePaymentController extends Controller
             'filters' => array_merge([
                 'per_page' => $perPage,
                 'keyword' => null,
-                'status' => null,
+                'status' => 'pending',
                 'record_date_from' => null,
                 'record_date_to' => null,
                 'payment_date_from' => null,

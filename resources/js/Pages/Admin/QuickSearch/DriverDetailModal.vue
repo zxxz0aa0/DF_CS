@@ -99,7 +99,7 @@ onMounted(() => {
                 <div v-if="driver" class="modal-body">
                     <!-- 基本資料 -->
                     <div class="card mb-3">
-                        <div class="card-header">
+                        <div class="card-header" style="background-color:#B3D9D9;">
                             <h6 class="mb-0">
                                 <i class="bi bi-person-badge"></i> 基本資料
                             </h6>
@@ -108,23 +108,23 @@ onMounted(() => {
                             <div class="row">
                                 <div class="col-md-4">
                                     <dl class="row mb-0">
-                                        <dt class="col-sm-5">姓名</dt>
-                                        <dd class="col-sm-7">{{ driver.name || '-' }}</dd>
+                                        <dt class="col-sm-4">姓名</dt>
+                                        <dd class="col-sm-8">{{ driver.name || '-' }}</dd>
 
-                                        <dt class="col-sm-5">身分證字號</dt>
-                                        <dd class="col-sm-7">{{ driver.id_number || '-' }}</dd>
+                                        <dt class="col-sm-4">身分證字號</dt>
+                                        <dd class="col-sm-8">{{ driver.id_number || '-' }}</dd>
 
-                                        <dt class="col-sm-5">生日</dt>
-                                        <dd class="col-sm-7">{{ formatDate(driver.birthday) }}</dd>
+                                        <dt class="col-sm-4">生日</dt>
+                                        <dd class="col-sm-8">{{ formatDate(driver.birthday) }}</dd>
                                     </dl>
                                 </div>
                                 <div class="col-md-4">
                                     <dl class="row mb-0">
-                                        <dt class="col-sm-5">聯絡地址</dt>
-                                        <dd class="col-sm-7">{{ driver.contact_address || '-' }}</dd>
+                                        <dt class="col-sm-3">聯絡地址</dt>
+                                        <dd class="col-sm-9">{{ driver.contact_address || '-' }}</dd>
 
-                                        <dt class="col-sm-5">戶籍地址</dt>
-                                        <dd class="col-sm-7">{{ driver.residence_address || '-' }}</dd>
+                                        <dt class="col-sm-3">戶籍地址</dt>
+                                        <dd class="col-sm-9">{{ driver.residence_address || '-' }}</dd>
                                     </dl>
                                 </div>
                                 <div class="col-md-4">
@@ -146,7 +146,7 @@ onMounted(() => {
 
                     <!-- 聯絡資訊 -->
                     <div class="card mb-3">
-                        <div class="card-header">
+                        <div class="card-header" style="background-color:#B3D9D9;">
                             <h6 class="mb-0">
                                 <i class="bi bi-telephone-fill"></i> 聯絡資訊
                             </h6>
@@ -155,27 +155,82 @@ onMounted(() => {
                             <div class="row">
                                 <div class="col-md-4">
                                     <dl class="row mb-0">
-                                        <dt class="col-sm-5">手機號碼1</dt>
-                                        <dd class="col-sm-7">{{ driver.mobile_phone1 || '-' }}</dd>
+                                        <dt class="col-sm-4">手機號碼1</dt>
+                                        <dd class="col-sm-8">{{ driver.mobile_phone1 || '-' }}</dd>
 
-                                        <dt class="col-sm-5">手機號碼2</dt>
-                                        <dd class="col-sm-7">{{ driver.mobile_phone2 || '-' }}</dd>
+                                        <dt class="col-sm-4">手機號碼2</dt>
+                                        <dd class="col-sm-8">{{ driver.mobile_phone2 || '-' }}</dd>
                                     </dl>
                                 </div>
                                 <div class="col-md-4">
                                     <dl class="row mb-0">
-                                        <dt class="col-sm-5">住家電話</dt>
-                                        <dd class="col-sm-7">{{ driver.home_phone || '-' }}</dd>
+                                        <dt class="col-sm-4">住家電話</dt>
+                                        <dd class="col-sm-8">{{ driver.home_phone || '-' }}</dd>
                                     </dl>
                                 </div>
                                 <div class="col-md-4">
                                     <dl class="row mb-0">
-                                        <dt class="col-sm-5">緊急聯絡人</dt>
-                                        <dd class="col-sm-7">{{ driver.emergency_contact || '-' }}</dd>
+                                        <dt class="col-sm-4">緊急聯絡人</dt>
+                                        <dd class="col-sm-8">{{ driver.emergency_contact || '-' }}</dd>
 
-                                        <dt class="col-sm-5">緊急聯絡電話</dt>
-                                        <dd class="col-sm-7">{{ driver.emergency_phone || '-' }}</dd>
+                                        <dt class="col-sm-4">緊急聯絡電話</dt>
+                                        <dd class="col-sm-8">{{ driver.emergency_phone || '-' }}</dd>
                                     </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 經常性費用 -->
+                    <div v-if="driver.recurring_cost_template" class="card mb-3">
+                        <div class="card-header" style="background-color:#B3D9D9;">
+                            <h6 class="mb-0">
+                                <i class="bi bi-cash-stack"></i> 經常性費用
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-1">
+                                <div class="col-md-4">
+                                    <dl class="row mb-0">
+                                        <dt class="col-sm-4">組合名稱：</dt>
+                                        <dd class="col-sm-8">{{ driver.recurring_cost_template.name }}</dd>
+                                    </dl>
+                                </div>
+                                <div class="col-md-4">
+                                    <div v-if="driver.recurring_cost_template.description" class="mb-3">
+                                        <strong>說明：</strong>{{ driver.recurring_cost_template.description }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <dl class="row mb-0">
+                                        <dt class="col-sm-4">費用總和：</dt>
+                                        <dd class="col-sm-8">
+                                            <span class="badge bg-primary">
+                                                ${{ driver.recurring_cost_template.total_amount?.toLocaleString() || '0' }}
+                                            </span>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                            <div v-if="driver.recurring_cost_template.items && driver.recurring_cost_template.items.length > 0">
+                                <h6 class="mb-2">費用明細：</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>會計科目</th>
+                                                <th>金額</th>
+                                                <th>備註</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="item in driver.recurring_cost_template.items" :key="item.id">
+                                                <td>{{ item.account_detail?.account_name || '-' }}</td>
+                                                <td>${{ item.amount?.toLocaleString() || '0' }}</td>
+                                                <td>{{ item.note || '-' }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -183,7 +238,7 @@ onMounted(() => {
 
                     <!-- 日期資訊 -->
                     <div class="card mb-3">
-                        <div class="card-header">
+                        <div class="card-header" style="background-color:#B3D9D9;">
                             <h6 class="mb-0">
                                 <i class="bi bi-calendar-event"></i> 日期資訊
                             </h6>
@@ -240,7 +295,7 @@ onMounted(() => {
 
                     <!-- 綁定車輛 -->
                     <div v-if="driver.vehicles && driver.vehicles.length > 0" class="card mb-3">
-                        <div class="card-header">
+                        <div class="card-header" style="background-color:#B3D9D9;">
                             <h6 class="mb-0">
                                 <i class="bi bi-car-front-fill"></i> 綁定車輛
                             </h6>
