@@ -79,14 +79,54 @@
                                             :class="{ 'is-invalid': errors.company_category_id }"
                                         >
                                             <option :value="null">請選擇公司類別</option>
-                                            <option v-for="category in companyCategories" 
-                                                    :key="category.id" 
+                                            <option v-for="category in companyCategories"
+                                                    :key="category.id"
                                                     :value="category.id">
                                                 {{ category.name }}
                                             </option>
                                         </select>
                                         <div v-if="errors.company_category_id" class="invalid-feedback">
                                             {{ errors.company_category_id }}
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="recurring_cost_id" class="form-label">經常性費用組合</label>
+                                        <select
+                                            id="recurring_cost_id"
+                                            v-model="form.recurring_cost_id"
+                                            class="form-control"
+                                            :class="{ 'is-invalid': errors.recurring_cost_id }"
+                                        >
+                                            <option :value="null">請選擇費用組合（可不選）</option>
+                                            <option v-for="template in recurringCostTemplates"
+                                                    :key="template.id"
+                                                    :value="template.id">
+                                                {{ template.name }} - {{ formatCurrency(template.total_amount) }}
+                                            </option>
+                                        </select>
+                                        <div v-if="errors.recurring_cost_id" class="invalid-feedback">
+                                            {{ errors.recurring_cost_id }}
+                                        </div>
+
+                                        <!-- 費用組合預覽 -->
+                                        <div v-if="selectedTemplate" class="card mt-2" style="background-color: #f8f9fa;">
+                                            <div class="card-body p-2">
+                                                <h6 class="card-title mb-2" style="font-size: 0.9rem;">組合內容預覽：</h6>
+                                                <ul class="list-unstyled mb-2" style="font-size: 0.85rem;">
+                                                    <li v-for="item in selectedTemplate.items" :key="item.id" class="mb-1">
+                                                        <i class="bi bi-dot"></i>
+                                                        {{ item.account_detail.account_name }}：
+                                                        <strong>{{ formatCurrency(item.amount) }}</strong>
+                                                        <span v-if="item.note" class="text-muted">（{{ item.note }}）</span>
+                                                    </li>
+                                                </ul>
+                                                <hr class="my-2">
+                                                <div class="d-flex justify-content-between">
+                                                    <strong style="font-size: 0.9rem;">總計：</strong>
+                                                    <strong class="text-primary" style="font-size: 0.9rem;">{{ formatCurrency(selectedTemplate.total_amount) }}</strong>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -358,13 +398,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { Link, useForm, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import DateInput from '@/Components/DateInput.vue'
 
 const props = defineProps({
     driver: Object,
-    companyCategories: Array
+    companyCategories: Array,
+    recurringCostTemplates: Array
 })
 
 const { errors } = usePage().props
@@ -373,6 +415,7 @@ const form = useForm({
     name: props.driver.name || '',
     id_number: props.driver.id_number || '',
     company_category_id: props.driver.company_category_id || null,
+    recurring_cost_id: props.driver.recurring_cost_id || null,
     birthday: props.driver.birthday || null,
     contact_address: props.driver.contact_address || '',
     residence_address: props.driver.residence_address || '',
@@ -390,6 +433,22 @@ const form = useForm({
     status: props.driver.status || 'open',
     notes: props.driver.notes || ''
 })
+
+// 選中的費用組合
+const selectedTemplate = computed(() => {
+    if (!form.recurring_cost_id) return null
+    // 使用 == 而不是 === 來處理字串和數字的比較
+    return props.recurringCostTemplates?.find(t => t.id == form.recurring_cost_id)
+})
+
+// 格式化金額
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('zh-TW', {
+        style: 'currency',
+        currency: 'TWD',
+        minimumFractionDigits: 0,
+    }).format(amount || 0)
+}
 
 const submit = () => {
     form.put(route('admin.drivers.update', props.driver.id))

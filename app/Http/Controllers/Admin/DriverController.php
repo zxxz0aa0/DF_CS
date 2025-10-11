@@ -7,6 +7,7 @@ use App\Http\Requests\DriverStoreRequest;
 use App\Http\Requests\DriverUpdateRequest;
 use App\Models\CompanyCategory;
 use App\Models\Driver;
+use App\Models\RecurringCostTemplate;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -57,9 +58,13 @@ class DriverController extends Controller
     public function create()
     {
         $companyCategories = CompanyCategory::all();
+        $recurringCostTemplates = RecurringCostTemplate::active()
+            ->with('items.accountDetail')
+            ->get();
 
         return Inertia::render('Admin/Drivers/Create', [
             'companyCategories' => $companyCategories,
+            'recurringCostTemplates' => $recurringCostTemplates,
         ]);
     }
 
@@ -82,12 +87,16 @@ class DriverController extends Controller
 
     public function edit(Driver $driver)
     {
-        $driver->load(['companyCategory']);
+        $driver->load(['companyCategory', 'recurringCostTemplate.items.accountDetail']);
         $companyCategories = CompanyCategory::all();
+        $recurringCostTemplates = RecurringCostTemplate::active()
+            ->with('items.accountDetail')
+            ->get();
 
         return Inertia::render('Admin/Drivers/Edit', [
             'driver' => $driver,
             'companyCategories' => $companyCategories,
+            'recurringCostTemplates' => $recurringCostTemplates,
         ]);
     }
 

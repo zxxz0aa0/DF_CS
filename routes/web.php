@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\DriverVehicleAssignmentController;
 use App\Http\Controllers\Admin\ExpensePaymentController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\QuickSearchController;
+use App\Http\Controllers\Admin\RecurringCostController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\VehicleController;
@@ -261,6 +262,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
         Route::get('/', [QuickSearchController::class, 'index'])->name('index');
         Route::get('/driver/{driver}', [QuickSearchController::class, 'showDriver'])->name('driver');
         Route::get('/vehicle/{vehicle}', [QuickSearchController::class, 'showVehicle'])->name('vehicle');
+    });
+
+    // 經常性費用管理路由
+    Route::prefix('recurring-costs')->name('recurring-costs.')->group(function () {
+        Route::get('/', [RecurringCostController::class, 'index'])->name('index');
+        Route::get('/create', [RecurringCostController::class, 'create'])->name('create');
+        Route::post('/', [RecurringCostController::class, 'store'])->name('store');
+        Route::get('/{recurringCost}/edit', [RecurringCostController::class, 'edit'])->name('edit');
+        Route::put('/{recurringCost}', [RecurringCostController::class, 'update'])->name('update');
+        Route::delete('/{recurringCost}', [RecurringCostController::class, 'destroy'])->name('destroy');
+        Route::post('/batch-apply', [RecurringCostController::class, 'batchApply'])->name('batch-apply');
     });
 });
 

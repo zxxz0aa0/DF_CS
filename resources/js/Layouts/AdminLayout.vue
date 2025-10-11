@@ -106,6 +106,12 @@
                                         <p>催帳管理</p>
                                     </Link>
                                 </li>
+                                <li class="nav-item ps-4">
+                                    <Link :href="route('admin.recurring-costs.index')" class="nav-link" :class="{ active: route().current('admin.recurring-costs.*') }" @click="closeSidebar">
+                                        <i class="nav-icon bi bi-coin"></i>
+                                        <p>經常性費用管理</p>
+                                    </Link>
+                                </li>
                             </ul>
                         </li>
 

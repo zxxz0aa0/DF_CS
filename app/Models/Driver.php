@@ -55,6 +55,11 @@ class Driver extends Model
         return $this->belongsTo(CompanyCategory::class);
     }
 
+    public function recurringCostTemplate(): BelongsTo
+    {
+        return $this->belongsTo(RecurringCostTemplate::class, 'recurring_cost_id');
+    }
+
     public function vehicleAssignments()
     {
         return $this->hasMany(DriverVehicleAssignment::class);
