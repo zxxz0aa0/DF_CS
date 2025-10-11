@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import AuthenticatedLayout from '@/Layouts/AdminLayout.vue';
 import DeleteUserForm from './Partials/DeleteUserForm.vue';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm.vue';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm.vue';
@@ -18,7 +18,7 @@ defineProps({
 <template>
     <Head title="個人設定" />
 
-    <AuthenticatedLayout>
+    <AuthenticatedLayout :user="$page.props.auth.user">
         <template #header>
             <div class="d-flex align-items-center">
                 <div class="me-3">

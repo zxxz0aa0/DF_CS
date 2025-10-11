@@ -25,8 +25,13 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    // 如果用戶已登入，跳轉到儀表板；未登入則跳轉到登入頁面
+    // 如果用戶已登入，根據角色跳轉；未登入則跳轉到登入頁面
     if (auth()->check()) {
+        $user = auth()->user();
+        // 檢查是否有 admin 權限，有的話跳到快速搜尋
+        if ($user && ($user->hasRole('admin') || $user->can('view admin dashboard'))) {
+            return redirect()->route('admin.quick-search.index');
+        }
         return redirect()->route('dashboard');
     }
 
@@ -34,6 +39,11 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
+    $user = auth()->user();
+    // 如果是 admin，重定向到快速搜尋
+    if ($user && ($user->hasRole('admin') || $user->can('view admin dashboard'))) {
+        return redirect()->route('admin.quick-search.index');
+    }
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 

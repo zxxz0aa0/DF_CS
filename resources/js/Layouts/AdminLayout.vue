@@ -62,13 +62,6 @@
                     <ul class="nav sidebar-menu flex-column" role="navigation" data-accordion="false">
                         <!-- 主要功能 -->
                         <li class="nav-header text-center text-white" style="background-color: #013A63;">主要功能</li>
-                        <!-- 儀表板 -->
-                        <li class="nav-item">
-                            <Link :href="route('admin.dashboard')" class="nav-link" :class="{ active: route().current('admin.dashboard') }" @click="closeSidebar">
-                                <i class="nav-icon bi bi-speedometer2"></i>
-                                <p>儀表板</p>
-                            </Link>
-                        </li>
 
                         <!-- 快速搜尋 -->
                         <li class="nav-item">
@@ -294,6 +287,13 @@
                                     </Link>
                                 </li>
                             </ul>
+                        </li>
+                        <!-- 儀表板 -->
+                        <li class="nav-item">
+                            <Link :href="route('admin.dashboard')" class="nav-link" :class="{ active: route().current('admin.dashboard') }" @click="closeSidebar">
+                                <i class="nav-icon bi bi-speedometer2"></i>
+                                <p>儀表板</p>
+                            </Link>
                         </li>
                         <!--<li class="nav-item">
                             <Link :href="route('dashboard')" class="nav-link">
