@@ -268,21 +268,21 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
         });
 
     // 快速搜尋路由
-    Route::prefix('quick-search')->name('quick-search.')->group(function () {
+    Route::prefix('quick-search')->name('quick-search.')->middleware('permission:view quick search')->group(function () {
         Route::get('/', [QuickSearchController::class, 'index'])->name('index');
         Route::get('/driver/{driver}', [QuickSearchController::class, 'showDriver'])->name('driver');
         Route::get('/vehicle/{vehicle}', [QuickSearchController::class, 'showVehicle'])->name('vehicle');
     });
 
     // 經常性費用管理路由
-    Route::prefix('recurring-costs')->name('recurring-costs.')->group(function () {
+    Route::prefix('recurring-costs')->name('recurring-costs.')->middleware('permission:view recurring costs')->group(function () {
         Route::get('/', [RecurringCostController::class, 'index'])->name('index');
-        Route::get('/create', [RecurringCostController::class, 'create'])->name('create');
-        Route::post('/', [RecurringCostController::class, 'store'])->name('store');
-        Route::get('/{recurringCost}/edit', [RecurringCostController::class, 'edit'])->name('edit');
-        Route::put('/{recurringCost}', [RecurringCostController::class, 'update'])->name('update');
-        Route::delete('/{recurringCost}', [RecurringCostController::class, 'destroy'])->name('destroy');
-        Route::post('/batch-apply', [RecurringCostController::class, 'batchApply'])->name('batch-apply');
+        Route::get('/create', [RecurringCostController::class, 'create'])->name('create')->middleware('permission:create recurring costs');
+        Route::post('/', [RecurringCostController::class, 'store'])->name('store')->middleware('permission:create recurring costs');
+        Route::get('/{recurringCost}/edit', [RecurringCostController::class, 'edit'])->name('edit')->middleware('permission:edit recurring costs');
+        Route::put('/{recurringCost}', [RecurringCostController::class, 'update'])->name('update')->middleware('permission:edit recurring costs');
+        Route::delete('/{recurringCost}', [RecurringCostController::class, 'destroy'])->name('destroy')->middleware('permission:delete recurring costs');
+        Route::post('/batch-apply', [RecurringCostController::class, 'batchApply'])->name('batch-apply')->middleware('permission:edit recurring costs');
     });
 });
 

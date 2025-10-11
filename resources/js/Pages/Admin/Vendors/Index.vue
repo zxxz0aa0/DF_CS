@@ -29,7 +29,7 @@
                                 </div>
                                 <div class="col-md-6 text-right">
                                     <Link
-                                        v-if="$page.props.auth.permissions.includes('vendor.create')"
+                                        v-if="$page.props.auth.permissions.includes('create vendors')"
                                         :href="route('admin.vendors.create')"
                                         class="btn btn-primary"
                                     >
@@ -94,14 +94,14 @@
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     <Link
-                                                        v-if="$page.props.auth.permissions.includes('vendor.edit')"
+                                                        v-if="$page.props.auth.permissions.includes('edit vendors')"
                                                         :href="route('admin.vendors.edit', vendor.id)"
                                                         class="btn btn-sm btn-outline-primary"
                                                     >
                                                         <i class="bi bi-pencil"></i>
                                                     </Link>
                                                     <button
-                                                        v-if="$page.props.auth.permissions.includes('vendor.delete')"
+                                                        v-if="$page.props.auth.permissions.includes('delete vendors')"
                                                         @click="deleteVendor(vendor)"
                                                         class="btn btn-sm btn-outline-danger"
                                                     >

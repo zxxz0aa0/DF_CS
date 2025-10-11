@@ -113,6 +113,25 @@ export function usePermissionLabels() {
         'edit driver vehicle assignments': '編輯駕駛車輛綁定',
         'delete driver vehicle assignments': '刪除駕駛車輛綁定',
         'batch driver vehicle assignments': '批次綁定操作',
+
+        // 文件管理
+        'view documents': '檢視文件',
+        'create documents': '新增文件',
+        'edit documents': '編輯文件',
+        'delete documents': '刪除文件',
+        'download documents': '下載文件',
+
+        // 快速搜尋
+        'view quick search': '檢視快速搜尋',
+
+        // 經常性費用管理
+        'view recurring costs': '檢視經常性費用',
+        'create recurring costs': '新增經常性費用',
+        'edit recurring costs': '編輯經常性費用',
+        'delete recurring costs': '刪除經常性費用',
+
+        // 催帳管理
+        'view collections': '檢視催帳管理',
     }
 
     // 權限分組名稱對照表
@@ -140,6 +159,10 @@ export function usePermissionLabels() {
         'accounts': '會計科目管理',
         'accounting': '帳務管理',
         'payments': '支出款項管理',
+        'documents': '文件管理',
+        'search': '快速搜尋',
+        'costs': '經常性費用管理',
+        'collections': '催帳管理',
     }
 
     const label = (permissionName) => map[permissionName] || permissionName
