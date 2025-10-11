@@ -51,8 +51,26 @@
             </div>
             <div class="card-body">
                 <!-- 搜尋列 -->
-                <div class="row mb-3 align-items-center">
-                    <div class="col-md-6">
+                <div class="row mb-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">公司種類</label>
+                        <select
+                            v-model="searchForm.company_category_id"
+                            class="form-select"
+                            @change="search"
+                        >
+                            <option value="">全部</option>
+                            <option
+                                v-for="category in companyCategories"
+                                :key="category.id"
+                                :value="category.id"
+                            >
+                                {{ category.name }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">關鍵字</label>
                         <div class="input-group">
                             <input
                                 v-model="searchForm.search"
@@ -66,7 +84,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="col-md-2 ms-auto" v-if="hasSearch">
+                    <div class="col-md-2" v-if="hasSearch">
                         <button @click="clearSearch" class="btn btn-outline-secondary w-100" type="button">
                             <i class="bi bi-x-circle"></i> 清除搜尋
                         </button>
@@ -183,6 +201,10 @@ const props = defineProps({
         type: Object,
         required: true
     },
+    companyCategories: {
+        type: Array,
+        default: () => []
+    },
     filters: {
         type: Object,
         default: () => ({})
@@ -190,11 +212,12 @@ const props = defineProps({
 })
 
 const searchForm = ref({
-    search: props.filters.search || ''
+    search: props.filters.search || '',
+    company_category_id: props.filters.company_category_id || ''
 })
 
 const hasSearch = computed(() => {
-    return Boolean(searchForm.value.search)
+    return Boolean(searchForm.value.search || searchForm.value.company_category_id)
 })
 
 const paginationPages = computed(() => {
@@ -222,7 +245,8 @@ const paginationPages = computed(() => {
 
 const search = () => {
     router.get(route('admin.collections.index'), {
-        search: searchForm.value.search || undefined
+        search: searchForm.value.search || undefined,
+        company_category_id: searchForm.value.company_category_id || undefined
     }, {
         preserveState: true,
         replace: true
@@ -230,11 +254,12 @@ const search = () => {
 }
 
 const clearSearch = () => {
-    if (!searchForm.value.search) {
+    if (!searchForm.value.search && !searchForm.value.company_category_id) {
         return
     }
 
     searchForm.value.search = ''
+    searchForm.value.company_category_id = ''
     search()
 }
 
@@ -244,6 +269,10 @@ const getPageUrl = (page) => {
 
     if (searchForm.value.search) {
         url.searchParams.set('search', searchForm.value.search)
+    }
+
+    if (searchForm.value.company_category_id) {
+        url.searchParams.set('company_category_id', searchForm.value.company_category_id)
     }
 
     return url.toString()

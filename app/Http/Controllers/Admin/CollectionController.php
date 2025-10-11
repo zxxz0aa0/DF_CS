@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CompanyCategory;
 use App\Models\DriverBalanceSummary;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -29,12 +30,20 @@ class CollectionController extends Controller
             $query->search($request->search);
         }
 
+        // 公司種類篩選
+        if ($request->has('company_category_id') && $request->company_category_id) {
+            $query->byCompanyCategory($request->company_category_id);
+        }
+
         // 排序（預設依欠款金額由多到少）
         $sortBy = $request->get('sort_by', 'balance');
         $sortOrder = $request->get('sort_order', 'asc');
         $query->orderBy($sortBy, $sortOrder);
 
         $debtors = $query->paginate(20);
+
+        // 取得所有公司種類
+        $companyCategories = CompanyCategory::orderBy('name')->get();
 
         // 統計資訊
         $statistics = [
@@ -45,7 +54,8 @@ class CollectionController extends Controller
         return Inertia::render('Admin/Collections/Index', [
             'debtors' => $debtors,
             'statistics' => $statistics,
-            'filters' => $request->only(['search', 'sort_by', 'sort_order']),
+            'companyCategories' => $companyCategories,
+            'filters' => $request->only(['search', 'company_category_id', 'sort_by', 'sort_order']),
         ]);
     }
 

@@ -125,4 +125,18 @@ class DriverBalanceSummary extends Model
                 ->orWhere('driver_id_number', 'like', "%{$term}%");
         });
     }
+
+    /**
+     * Scope: 依公司種類篩選
+     */
+    public function scopeByCompanyCategory($query, ?int $companyCategoryId)
+    {
+        if (! $companyCategoryId) {
+            return $query;
+        }
+
+        return $query->whereHas('driver', function ($q) use ($companyCategoryId) {
+            $q->where('company_category_id', $companyCategoryId);
+        });
+    }
 }
