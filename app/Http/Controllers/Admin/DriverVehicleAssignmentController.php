@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Driver;
 use App\Models\DriverVehicleAssignment;
 use App\Models\Vehicle;
+use App\Models\VehicleLicense;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -80,8 +81,28 @@ class DriverVehicleAssignmentController extends Controller
         try {
             DriverVehicleAssignment::create($validated);
 
-            return redirect()->route('admin.driver-vehicle-assignments.index')
-                ->with('success', '駕駛與車輛綁定成功！');
+            // 取得駕駛和車輛資料
+            $driver = Driver::find($validated['driver_id']);
+            $vehicle = Vehicle::find($validated['vehicle_id']);
+
+            // 更新 vehicle_licenses 的 holder_name
+            $updatedCount = VehicleLicense::where('license_number', $vehicle->license_number)
+                ->where('status', 'active')
+                ->update([
+                    'holder_name' => $driver->name,
+                    'updated_by' => auth()->id(),
+                    'updated_at' => now()
+                ]);
+
+            // 提供不同的成功訊息
+            if ($updatedCount > 0) {
+                return redirect()->route('admin.driver-vehicle-assignments.index')
+                    ->with('success', "駕駛與車輛綁定成功！車牌 {$vehicle->license_number} 的持有人已更新為 {$driver->name}。");
+            } else {
+                return redirect()->route('admin.driver-vehicle-assignments.index')
+                    ->with('success', '駕駛與車輛綁定成功！')
+                    ->with('warning', "未找到車牌 {$vehicle->license_number} 對應的有效牌照記錄。");
+            }
         } catch (\Illuminate\Database\QueryException $e) {
             if ($e->getCode() === '23000') {
                 return back()->withErrors(['driver_id' => '此駕駛與車輛已經綁定過了。']);
@@ -119,7 +140,64 @@ class DriverVehicleAssignmentController extends Controller
         $validated['updated_by'] = auth()->id();
 
         try {
+            // 記錄舊的車輛和駕駛資料
+            $oldVehicle = $driverVehicleAssignment->vehicle;
+            $oldDriver = $driverVehicleAssignment->driver;
+
+            // 更新綁定
             $driverVehicleAssignment->update($validated);
+
+            // 取得新的駕駛和車輛資料
+            $newDriver = Driver::find($validated['driver_id']);
+            $newVehicle = Vehicle::find($validated['vehicle_id']);
+
+            // 如果車輛有變更，需要處理兩台車的牌照持有人
+            if ($oldVehicle->id !== $newVehicle->id) {
+                // 更新新車輛的牌照持有人為新駕駛
+                VehicleLicense::where('license_number', $newVehicle->license_number)
+                    ->where('status', 'active')
+                    ->update([
+                        'holder_name' => $newDriver->name,
+                        'updated_by' => auth()->id(),
+                        'updated_at' => now()
+                    ]);
+
+                // 檢查舊車輛是否還有其他駕駛
+                $remainingDrivers = DriverVehicleAssignment::where('vehicle_id', $oldVehicle->id)
+                    ->where('id', '!=', $driverVehicleAssignment->id)
+                    ->with('driver')
+                    ->get();
+
+                if ($remainingDrivers->isNotEmpty()) {
+                    // 如果還有其他駕駛，更新為最後一位駕駛的姓名
+                    $lastDriver = $remainingDrivers->last()->driver;
+                    VehicleLicense::where('license_number', $oldVehicle->license_number)
+                        ->where('status', 'active')
+                        ->update([
+                            'holder_name' => $lastDriver->name,
+                            'updated_by' => auth()->id(),
+                            'updated_at' => now()
+                        ]);
+                } else {
+                    // 沒有其他駕駛，清空持有人
+                    VehicleLicense::where('license_number', $oldVehicle->license_number)
+                        ->where('status', 'active')
+                        ->update([
+                            'holder_name' => null,
+                            'updated_by' => auth()->id(),
+                            'updated_at' => now()
+                        ]);
+                }
+            } elseif ($oldDriver->id !== $newDriver->id) {
+                // 如果只是更換駕駛（車輛未變），直接更新持有人
+                VehicleLicense::where('license_number', $newVehicle->license_number)
+                    ->where('status', 'active')
+                    ->update([
+                        'holder_name' => $newDriver->name,
+                        'updated_by' => auth()->id(),
+                        'updated_at' => now()
+                    ]);
+            }
 
             return redirect()->route('admin.driver-vehicle-assignments.index')
                 ->with('success', '綁定資料已成功更新！');

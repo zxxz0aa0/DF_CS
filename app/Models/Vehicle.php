@@ -124,6 +124,17 @@ class Vehicle extends Model
         return $this->hasMany(Document::class);
     }
 
+    public function vehicleLicense()
+    {
+        return $this->hasOne(VehicleLicense::class, 'license_number', 'license_number')
+                    ->where('status', 'active');
+    }
+
+    public function vehicleLicenses()
+    {
+        return $this->hasMany(VehicleLicense::class, 'license_number', 'license_number');
+    }
+
     // 存取器 (Accessors)
     public function getStatusTextAttribute(): string
     {

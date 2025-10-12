@@ -119,10 +119,11 @@
                                         </td>
                                         <td>
                                             <div v-if="document.expiry_date">
-                                                <div>{{ formatDate(document.expiry_date) }}</div>
+                                                <div>{{ formatDate(document.expiry_date) }}
                                                 <small :class="getDaysClass(document.days_until_expiry)">
-                                                    {{ getDaysText(document.days_until_expiry) }}
+                                                    ({{ getDaysText(document.days_until_expiry) }})
                                                 </small>
+                                                </div>
                                             </div>
                                             <span v-else class="text-muted">—</span>
                                         </td>
@@ -285,7 +286,7 @@ const getDaysText = (days) => {
 const getDaysClass = (days) => {
     if (days === null) return 'text-muted'
     if (days < 0) return 'text-danger fw-bold'
-    if (days <= 60) return 'text-warning fw-bold'
+    if (days <= 60) return 'text-primary fw-bold'
     return 'text-success'
 }
 

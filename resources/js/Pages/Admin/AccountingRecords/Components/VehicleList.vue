@@ -14,6 +14,8 @@
               <th style="width: 15%;">車主名稱</th>
               <th style="width: 10%;">廠牌</th>
               <th style="width: 11%;">款式</th>
+              <th style="width: 11%;">顏色</th>
+              <th style="width: 11%;">出廠日</th>
               <th style="width: 15%;">入籍日期</th>
               <th style="width: 10%;">操作</th>
             </tr>
@@ -38,6 +40,8 @@
               <td>{{ vehicle.owner_name || '-' }}</td>
               <td>{{ vehicle.brand || '-' }}</td>
               <td>{{ vehicle.vehicle_model || '-' }}</td>
+              <td>{{ vehicle.vehicle_color }}</td>
+              <td>{{ formatManufactureDate(vehicle.manufacture_year, vehicle.manufacture_month) }}</td>
               <td>{{ vehicle.registration_date || '-' }}</td>
               <td>
                 <button
@@ -71,4 +75,13 @@ const selectVehicle = (vehicleId) => {
 const viewDetail = (vehicle) => {
   emit('view-detail', vehicle)
 }
+
+const formatManufactureDate = (year, month) => {
+  if (!year && !month) return '-'
+  if (year && month) return `${year}年${month}月`
+  if (year) return `${year}年`
+  if (month) return `${month}月`
+  return '-'
+}
+
 </script>
