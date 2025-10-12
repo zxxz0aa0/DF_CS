@@ -6,10 +6,10 @@
             </h2>
         </template>
 
-        <div class="py-12">
+        <div class="py-0">
             <div class="max-w-12xl mx-auto sm:px-2 lg:px-0">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
+                    <div class="text-gray-900">
                         <!-- 統計卡片區 -->
                         <div class="row mb-4">
                             <div class="col-md-4">
@@ -54,13 +54,17 @@
                             <!-- 搜尋區 -->
                             <div class="flex space-x-2">
                                 <input
-                                    v-model="searchForm.search"
+                                    v-model="searchForm.keyword"
                                     type="text"
-                                    placeholder="搜尋文件名稱或文件號碼..."
+                                    :placeholder="searchPlaceholder"
                                     class="form-control"
                                     style="width: 250px;"
                                     @keyup.enter="search"
                                 >
+                                <select v-model="searchForm.search_type" class="form-select" style="width: 150px;">
+                                    <option value="driver">駕駛資料</option>
+                                    <option value="vehicle">車輛資料</option>
+                                </select>
                                 <select v-model="searchForm.category" class="form-select" style="width: 150px;">
                                     <option value="">所有類別</option>
                                     <option value="identity">身分證件</option>
@@ -249,7 +253,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 
@@ -261,9 +265,16 @@ const props = defineProps({
 
 const page = usePage()
 const searchForm = reactive({
-    search: props.filters.search || '',
+    search_type: props.filters.search_type || 'driver',
+    keyword: props.filters.keyword || '',
     category: props.filters.category || '',
     status: props.filters.status || '',
+})
+
+const searchPlaceholder = computed(() => {
+    return searchForm.search_type === 'vehicle'
+        ? '搜尋車牌號碼或車隊編號...'
+        : '搜尋駕駛姓名或身分證字號...'
 })
 
 const documentToDelete = ref(null)
@@ -298,7 +309,8 @@ const search = () => {
 }
 
 const clearSearch = () => {
-    searchForm.search = ''
+    searchForm.search_type = 'driver'
+    searchForm.keyword = ''
     searchForm.category = ''
     searchForm.status = ''
     search()

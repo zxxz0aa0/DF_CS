@@ -29,12 +29,21 @@ class DocumentController extends Controller
         $query = Document::with(['driver', 'vehicle', 'files', 'createdBy']);
 
         // 搜尋
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('document_name', 'like', "%{$search}%")
-                  ->orWhere('document_number', 'like', "%{$search}%");
-            });
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $searchType = $request->search_type;
+
+            if ($searchType === 'vehicle') {
+                $query->whereHas('vehicle', function ($q) use ($keyword) {
+                    $q->where('license_number', 'like', "%{$keyword}%")
+                      ->orWhere('fleet_number', 'like', "%{$keyword}%");
+                });
+            } else {
+                $query->whereHas('driver', function ($q) use ($keyword) {
+                    $q->where('name', 'like', "%{$keyword}%")
+                      ->orWhere('id_number', 'like', "%{$keyword}%");
+                });
+            }
         }
 
         // 篩選：文件類別
@@ -62,7 +71,8 @@ class DocumentController extends Controller
         return Inertia::render('Admin/Documents/Index', [
             'documents' => $documents,
             'filters' => [
-                'search' => $request->search,
+                'search_type' => $request->search_type,
+                'keyword' => $request->keyword,
                 'category' => $request->category,
                 'status' => $request->status,
                 'driver_id' => $request->driver_id,
