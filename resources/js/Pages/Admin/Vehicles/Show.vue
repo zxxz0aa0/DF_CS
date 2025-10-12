@@ -385,8 +385,8 @@
                                                 class="page-link"
                                                 v-html="link.label"
                                                 @click="loadAuditLogs(link.url)"
-                                            />
-                                            <span v-else class="page-link" v-html="link.label" />
+                                            ></button>
+                                            <span v-else class="page-link" v-html="link.label" ></span>
                                         </li>
                                     </ul>
                                 </nav>

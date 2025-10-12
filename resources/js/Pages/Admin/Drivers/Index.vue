@@ -61,11 +61,11 @@
                             </div>
                             <div class="col-md-2">
                                 <div class="form-check">
-                                    <input 
-                                        v-model="searchForm.license_expiring" 
+                                    <input
+                                        v-model="searchForm.license_expiring"
                                         @change="search"
-                                        class="form-check-input" 
-                                        type="checkbox" 
+                                        class="form-check-input"
+                                        type="checkbox"
                                         id="licenseExpiring"
                                     >
                                     <label class="form-check-label" for="licenseExpiring">
@@ -88,10 +88,13 @@
                             <table class="table table-bordered table-striped">
                                 <thead>
                                     <tr>
+                                        <th>公司類別</th>
                                         <th>姓名</th>
                                         <th>身分證字號</th>
-                                        <th>公司類別</th>
-                                        <th>聯絡電話</th>
+                                        <th>生日</th>
+                                        <th>年齡</th>
+                                        <th>通訊地址</th>
+                                        <th>聯絡電話1</th>
                                         <th>駕照到期</th>
                                         <th>執登到期</th>
                                         <th>狀態</th>
@@ -100,12 +103,15 @@
                                 </thead>
                                 <tbody>
                                     <tr v-for="driver in drivers.data" :key="driver.id">
+                                        <td>{{ driver.company_category?.name || '-' }}</td>
                                         <td>{{ driver.name }}</td>
                                         <td>{{ driver.id_number }}</td>
-                                        <td>{{ driver.company_category?.name || '-' }}</td>
+                                        <td>{{ formatBthDate(driver.birthday) }}</td>
+                                        <td>{{ calculateAge(driver.birthday) }}</td>
+                                        <td>{{ driver.contact_address }}</td>
                                         <td>{{ driver.mobile_phone1 || driver.home_phone || '-' }}</td>
                                         <td>
-                                            <span v-if="driver.license_expire_date" 
+                                            <span v-if="driver.license_expire_date"
                                                   :class="getLicenseExpireClass(driver.license_days_remaining)">
                                                 {{ formatDate(driver.license_expire_date) }}
                                                 <small v-if="driver.license_days_remaining !== null">
@@ -115,7 +121,7 @@
                                             <span v-else>-</span>
                                         </td>
                                         <td>
-                                            <span v-if="driver.professional_license_expire_date" 
+                                            <span v-if="driver.professional_license_expire_date"
                                                   :class="getLicenseExpireClass(driver.professional_license_days_remaining)">
                                                 {{ formatDate(driver.professional_license_expire_date) }}
                                                 <small v-if="driver.professional_license_days_remaining !== null">
@@ -173,12 +179,12 @@
                                             上一頁
                                         </Link>
                                     </li>
-                                    <li v-for="page in paginationPages" 
-                                        :key="page" 
-                                        class="page-item" 
+                                    <li v-for="page in paginationPages"
+                                        :key="page"
+                                        class="page-item"
                                         :class="{ active: page === drivers.current_page }">
-                                        <Link class="page-link" 
-                                              :href="getPageUrl(page)" 
+                                        <Link class="page-link"
+                                              :href="getPageUrl(page)"
                                               :preserve-state="true">
                                             {{ page }}
                                         </Link>
@@ -273,9 +279,9 @@ let deleteModal = null
 let statusModal = null
 
 const hasFilters = computed(() => {
-    return searchForm.value.search || 
-           searchForm.value.status || 
-           searchForm.value.company_category_id || 
+    return searchForm.value.search ||
+           searchForm.value.status ||
+           searchForm.value.company_category_id ||
            searchForm.value.license_expiring
 })
 
@@ -283,10 +289,10 @@ const paginationPages = computed(() => {
     const pages = []
     const current = props.drivers.current_page
     const last = props.drivers.last_page
-    
+
     let start = Math.max(1, current - 2)
     let end = Math.min(last, current + 2)
-    
+
     if (end - start < 4) {
         if (start === 1) {
             end = Math.min(last, start + 4)
@@ -294,11 +300,11 @@ const paginationPages = computed(() => {
             start = Math.max(1, end - 4)
         }
     }
-    
+
     for (let i = start; i <= end; i++) {
         pages.push(i)
     }
-    
+
     return pages
 })
 
@@ -322,19 +328,36 @@ const clearFilters = () => {
 const getPageUrl = (page) => {
     const url = new URL(props.drivers.path, window.location.origin)
     url.searchParams.set('page', page)
-    
+
     Object.entries(searchForm.value).forEach(([key, value]) => {
         if (value) {
             url.searchParams.set(key, value)
         }
     })
-    
+
     return url.toString()
 }
 
 const formatDate = (dateString) => {
     if (!dateString) return '-'
     return new Date(dateString).toLocaleDateString('zh-TW')
+}
+
+const formatBthDate = (date) => {
+  if (!date) return '-'
+  const d = new Date(date)
+  if (isNaN(d)) return '-'
+  const rocYear = d.getFullYear() - 1911
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${rocYear}/${month}/${day}`
+}
+
+const calculateAge = (birthday) => {
+  if (!birthday) return '-'
+  const diff = Date.now() - new Date(birthday).getTime()
+  const ageDate = new Date(diff)
+  return Math.abs(ageDate.getUTCFullYear() - 1970)
 }
 
 const getLicenseExpireClass = (daysRemaining) => {

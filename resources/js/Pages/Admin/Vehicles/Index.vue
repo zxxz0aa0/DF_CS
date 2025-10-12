@@ -166,10 +166,13 @@
                                         <table class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>
+                                                    <th>公司類別</th>
                                                     <th>車牌號碼</th>
                                                     <th>車主名稱</th>
-                                                    <th>公司類別</th>
-                                                    <th>車輛類型</th>
+                                                    <th>廠牌</th>
+                                                    <th>車款</th>
+                                                    <th>顏色</th>
+                                                    <th>出廠日</th>
                                                     <th>檢驗到期日</th>
                                                     <th>剩餘天數</th>
                                                     <th>狀態</th>
@@ -181,12 +184,17 @@
                                                     <td colspan="8" class="text-center">無車輛資料</td>
                                                 </tr>
                                                 <tr v-for="vehicle in vehicles.data" :key="vehicle.id">
+                                                    <td>{{ vehicle.company_category?.name }}</td>
                                                     <td>
                                                         <strong>{{ vehicle.license_number }}</strong>
                                                     </td>
                                                     <td>{{ vehicle.owner_name }}</td>
-                                                    <td>{{ vehicle.company_category?.name }}</td>
-                                                    <td>{{ vehicle.vehicle_type || '-' }}</td>
+                                                    <td>{{ vehicle.brand || '-' }}</td>
+                                                    <td>{{ vehicle.vehicle_model || '-' }}</td>
+                                                    <td>{{ vehicle.vehicle_color || '-' }}</td>
+                                                    <td>
+                                                        {{ formatManufactureDate(vehicle.manufacture_year, vehicle.manufacture_month) }}
+                                                    </td>
                                                     <td>
                                                         <span v-if="vehicle.inspection_date">
                                                             {{ formatDate(vehicle.inspection_date) }}
@@ -581,6 +589,15 @@ const showImportModal = () => {
         resetImportState()
         importModal.show()
     }
+}
+
+// 格式化出廠日期
+const formatManufactureDate = (year, month) => {
+    if (!year && !month) return '-'
+    if (year && month) return `${year}年${month}月`
+    if (year) return `${year}年`
+    if (month) return `${month}月`
+    return '-'
 }
 
 // 處理檔案選擇

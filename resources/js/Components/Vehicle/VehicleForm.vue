@@ -445,9 +445,9 @@
                                 :class="{ 'is-invalid': errors.property_type }"
                             >
                                 <option value="">請選擇</option>
-                                <option value="轎式">公司資產</option>
-                                <option value="休旅式">靠行車</option>
-                                <option value="廂式">衛星派遣</option>
+                                <option value="公司資產">公司資產</option>
+                                <option value="靠行車">靠行車</option>
+                                <option value="衛星派遣">衛星派遣</option>
                             </select>
                             <div v-if="errors.property_type" class="invalid-feedback">
                                 {{ errors.property_type }}

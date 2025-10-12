@@ -127,7 +127,7 @@
 
         <!-- 牌照列表 -->
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-          <div class="p-6">
+          <div class="">
             <!-- 表格顯示 -->
             <div class="overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200">
