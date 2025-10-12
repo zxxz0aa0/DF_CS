@@ -14,7 +14,7 @@
 
       <!-- 主要內容 -->
       <div class="content">
-        <div class="container-fluid">
+        <div class="">
 
           <!-- 1. 搜尋功能卡片 -->
           <SearchPanel

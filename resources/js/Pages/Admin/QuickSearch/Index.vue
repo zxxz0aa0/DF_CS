@@ -122,13 +122,13 @@ const formatManufactureDate = (year, month) => {
 
         <!-- 主要內容 -->
         <div class="content">
-            <div class="container-fluid">
+            <div class="">
                 <!-- 搜尋區域 -->
                 <div class="card mb-3">
                     <div class="card-body">
                         <form @submit.prevent="handleSearch">
                             <div class="row g-3">
-                                <div class="col-md-4">
+                                <div class="col-md-2">
                                     <input
                                         v-model="searchForm.keyword"
                                         type="text"
@@ -136,7 +136,7 @@ const formatManufactureDate = (year, month) => {
                                         placeholder="請輸入姓名、車牌號碼、身分證字號..."
                                     >
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-1">
                                     <select v-model="searchForm.type" class="form-select">
                                         <option value="all">全部</option>
                                         <option value="driver">駕駛</option>

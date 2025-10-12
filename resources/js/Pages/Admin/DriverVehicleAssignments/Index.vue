@@ -6,10 +6,10 @@
             </h2>
         </template>
 
-        <div class="py-12">
+        <div class="py-0">
             <div class="max-w-12xl mx-auto sm:px-2 lg:px-0">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
+                    <div class="text-gray-900">
                         <!-- 功能按鈕區 -->
                         <div class="flex justify-between items-center mb-6">
                             <div class="flex space-x-2">
@@ -50,15 +50,15 @@
                             </div>
                         </div>
 
-                        <!-- 統計資訊 -->
-                        <div class="row mb-4">
+                        <!-- 統計資訊
+                        <div class="row mb-2">
                             <div class="col-md-12">
                                 <div class="alert alert-info">
                                     <i class="bi bi-info-circle me-2"></i>
                                     目前共有 {{ assignments.total }} 筆綁定記錄
                                 </div>
                             </div>
-                        </div>
+                        </div>-->
 
                         <!-- 資料表格 -->
                         <div class="table-responsive">

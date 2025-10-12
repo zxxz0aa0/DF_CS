@@ -20,7 +20,7 @@
       </div>
 
       <section class="content">
-        <div class="container-fluid">
+        <div class="">
           <div class="card">
             <div class="card-header d-flex flex-wrap justify-content-between align-items-center" style="background-color:#B3D9D9;">
               <h3 class="card-title mb-2 mb-md-0">
@@ -93,7 +93,7 @@
               <form class="bg-light border rounded p-3 mb-3" @submit.prevent="submitFilters">
                 <div class="row g-3">
                   <div class="col-lg-3 col-md-4 col-sm-6">
-                    <label class="form-label">關鍵字</label>
+                    <!--<label class="form-label">關鍵字</label>-->
                     <input
                       v-model="filterForm.keyword"
                       type="text"
@@ -103,7 +103,7 @@
                   </div>
 
                   <div class="col-lg-2 col-md-4 col-sm-6">
-                    <label class="form-label">狀態</label>
+                    <!--<label class="form-label">狀態</label>-->
                     <select v-model="filterForm.status" class="form-select">
                       <option value="">全部</option>
                       <option value="pending">未支付</option>
@@ -150,10 +150,10 @@
                   </div>-->
 
                   <div class="col-lg-2 col-md-4 col-sm-6">
-                    <label class="form-label">每頁筆數</label>
+                    <!--<label class="form-label">每頁筆數</label>-->
                     <select v-model.number="filterForm.per_page" class="form-select">
                       <option v-for="option in perPageOptions" :key="option" :value="option">
-                        {{ option }}
+                       顯示 {{ option }}筆
                       </option>
                     </select>
                   </div>

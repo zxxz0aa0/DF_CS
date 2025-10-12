@@ -66,7 +66,7 @@
                 </div>
 
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header" style="background-color:#B3D9D9;">
                         <h3 class="card-title">證照到期清單</h3>
                         <div class="card-tools">
                             <button @click="refreshData" class="btn btn-primary btn-sm">

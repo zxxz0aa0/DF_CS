@@ -19,7 +19,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header" style="background-color:#B3D9D9;">
                         <div class="d-flex justify-content-between align-items-center">
                             <h3 class="card-title">公司列表</h3>
                             <Link :href="route('admin.companies.create')" class="btn btn-primary">
@@ -96,7 +96,7 @@
                                         <td>{{ company.tax_id || '-' }}</td>
                                         <td>{{ company.representative || '-' }}</td>
                                         <td>
-                                            <span 
+                                            <span
                                                 class="badge"
                                                 :class="company.status === 'active' ? 'bg-success' : 'bg-danger'"
                                             >
@@ -326,14 +326,14 @@ const getPageNumbers = () => {
     const current = props.companies.current_page
     const last = props.companies.last_page
     const pages = []
-    
+
     let start = Math.max(1, current - 2)
     let end = Math.min(last, current + 2)
-    
+
     for (let i = start; i <= end; i++) {
         pages.push(i)
     }
-    
+
     return pages
 }
 

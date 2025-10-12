@@ -19,12 +19,12 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header" style="background-color:#B3D9D9;">
                         <div class="d-flex justify-content-between align-items-center">
                             <h3 class="card-title">公司類別列表</h3>
-                            <Link 
+                            <Link
                                 v-if="can('create company categories')"
-                                :href="route('admin.company-categories.create')" 
+                                :href="route('admin.company-categories.create')"
                                 class="btn btn-primary"
                             >
                                 <i class="bi bi-plus-circle me-1"></i>新增類別
@@ -284,14 +284,14 @@ const getPageNumbers = () => {
     const current = props.categories.current_page
     const last = props.categories.last_page
     const pages = []
-    
+
     let start = Math.max(1, current - 2)
     let end = Math.min(last, current + 2)
-    
+
     for (let i = start; i <= end; i++) {
         pages.push(i)
     }
-    
+
     return pages
 }
 

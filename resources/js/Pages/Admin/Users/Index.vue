@@ -17,12 +17,12 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header" style="background-color:#B3D9D9;">
                         <h3 class="card-title">使用者列表</h3>
                         <div class="card-tools">
-                            <Link 
+                            <Link
                                 v-if="can('create users')"
-                                :href="route('admin.users.create')" 
+                                :href="route('admin.users.create')"
                                 class="btn btn-primary btn-sm"
                             >
                                 <i class="bi bi-plus"></i> 新增使用者
@@ -85,16 +85,16 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <Link 
+                                                <Link
                                                     v-if="can('view users')"
-                                                    :href="route('admin.users.show', user.id)" 
+                                                    :href="route('admin.users.show', user.id)"
                                                     class="btn btn-info btn-sm"
                                                 >
                                                     <i class="bi bi-eye"></i>
                                                 </Link>
-                                                <Link 
+                                                <Link
                                                     v-if="can('edit users')"
-                                                    :href="route('admin.users.edit', user.id)" 
+                                                    :href="route('admin.users.edit', user.id)"
                                                     class="btn btn-warning btn-sm"
                                                 >
                                                     <i class="bi bi-pencil"></i>
@@ -202,12 +202,12 @@ const paginationRange = computed(() => {
     const range = []
     const current = props.users?.current_page || 1
     const last = props.users?.last_page || 1
-    
+
     // 簡單的分頁邏輯
     for (let i = Math.max(1, current - 2); i <= Math.min(last, current + 2); i++) {
         range.push(i)
     }
-    
+
     return range
 })
 
