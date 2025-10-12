@@ -42,10 +42,18 @@
               <td>
                 <button
                   @click.stop="viewDetail(driver)"
-                  class="btn btn-sm btn-info"
+                  class="btn btn-sm btn-info me-1"
                   title="檢視詳細資料"
                 >
                   <i class="bi bi-eye"></i>
+                </button>
+                <button
+                  @click.stop="viewRecurringCost(driver)"
+                  class="btn btn-sm btn-warning"
+                  title="檢視經常性費用"
+                  :disabled="!driver.recurring_cost_id"
+                >
+                  <i class="bi bi-cash-stack"></i>
                 </button>
               </td>
             </tr>
@@ -62,7 +70,7 @@ const props = defineProps({
   selectedId: { type: Number, default: null }
 })
 
-const emit = defineEmits(['select', 'view-detail'])
+const emit = defineEmits(['select', 'view-detail', 'view-recurring-cost'])
 
 const selectDriver = (driverId) => {
   emit('select', driverId)
@@ -70,6 +78,10 @@ const selectDriver = (driverId) => {
 
 const viewDetail = (driver) => {
   emit('view-detail', driver)
+}
+
+const viewRecurringCost = (driver) => {
+  emit('view-recurring-cost', driver)
 }
 
 const formatDate = (date) => {

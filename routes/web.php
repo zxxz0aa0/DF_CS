@@ -241,6 +241,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
             // 搜尋會計科目
             Route::get('account-details/search', [AccountingRecordController::class, 'searchAccountDetails'])
                 ->name('account-details.search');
+
+            // 取得經常性費用組合詳細資料（帳務頁使用）
+            Route::get('recurring-costs/{recurringCost}', [RecurringCostController::class, 'show'])
+                ->name('recurring-costs.show');
         });
     });
 
@@ -279,6 +283,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
         Route::get('/', [RecurringCostController::class, 'index'])->name('index');
         Route::get('/create', [RecurringCostController::class, 'create'])->name('create')->middleware('permission:create recurring costs');
         Route::post('/', [RecurringCostController::class, 'store'])->name('store')->middleware('permission:create recurring costs');
+        Route::get('/{recurringCost}', [RecurringCostController::class, 'show'])->name('show');
         Route::get('/{recurringCost}/edit', [RecurringCostController::class, 'edit'])->name('edit')->middleware('permission:edit recurring costs');
         Route::put('/{recurringCost}', [RecurringCostController::class, 'update'])->name('update')->middleware('permission:edit recurring costs');
         Route::delete('/{recurringCost}', [RecurringCostController::class, 'destroy'])->name('destroy')->middleware('permission:delete recurring costs');

@@ -29,6 +29,7 @@
             :selected-id="selectedDriverId"
             @select="handleDriverSelect"
             @view-detail="showDriverDetail"
+            @view-recurring-cost="showDriverRecurringCost"
           />
 
           <!-- 3. 車輛列表卡片 -->
@@ -87,6 +88,14 @@
             @submit="handleEditSubmit"
           />
 
+          <!-- 經常性費用 Modal -->
+          <RecurringCostModal
+            v-if="selectedDriverForRecurringCost"
+            :show="showRecurringCostModal"
+            :driver="selectedDriverForRecurringCost"
+            @close="closeRecurringCostModal"
+          />
+
         </div>
       </div>
     </div>
@@ -105,6 +114,7 @@ import AccountingRecordList from './Components/AccountingRecordList.vue'
 import DriverDetailModal from './Components/DriverDetailModal.vue'
 import VehicleDetailModal from './Components/VehicleDetailModal.vue'
 import AccountingRecordEditModal from './Components/AccountingRecordEditModal.vue'
+import RecurringCostModal from './Components/RecurringCostModal.vue'
 
 const props = defineProps({
   drivers: { type: Array, default: () => [] },
@@ -139,9 +149,11 @@ const selectedVehicle = computed(() => {
 const showDriverModal = ref(false)
 const showVehicleModal = ref(false)
 const showEditModal = ref(false)
+const showRecurringCostModal = ref(false)
 const selectedDriverForView = ref(null)
 const selectedVehicleForView = ref(null)
 const selectedRecordForEdit = ref(null)
+const selectedDriverForRecurringCost = ref(null)
 
 // 顯示駕駛詳細資料
 const showDriverDetail = (driver) => {
@@ -168,6 +180,20 @@ const closeVehicleModal = () => {
   showVehicleModal.value = false
   setTimeout(() => {
     selectedVehicleForView.value = null
+  }, 300) // 等待動畫完成
+}
+
+// 顯示駕駛經常性費用
+const showDriverRecurringCost = (driver) => {
+  selectedDriverForRecurringCost.value = driver
+  showRecurringCostModal.value = true
+}
+
+// 關閉經常性費用 Modal
+const closeRecurringCostModal = () => {
+  showRecurringCostModal.value = false
+  setTimeout(() => {
+    selectedDriverForRecurringCost.value = null
   }, 300) // 等待動畫完成
 }
 

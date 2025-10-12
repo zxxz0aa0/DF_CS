@@ -1,5 +1,5 @@
 <template>
-  <div class="position-relative">
+  <div class="position-relative" ref="inputContainer">
     <div class="input-group input-group-sm">
       <input
         v-model="searchKeyword"
@@ -7,7 +7,7 @@
         class="form-control"
         placeholder="輸入科目編號"
         @input="handleInput"
-        @focus="showDropdown = true"
+        @focus="handleFocus"
       >
       <button
         @click="openModal"
@@ -18,26 +18,28 @@
       </button>
     </div>
 
-    <!-- 自動完成下拉選單 -->
-    <div
-      v-if="showDropdown && filteredAccounts.length > 0"
-      class="dropdown-menu show position-absolute w-100"
-      style="max-height: 300px; overflow-y: auto; z-index: 1000;"
-    >
-      <a
-        v-for="account in filteredAccounts"
-        :key="account.id"
-        href="#"
-        class="dropdown-item"
-        @click.prevent="selectAccount(account)"
+    <!-- 自動完成下拉選單 - 使用 Teleport 渲染到 body -->
+    <Teleport to="body">
+      <div
+        v-if="showDropdown && filteredAccounts.length > 0"
+        class="dropdown-menu show position-fixed"
+        :style="dropdownStyle"
       >
-        <strong>{{ account.account_code }}</strong> - {{ account.account_name }}
-        <br>
-        <small class="text-muted">
-          {{ account.main_category_name }} / {{ account.sub_category_name }}
-        </small>
-      </a>
-    </div>
+        <a
+          v-for="account in filteredAccounts"
+          :key="account.id"
+          href="#"
+          class="dropdown-item"
+          @click.prevent="selectAccount(account)"
+        >
+          <strong>{{ account.account_code }}</strong> - {{ account.account_name }}
+          <br>
+          <small class="text-muted">
+            {{ account.main_category_name }} / {{ account.sub_category_name }}
+          </small>
+        </a>
+      </div>
+    </Teleport>
 
     <!-- 模態框選擇器 -->
     <div
@@ -98,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import axios from 'axios'
 
 const props = defineProps({
@@ -107,13 +109,41 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'select'])
 
+const inputContainer = ref(null)
 const searchKeyword = ref('')
 const filteredAccounts = ref([])
 const showDropdown = ref(false)
+const dropdownPosition = ref({ top: 0, left: 0, width: 0 })
 
 const showModal = ref(false)
 const modalSearchKeyword = ref('')
 const modalAccounts = ref([])
+
+// 計算下拉選單的位置和樣式
+const dropdownStyle = computed(() => {
+  return {
+    top: `${dropdownPosition.value.top}px`,
+    left: `${dropdownPosition.value.left}px`,
+    width: `${dropdownPosition.value.width}px`,
+    maxHeight: '300px',
+    overflowY: 'auto',
+    zIndex: '1050'
+  }
+})
+
+// 更新下拉選單位置
+const updateDropdownPosition = () => {
+  if (inputContainer.value) {
+    const rect = inputContainer.value.getBoundingClientRect()
+
+    // 使用 position: fixed，所以不需要加上 scrollY/scrollX
+    dropdownPosition.value = {
+      top: rect.bottom,
+      left: rect.left,
+      width: rect.width
+    }
+  }
+}
 
 // 監聽 modelValue 變化，當被清空時也清空輸入框
 watch(() => props.modelValue, (newValue) => {
@@ -123,6 +153,14 @@ watch(() => props.modelValue, (newValue) => {
     showDropdown.value = false
   }
 })
+
+// 處理 focus 事件
+const handleFocus = () => {
+  updateDropdownPosition()
+  if (filteredAccounts.value.length > 0) {
+    showDropdown.value = true
+  }
+}
 
 // 處理輸入 - 自動完成
 const handleInput = async () => {
@@ -139,6 +177,10 @@ const handleInput = async () => {
     )
     filteredAccounts.value = response.data
     showDropdown.value = true
+
+    // 等待 DOM 更新後再計算位置
+    await nextTick()
+    updateDropdownPosition()
   } catch (error) {
     console.error('搜尋失敗:', error)
   }
@@ -184,9 +226,32 @@ const closeModal = () => {
 }
 
 // 點擊外部關閉下拉選單
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('.position-relative')) {
-    showDropdown.value = false
+const handleClickOutside = (e) => {
+  if (inputContainer.value && !inputContainer.value.contains(e.target)) {
+    // 檢查是否點擊在下拉選單內
+    const dropdownElement = document.querySelector('.dropdown-menu.show.position-fixed')
+    if (!dropdownElement || !dropdownElement.contains(e.target)) {
+      showDropdown.value = false
+    }
   }
+}
+
+// 滾動和視窗大小改變時更新位置
+const handleScrollOrResize = () => {
+  if (showDropdown.value) {
+    updateDropdownPosition()
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+  window.addEventListener('scroll', handleScrollOrResize, true)
+  window.addEventListener('resize', handleScrollOrResize)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('scroll', handleScrollOrResize, true)
+  window.removeEventListener('resize', handleScrollOrResize)
 })
 </script>

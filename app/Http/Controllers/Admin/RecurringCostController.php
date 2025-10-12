@@ -46,6 +46,16 @@ class RecurringCostController extends Controller
     }
 
     /**
+     * 顯示單一經常性費用組合詳細資料 (API)
+     */
+    public function show(RecurringCostTemplate $recurringCost)
+    {
+        $recurringCost->load('items.accountDetail');
+
+        return response()->json($recurringCost);
+    }
+
+    /**
      * 儲存新增
      */
     public function store(Request $request)

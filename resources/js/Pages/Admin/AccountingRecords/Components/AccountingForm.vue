@@ -252,3 +252,21 @@ defineExpose({
   resetForm
 })
 </script>
+
+<style scoped>
+/* 解決下拉選單被表格容器裁切的問題 */
+.table-responsive {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+}
+
+/* 確保包含下拉選單的儲存格允許溢出 */
+.table-responsive table td {
+  overflow: visible !important;
+}
+
+/* 確保 card-body 也不會裁切 */
+.card-body {
+  overflow: visible !important;
+}
+</style>
