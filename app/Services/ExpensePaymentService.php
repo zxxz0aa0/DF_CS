@@ -155,19 +155,8 @@ class ExpensePaymentService
         $payload['gross_amount'] = round((float) ($payload['gross_amount'] ?? 0), 2);
         $payload['net_amount'] = round((float) ($payload['net_amount'] ?? ($payload['gross_amount'] - $payload['deduction'])), 2);
 
-        if (! empty($payload['driver_id'])) {
-            $driver = Driver::find($payload['driver_id']);
-            if ($driver) {
-                $payload['member_name'] = $payload['member_name'] ?: $driver->name;
-            }
-        }
-
-        if (! empty($payload['vehicle_id'])) {
-            $vehicle = Vehicle::find($payload['vehicle_id']);
-            if ($vehicle) {
-                $payload['vehicle_license_number'] = $payload['vehicle_license_number'] ?: $vehicle->license_number;
-            }
-        } elseif (! empty($payload['vehicle_license_number'])) {
+        // 根據 vehicle_license_number 查詢 vehicle_id
+        if (! empty($payload['vehicle_license_number'])) {
             $vehicle = Vehicle::where('license_number', $payload['vehicle_license_number'])->first();
             if ($vehicle) {
                 $payload['vehicle_id'] = $vehicle->id;

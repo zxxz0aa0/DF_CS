@@ -16,6 +16,7 @@ use App\Models\Vehicle;
 use App\Services\ExpensePaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -142,24 +143,44 @@ class ExpensePaymentController extends Controller
 
     public function import(ExpensePaymentImportRequest $request): RedirectResponse
     {
-        $import = new ExpensePaymentsImport($this->expensePaymentService);
+        try {
+            DB::transaction(function () use ($request) {
+                $import = new ExpensePaymentsImport($this->expensePaymentService);
 
-        Excel::import($import, $request->file('file'));
+                Excel::import($import, $request->file('file'));
 
-        $failures = $import->getFailures();
-        $successCount = $import->getSuccessCount();
+                $failures = $import->getFailures();
+                $successCount = $import->getSuccessCount();
 
-        $failurePayload = collect($failures)->map(static function ($failure) {
-            return [
-                'row' => method_exists($failure, 'row') ? $failure->row() : null,
-                'attribute' => method_exists($failure, 'attribute') ? $failure->attribute() : null,
-                'errors' => method_exists($failure, 'errors') ? $failure->errors() : [],
-            ];
-        })->toArray();
+                if (empty($failures) && $successCount > 0) {
+                    // 若無失敗，交易會自動提交
+                    session()->flash('success', "成功匯入 {$successCount} 筆資料");
+                } elseif ($failures) {
+                    // 若有失敗，整個交易回滾
+                    throw new \Exception("匯入失敗，發現 " . count($failures) . " 筆錯誤資料，已回滾所有變更");
+                }
+            });
+        } catch (\Throwable $throwable) {
+            $import = new ExpensePaymentsImport($this->expensePaymentService);
+            Excel::import($import, $request->file('file'));
 
-        return back()->with([
-            'success' => "成功匯入 {$successCount} 筆資料",
-            'importFailures' => $failurePayload,
-        ]);
+            $failures = $import->getFailures();
+            $successCount = $import->getSuccessCount();
+
+            $failurePayload = collect($failures)->map(static function ($failure) {
+                return [
+                    'row' => method_exists($failure, 'row') ? $failure->row() : null,
+                    'attribute' => method_exists($failure, 'attribute') ? $failure->attribute() : null,
+                    'errors' => method_exists($failure, 'errors') ? $failure->errors() : [],
+                ];
+            })->toArray();
+
+            return back()->with([
+                'warning' => "匯入完成，成功 {$successCount} 筆，失敗 " . count($failures) . " 筆（已回滾失敗資料）",
+                'importFailures' => $failurePayload,
+            ]);
+        }
+
+        return back();
     }
 }
