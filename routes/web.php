@@ -21,13 +21,15 @@ use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\Admin\VehicleLicenseController;
 use App\Http\Controllers\Admin\VendorController;
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
     // 如果用戶已登入，根據角色跳轉；未登入則跳轉到登入頁面
-    if (auth()->check()) {
-        $user = auth()->user();
+    if (Auth::check()) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         // 檢查是否有 admin 權限，有的話跳到快速搜尋
         if ($user && ($user->hasRole('admin') || $user->can('view admin dashboard'))) {
             return redirect()->route('admin.quick-search.index');
@@ -39,7 +41,8 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    $user = auth()->user();
+    /** @var \App\Models\User $user */
+    $user = Auth::user();
     // 如果是 admin，重定向到快速搜尋
     if ($user && ($user->hasRole('admin') || $user->can('view admin dashboard'))) {
         return redirect()->route('admin.quick-search.index');

@@ -16,7 +16,6 @@ use App\Models\Vehicle;
 use App\Services\ExpensePaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -141,46 +140,69 @@ class ExpensePaymentController extends Controller
         return Excel::download(new ExpensePaymentsTemplateExport(), 'expense_payments_template.xlsx');
     }
 
-    public function import(ExpensePaymentImportRequest $request): RedirectResponse
+    public function import(ExpensePaymentImportRequest $request)
     {
+        // 強制設定回應為 JSON
+        $request->headers->set('Accept', 'application/json');
+
+        $import = new ExpensePaymentsImport($this->expensePaymentService);
+
         try {
-            DB::transaction(function () use ($request) {
-                $import = new ExpensePaymentsImport($this->expensePaymentService);
-
-                Excel::import($import, $request->file('file'));
-
-                $failures = $import->getFailures();
-                $successCount = $import->getSuccessCount();
-
-                if (empty($failures) && $successCount > 0) {
-                    // 若無失敗，交易會自動提交
-                    session()->flash('success', "成功匯入 {$successCount} 筆資料");
-                } elseif ($failures) {
-                    // 若有失敗，整個交易回滾
-                    throw new \Exception("匯入失敗，發現 " . count($failures) . " 筆錯誤資料，已回滾所有變更");
-                }
-            });
-        } catch (\Throwable $throwable) {
-            $import = new ExpensePaymentsImport($this->expensePaymentService);
             Excel::import($import, $request->file('file'));
 
             $failures = $import->getFailures();
             $successCount = $import->getSuccessCount();
 
-            $failurePayload = collect($failures)->map(static function ($failure) {
-                return [
-                    'row' => method_exists($failure, 'row') ? $failure->row() : null,
-                    'attribute' => method_exists($failure, 'attribute') ? $failure->attribute() : null,
-                    'errors' => method_exists($failure, 'errors') ? $failure->errors() : [],
-                ];
-            })->toArray();
+            // 若有失敗記錄
+            if (!empty($failures)) {
+                $failurePayload = collect($failures)->map(static function ($failure) {
+                    return [
+                        'row' => method_exists($failure, 'row') ? $failure->row() : null,
+                        'attribute' => method_exists($failure, 'attribute') ? $failure->attribute() : null,
+                        'errors' => method_exists($failure, 'errors') ? $failure->errors() : [],
+                    ];
+                })->toArray();
 
-            return back()->with([
-                'warning' => "匯入完成，成功 {$successCount} 筆，失敗 " . count($failures) . " 筆（已回滾失敗資料）",
-                'importFailures' => $failurePayload,
+                // 設定 session flash 訊息
+                session()->flash('warning', "匯入完成，成功 {$successCount} 筆，失敗 " . count($failures) . " 筆");
+                session()->flash('importFailures', $failurePayload);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "匯入完成，成功 {$successCount} 筆，失敗 " . count($failures) . " 筆",
+                    'type' => 'warning',
+                    'import_failures' => $failurePayload,
+                ]);
+            }
+
+            // 完全成功
+            if ($successCount > 0) {
+                session()->flash('success', "成功匯入 {$successCount} 筆資料");
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "成功匯入 {$successCount} 筆資料",
+                    'type' => 'success',
+                ]);
+            }
+
+            // 沒有任何資料
+            session()->flash('warning', '沒有找到可匯入的資料');
+
+            return response()->json([
+                'success' => true,
+                'message' => '沒有找到可匯入的資料',
+                'type' => 'warning',
             ]);
-        }
 
-        return back();
+        } catch (\Throwable $throwable) {
+            session()->flash('error', '匯入失敗：' . $throwable->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => '匯入失敗：' . $throwable->getMessage(),
+                'type' => 'error',
+            ], 500);
+        }
     }
 }

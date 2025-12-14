@@ -10,14 +10,13 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
 
-class ExpensePaymentsImport implements ToCollection, WithHeadingRow, WithValidation, SkipsOnFailure
+class ExpensePaymentsImport implements ToCollection, SkipsOnFailure
 {
     protected array $failures = [];
     protected int $successCount = 0;
+    protected array $headers = [];
 
     public function __construct(private readonly ExpensePaymentService $expensePaymentService)
     {
@@ -25,10 +24,21 @@ class ExpensePaymentsImport implements ToCollection, WithHeadingRow, WithValidat
 
     public function collection(Collection $rows)
     {
-        foreach ($rows as $index => $row) {
-            $rowNumber = $index + 2; // header row offset
+        if ($rows->isEmpty()) {
+            return;
+        }
 
-            $data = $this->transformRow($row->toArray());
+        // 第一列是標題列
+        $this->headers = array_map([$this, 'normalizeHeaderName'], $rows->first()->toArray());
+
+        // 從第二列開始處理資料
+        $dataRows = $rows->skip(1)->values(); // 重新索引
+        foreach ($dataRows as $index => $row) {
+            $rowNumber = $index + 2; // 實際的 Excel 列號（標題是第1列，資料從第2列開始）
+
+            $rowData = $this->mapRowToHeaders($row->toArray());
+            $data = $this->transformRow($rowData);
+
             $validator = Validator::make($data, $this->rules());
 
             if ($validator->fails()) {
@@ -74,19 +84,103 @@ class ExpensePaymentsImport implements ToCollection, WithHeadingRow, WithValidat
         ];
     }
 
+    /**
+     * 將資料列對應到標題列
+     */
+    protected function mapRowToHeaders(array $rowValues): array
+    {
+        $mapped = [];
+        foreach ($this->headers as $index => $header) {
+            $header = $this->normalizeHeaderName($header);
+            if ($header === '') {
+                continue;
+            }
+            $canonical = $this->canonicalizeHeader($header);
+            if ($canonical === '') {
+                continue;
+            }
+            if (isset($rowValues[$index])) {
+                $mapped[$canonical] = $rowValues[$index];
+            }
+        }
+        return $mapped;
+    }
+
+    /**
+     * 標題名稱清洗（去除前後空白）
+     */
+    protected function normalizeHeaderName($header): string
+    {
+        if (! is_string($header)) {
+            return (string) $header;
+        }
+        // 移除 BOM、全形空白、零寬空白
+        $header = str_replace(["\u{FEFF}", "\u{200B}", "\u{00A0}"], '', $header);
+        return trim($header);
+    }
+
+    /**
+     * 將標題映射為統一欄位鍵名
+     */
+    protected function canonicalizeHeader(string $header): string
+    {
+        $map = [
+            '紀錄日期' => 'record_date',
+            '交易日期' => 'record_date',
+            'record_date' => 'record_date',
+            '紀錄時間' => 'record_time',
+            '時間' => 'record_time',
+            'record_time' => 'record_time',
+            '隊員編號' => 'member_code',
+            'member_code' => 'member_code',
+            '隊員姓名' => 'member_name',
+            'member_name' => 'member_name',
+            '車牌號碼' => 'vehicle_license_number',
+            'vehicle_license_number' => 'vehicle_license_number',
+            '款項名稱' => 'item_name',
+            '款項' => 'item_name',
+            'item_name' => 'item_name',
+            '支付金額' => 'gross_amount',
+            '支付金額(元)' => 'gross_amount',
+            'gross_amount' => 'gross_amount',
+            '應扣款' => 'deduction',
+            'deduction' => 'deduction',
+            '實付金額' => 'net_amount',
+            'net_amount' => 'net_amount',
+            '狀態' => 'status',
+            'status' => 'status',
+            '支付日期' => 'payment_date',
+            'payment_date' => 'payment_date',
+            '支付方式' => 'payment_method',
+            'payment_method' => 'payment_method',
+            '備註' => 'note',
+            'note' => 'note',
+        ];
+
+        return $map[$header] ?? $header;
+    }
+
     protected function transformRow(array $row): array
     {
-        // 支援中文欄位名稱的對應
-        $recordDate = $this->parseDate($row['record_date'] ?? $row['紀錄日期'] ?? null);
-        $paymentDate = $this->parseDate($row['payment_date'] ?? $row['支付日期'] ?? null);
-        $status = strtolower((string) ($row['status'] ?? $row['狀態'] ?? 'pending'));
+        // 簡化的欄位取得（直接支援中文標題）
+        $recordDate = $this->parseDate($row['紀錄日期'] ?? $row['record_date'] ?? null);
+        $paymentDate = $this->parseDate($row['支付日期'] ?? $row['payment_date'] ?? null);
+        $recordTime = $this->normalizeTime($row['紀錄時間'] ?? $row['record_time'] ?? null);
+        // 將隊員編號轉為字串，避免數字格式被驗證擋下
+        $memberCode = $row['隊員編號'] ?? $row['member_code'] ?? null;
+        if (is_numeric($memberCode)) {
+            $memberCode = (string) $memberCode;
+        } elseif (is_string($memberCode)) {
+            $memberCode = trim($memberCode);
+        }
+
+        $statusRaw = $row['狀態'] ?? $row['status'] ?? 'pending';
+        $status = strtolower((string) $statusRaw);
         $status = in_array($status, ['paid', '已支付'], true) ? 'paid' : 'pending';
 
-        $gross = (float) ($row['gross_amount'] ?? $row['支付金額'] ?? 0);
-        $deduction = (float) ($row['deduction'] ?? $row['應扣款'] ?? 0);
-        $net = $row['net_amount'] ?? $row['實付金額'] ?? ($gross - $deduction);
-
-        $recordTime = $this->normalizeTime($row['record_time'] ?? $row['紀錄時間'] ?? null);
+        $gross = (float) ($row['支付金額'] ?? $row['gross_amount'] ?? 0);
+        $deduction = (float) ($row['應扣款'] ?? $row['deduction'] ?? 0);
+        $net = $row['實付金額'] ?? $row['net_amount'] ?? ($gross - $deduction);
 
         if ($status === 'paid' && ! $paymentDate) {
             $paymentDate = $recordDate;
@@ -95,26 +189,38 @@ class ExpensePaymentsImport implements ToCollection, WithHeadingRow, WithValidat
         return [
             'record_date' => $recordDate,
             'record_time' => $recordTime,
-            'member_code' => Arr::get($row, 'member_code') ?? Arr::get($row, '隊員編號'),
-            'member_name' => Arr::get($row, 'member_name') ?? Arr::get($row, '隊員姓名'),
-            'vehicle_license_number' => Arr::get($row, 'vehicle_license_number') ?? Arr::get($row, '車牌號碼'),
-            'item_name' => Arr::get($row, 'item_name') ?? Arr::get($row, '款項名稱'),
+            'member_code' => $memberCode,
+            'member_name' => $row['隊員姓名'] ?? $row['member_name'] ?? null,
+            'vehicle_license_number' => $row['車牌號碼'] ?? $row['vehicle_license_number'] ?? null,
+            'item_name' => $row['款項名稱'] ?? $row['item_name'] ?? null,
             'gross_amount' => $gross,
             'deduction' => $deduction,
             'net_amount' => $net,
             'status' => $status,
             'payment_date' => $paymentDate,
-            'payment_method' => Arr::get($row, 'payment_method') ?? Arr::get($row, '支付方式'),
-            'note' => Arr::get($row, 'note') ?? Arr::get($row, '備註'),
+            'payment_method' => $row['支付方式'] ?? $row['payment_method'] ?? null,
+            'note' => $row['備註'] ?? $row['note'] ?? null,
         ];
     }
 
-    protected function parseDate(?string $value): ?string
+    protected function parseDate($value): ?string
     {
         if (! $value) {
             return null;
         }
 
+        // 如果是 Excel 序列號（數字格式）
+        if (is_numeric($value)) {
+            try {
+                // Excel 的日期起始點是 1900-01-01
+                $unixTimestamp = ($value - 25569) * 86400;
+                return Carbon::createFromTimestamp($unixTimestamp)->format('Y-m-d');
+            } catch (\Exception) {
+                return null;
+            }
+        }
+
+        // 如果是字串格式
         try {
             return Carbon::parse($value)->format('Y-m-d');
         } catch (\Exception) {
@@ -122,22 +228,33 @@ class ExpensePaymentsImport implements ToCollection, WithHeadingRow, WithValidat
         }
     }
 
-    protected function normalizeTime(?string $value): ?string
+    protected function normalizeTime($value): ?string
     {
-        if (! $value) {
+        if ($value === null || $value === '') {
             return null;
         }
 
-        if (preg_match('/^(\d{1,2}):(\d{2})$/', $value, $matches)) {
+        // 如果是 Excel 時間小數格式（0.0 到 1.0 之間）
+        if (is_numeric($value) && (float)$value >= 0 && (float)$value < 1) {
+            $totalSeconds = round((float)$value * 86400);
+            $hours = floor($totalSeconds / 3600);
+            $minutes = floor(($totalSeconds % 3600) / 60);
+            return sprintf('%02d:%02d', (int)$hours, (int)$minutes);
+        }
+
+        // 如果是字串格式
+        $stringValue = (string) $value;
+
+        if (preg_match('/^(\d{1,2}):(\d{2})$/', $stringValue, $matches)) {
             return sprintf('%02d:%02d', (int) $matches[1], (int) $matches[2]);
         }
 
-        if (preg_match('/^(\d{1,2}):(\d{2}):(\d{2})$/', $value, $matches)) {
+        if (preg_match('/^(\d{1,2}):(\d{2}):(\d{2})$/', $stringValue, $matches)) {
             return sprintf('%02d:%02d', (int) $matches[1], (int) $matches[2]);
         }
 
         try {
-            return Carbon::parse($value)->format('H:i');
+            return Carbon::parse($stringValue)->format('H:i');
         } catch (\Exception) {
             return null;
         }

@@ -61,9 +61,12 @@
                   v-if="permissions.canImport"
                   type="button"
                   class="btn btn-outline-info"
+                  :disabled="importForm.processing"
                   @click="triggerImport"
                 >
-                  <i class="bi bi-upload"></i> 匯入
+                  <i class="bi bi-upload"></i>
+                  <span v-if="importForm.processing"> 匯入中...</span>
+                  <span v-else> 匯入</span>
                 </button>
               </div>
             </div>
@@ -74,6 +77,14 @@
               </div>
               <div v-if="flash.error" class="alert alert-danger">
                 {{ flash.error }}
+              </div>
+              <div v-if="importForm.errors && Object.keys(importForm.errors).length" class="alert alert-danger">
+                <ul class="mb-0">
+                  <li v-for="(message, field) in importForm.errors" :key="field">{{ message }}</li>
+                </ul>
+              </div>
+              <div v-if="flash.warning" class="alert alert-warning">
+                {{ flash.warning }}
               </div>
               <div v-if="flashFailures.length" class="alert alert-warning">
                 <strong>匯入失敗 {{ flashFailures.length }} 筆</strong>
@@ -110,44 +121,6 @@
                       <option value="paid">已支付</option>
                     </select>
                   </div>
-
-                  <!--<div class="col-lg-3 col-md-4 col-sm-6">
-                    <label class="form-label">紀錄日期（起）</label>
-                    <input v-model="filterForm.record_date_from" type="date" class="form-control">
-                  </div>
-                  <div class="col-lg-3 col-md-4 col-sm-6">
-                    <label class="form-label">紀錄日期（迄）</label>
-                    <input v-model="filterForm.record_date_to" type="date" class="form-control">
-                  </div>
-
-                  <div class="col-lg-3 col-md-4 col-sm-6">
-                    <label class="form-label">支付日期（起）</label>
-                    <input v-model="filterForm.payment_date_from" type="date" class="form-control">
-                  </div>
-                  <div class="col-lg-3 col-md-4 col-sm-6">
-                    <label class="form-label">支付日期（迄）</label>
-                    <input v-model="filterForm.payment_date_to" type="date" class="form-control">
-                  </div>
-
-                  <div class="col-lg-3 col-md-4 col-sm-6">
-                    <label class="form-label">隊員</label>
-                    <select v-model="filterForm.driver_id" class="form-select">
-                      <option value="">全部</option>
-                      <option v-for="driver in drivers" :key="driver.id" :value="driver.id">
-                        {{ driver.name }} ({{ driver.id_number }})
-                      </option>
-                    </select>
-                  </div>
-
-                  <div class="col-lg-3 col-md-4 col-sm-6">
-                    <label class="form-label">車輛</label>
-                    <select v-model="filterForm.vehicle_id" class="form-select">
-                      <option value="">全部</option>
-                      <option v-for="vehicle in vehicles" :key="vehicle.id" :value="vehicle.id">
-                        {{ vehicle.license_number }}
-                      </option>
-                    </select>
-                  </div>-->
 
                   <div class="col-lg-2 col-md-4 col-sm-6">
                     <!--<label class="form-label">每頁筆數</label>-->
@@ -226,7 +199,7 @@
                       <th class="text-end">實付金額</th>
                       <th>狀態</th>
                       <th>支付日期</th>
-                      <th>最後更新</th>
+                      <th>建立日期</th>
                       <th>操作</th>
                     </tr>
                   </thead>
@@ -259,7 +232,7 @@
                         </span>
                       </td>
                       <td>{{ formatDate(payment.payment_date) }}</td>
-                      <td>{{ formatTimestamp(payment.updated_at) }}</td>
+                      <td>{{ formatTimestamp(payment.created_at) }}</td>
                       <td>
                         <div class="btn-group btn-group-sm">
                           <button
@@ -573,7 +546,8 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+// 控制頁面資料與彈窗狀態
+import { computed, reactive, ref, watch, onMounted } from 'vue'
 import { Link, router, useForm, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Modal from '@/Components/Modal.vue'
@@ -617,6 +591,25 @@ const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const showBulkModal = ref(false)
 const importInput = ref(null)
+
+// 強制關閉所有 dialog，避免殘留的 backdrop 造成整頁像 modal
+function forceCloseDialogs() {
+  showCreateModal.value = false
+  showEditModal.value = false
+  showBulkModal.value = false
+  document.querySelectorAll('dialog[open]').forEach((dialog) => {
+    try {
+      dialog.close()
+    } catch (e) {
+      console.warn('關閉 dialog 失敗', e)
+    }
+  })
+  document.body.style.overflow = ''
+}
+
+onMounted(() => {
+  forceCloseDialogs()
+})
 
 const createForm = useForm({
   record_date: props.filters.record_date_from || new Date().toISOString().slice(0, 10),
@@ -729,20 +722,62 @@ const importForm = useForm({
   file: null
 })
 
-function handleImport(event) {
+async function handleImport(event) {
   const files = event.target.files
   if (!files || !files.length) {
     return
   }
-  importForm.file = files[0]
-  importForm.post(route('admin.expense-payments.import'), {
-    onFinish: () => {
-      importForm.reset('file')
-      if (importInput.value) {
-        importInput.value.value = ''
-      }
+
+  console.log('開始匯入檔案:', files[0].name)
+
+  try {
+    // 建立 FormData
+    const formData = new FormData()
+    formData.append('file', files[0])
+
+    // 執行匯入
+    const response = await fetch(route('admin.expense-payments.import'), {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+      },
+      body: formData,
+    })
+
+    // 檢查 Content-Type
+    const contentType = response.headers.get('content-type')
+    console.log('Response Content-Type:', contentType)
+    console.log('Response Status:', response.status)
+
+    if (!contentType || !contentType.includes('application/json')) {
+      // 不是 JSON 響應，可能是錯誤頁面
+      const text = await response.text()
+      console.error('非 JSON 響應:', text.substring(0, 500))
+      alert('伺服器錯誤：返回的不是 JSON 格式。請查看瀏覽器控制台了解詳情。')
+      return
     }
-  })
+
+    const result = await response.json()
+
+    if (response.ok && result.success) {
+      // 匯入成功，重新載入頁面（後端已設定 flash 訊息）
+      window.location.href = route('admin.expense-payments.index')
+    } else {
+      // 匯入失敗
+      alert(result.message || '匯入失敗')
+    }
+
+  } catch (error) {
+    console.error('匯入錯誤:', error)
+    alert('匯入過程中發生錯誤：' + error.message)
+  } finally {
+    // 清空檔案輸入
+    if (importInput.value) {
+      importInput.value.value = ''
+    }
+  }
 }
 
 function toggleSelection(id, checked) {

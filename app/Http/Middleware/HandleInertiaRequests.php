@@ -67,6 +67,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
                 'warning' => fn () => $request->session()->get('warning'),
+                'importFailures' => fn () => $request->session()->get('importFailures', []),
             ],
             'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),
