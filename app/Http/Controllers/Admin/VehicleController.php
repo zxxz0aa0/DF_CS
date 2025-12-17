@@ -73,14 +73,59 @@ class VehicleController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $companyCategories = CompanyCategory::all();
         $companies = Company::select('id', 'name', 'category_id')->get();
 
+        // 檢查是否為換牌模式
+        $sourceVehicle = null;
+        if ($request->has('source')) {
+            $sourceVehicle = Vehicle::find($request->input('source'));
+
+            if ($sourceVehicle) {
+                // 轉換民國年
+                if ($sourceVehicle->license_issue_year) {
+                    $sourceVehicle->license_issue_year_republic = Vehicle::convertWesternToRepublic(
+                        $sourceVehicle->license_issue_year
+                    );
+                }
+
+                if ($sourceVehicle->inspection_year) {
+                    $sourceVehicle->inspection_year_republic = Vehicle::convertWesternToRepublic(
+                        $sourceVehicle->inspection_year
+                    );
+                }
+
+                if ($sourceVehicle->registration_year) {
+                    $sourceVehicle->registration_year_republic = Vehicle::convertWesternToRepublic(
+                        $sourceVehicle->registration_year
+                    );
+                }
+
+                // 清除不需要複製的欄位
+                $sourceVehicle->license_number = null;
+                $sourceVehicle->id = null;
+                $sourceVehicle->vehicle_status = 'active';
+                $sourceVehicle->created_by = null;
+                $sourceVehicle->updated_by = null;
+                $sourceVehicle->created_at = null;
+                $sourceVehicle->updated_at = null;
+                $sourceVehicle->deleted_at = null;
+                $sourceVehicle->replacement_license = null;
+
+                // 不複製退籍日期
+                $sourceVehicle->deregistration_year = null;
+                $sourceVehicle->deregistration_month = null;
+                $sourceVehicle->deregistration_day = null;
+            }
+        }
+
         return Inertia::render('Admin/Vehicles/Create', [
             'companyCategories' => $companyCategories,
             'companies' => $companies,
+            'sourceVehicle' => $sourceVehicle,
+            'isReplacementMode' => $sourceVehicle !== null,
         ]);
     }
 

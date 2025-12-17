@@ -236,6 +236,15 @@
                                                                 <i class="fas fa-edit"></i>編輯
                                                             </Link>
 
+                                                            <Link
+                                                                v-if="$page.props.auth.permissions?.includes('create vehicles')"
+                                                                :href="route('admin.vehicles.create', { source: vehicle.id })"
+                                                                class="btn btn-success"
+                                                                title="換牌"
+                                                            >
+                                                                <i class="fas fa-exchange-alt"></i>換牌
+                                                            </Link>
+
                                                             <button
                                                                 v-if="$page.props.auth.permissions?.includes('manage vehicle status')"
                                                                 type="button"

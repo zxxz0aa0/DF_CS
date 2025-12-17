@@ -6,7 +6,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0">新增車輛</h1>
+                            <h1 class="m-0">{{ isReplacementMode ? '換牌新增車輛' : '新增車輛' }}</h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
@@ -16,7 +16,7 @@
                                 <li class="breadcrumb-item">
                                     <Link :href="route('admin.vehicles.index')">車輛管理</Link>
                                 </li>
-                                <li class="breadcrumb-item active">新增車輛</li>
+                                <li class="breadcrumb-item active">{{ isReplacementMode ? '換牌新增車輛' : '新增車輛' }}</li>
                             </ol>
                         </div>
                     </div>
@@ -27,11 +27,12 @@
             <section class="content">
                 <div class="container-fluid">
                     <VehicleForm
+                        :vehicle="sourceVehicle"
                         :company-categories="companyCategories"
                         :companies="companies"
                         :errors="$page.props.errors"
                         :processing="processing"
-                        submit-text="新增車輛"
+                        :submit-text="isReplacementMode ? '換牌新增車輛' : '新增車輛'"
                         @submit="handleSubmit"
                     />
                 </div>
@@ -49,6 +50,14 @@ import VehicleForm from '@/Components/Vehicle/VehicleForm.vue'
 const props = defineProps({
     companyCategories: Array,
     companies: Array,
+    sourceVehicle: {
+        type: Object,
+        default: null
+    },
+    isReplacementMode: {
+        type: Boolean,
+        default: false
+    }
 })
 
 const processing = ref(false)
