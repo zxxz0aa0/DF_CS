@@ -184,7 +184,9 @@ const formatManufactureDate = (year, month) => {
                                         <td>{{ driver.id_number }}</td>
                                         <!--可以顯示遮身分證字號<td>{{ maskIdNumber(driver.id_number) }}</td>-->
                                         <td>{{ formatDate(driver.birthday) }}</td>
-                                        <td>{{ calculateAge(driver.birthday) }}</td>
+                                        <td :class="Number(calculateAge(driver.birthday)) >= 69 ? 'text-danger' : ''">
+                                            {{ calculateAge(driver.birthday) }}
+                                        </td>
                                         <td>{{ driver.mobile_phone1 || '-' }}</td>
                                         <td>{{ driver.contact_address || '-' }}</td>
                                         <td>{{ driver.company_category?.name || '-' }}</td>

@@ -36,7 +36,9 @@
               <td>{{ driver.name }}</td>
               <td>{{ driver.id_number }}</td>
               <td>{{ formatDate(driver.birthday) }}</td>
-              <td>{{ calculateAge(driver.birthday) }}</td>
+              <td :class="Number(calculateAge(driver.birthday)) >= 69 ? 'text-danger' : ''">
+                  {{ calculateAge(driver.birthday) }}
+              </td>
               <td>{{ driver.mobile_phone1 }}</td>
               <td>{{ formatDate(driver.registration_date) }}</td>
               <td>
