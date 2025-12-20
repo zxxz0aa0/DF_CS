@@ -9,6 +9,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ExpensePaymentService
@@ -69,8 +70,8 @@ class ExpensePaymentService
             'payment_method' => $paymentMethod,
         ];
 
-        if (auth()->check()) {
-            $updatePayload['updated_by'] = auth()->id();
+        if (Auth::check()) {
+            $updatePayload['updated_by'] = Auth::id();
         }
 
         $updatePayload['updated_at'] = now();
@@ -82,7 +83,7 @@ class ExpensePaymentService
         if ($status === 'paid') {
             $updatePayload['payment_date'] = $paymentDate;
             $updatePayload['paid_at'] = now();
-            $updatePayload['paid_by'] = auth()->id();
+            $updatePayload['paid_by'] = Auth::id();
         } else {
             $updatePayload['payment_date'] = null;
             $updatePayload['paid_at'] = null;
@@ -171,7 +172,7 @@ class ExpensePaymentService
             $payload['paid_at'] = $existing && $existing->status === 'paid'
                 ? ($existing->paid_at ?? now())
                 : now();
-            $payload['paid_by'] = auth()->id();
+            $payload['paid_by'] = Auth::id();
         } else {
             $payload['payment_date'] = null;
             $payload['payment_method'] = null;

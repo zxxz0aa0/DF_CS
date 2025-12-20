@@ -308,13 +308,34 @@ const paginationPages = computed(() => {
     return pages
 })
 
+// 只送出有效篩選條件
+const buildSearchParams = () => {
+    const params = {}
+    Object.entries(searchForm.value).forEach(([key, value]) => {
+        if (key === 'license_expiring') {
+            if (value) {
+                params[key] = 1
+            }
+            return
+        }
+
+        if (value !== '' && value !== null && value !== undefined) {
+            params[key] = value
+        }
+    })
+
+    return params
+}
+
+// 送出篩選條件查詢
 const search = () => {
-    router.get(route('admin.drivers.index'), searchForm.value, {
+    router.get(route('admin.drivers.index'), buildSearchParams(), {
         preserveState: true,
         replace: true
     })
 }
 
+// 清除篩選並重新查詢
 const clearFilters = () => {
     searchForm.value = {
         search: '',
@@ -325,14 +346,14 @@ const clearFilters = () => {
     search()
 }
 
+// 產生含篩選條件的分頁連結
 const getPageUrl = (page) => {
     const url = new URL(props.drivers.path, window.location.origin)
     url.searchParams.set('page', page)
 
-    Object.entries(searchForm.value).forEach(([key, value]) => {
-        if (value) {
-            url.searchParams.set(key, value)
-        }
+    const params = buildSearchParams()
+    Object.entries(params).forEach(([key, value]) => {
+        url.searchParams.set(key, value)
     })
 
     return url.toString()
@@ -406,8 +427,9 @@ const toggleDriverStatus = () => {
     }
 }
 
+// 依目前篩選條件匯出
 const exportDrivers = () => {
-    window.open(route('admin.drivers.export', searchForm.value))
+    window.open(route('admin.drivers.export', buildSearchParams()))
 }
 
 onMounted(() => {

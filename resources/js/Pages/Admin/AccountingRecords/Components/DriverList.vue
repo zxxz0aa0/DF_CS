@@ -14,7 +14,7 @@
               <th style="width: 12%;">生日</th>
               <th style="width: 8%;">年齡</th>
               <th style="width: 15%;">電話</th>
-              <th style="width: 12%;">入籍日期</th>
+              <th style="width: 12%;">狀態</th>
               <th style="width: 10%;">操作</th>
             </tr>
           </thead>
@@ -40,7 +40,11 @@
                   {{ calculateAge(driver.birthday) }}
               </td>
               <td>{{ driver.mobile_phone1 }}</td>
-              <td>{{ formatDate(driver.registration_date) }}</td>
+              <td>
+                <span :class="driver.status === 'open' ? 'text-success' : 'text-danger'">
+                {{ driver.status === 'open' ? '在籍中' : '已退籍' }}
+                </span>
+              </td>
               <td>
                 <button
                   @click.stop="viewDetail(driver)"

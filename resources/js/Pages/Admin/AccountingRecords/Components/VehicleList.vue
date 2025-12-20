@@ -16,7 +16,7 @@
               <th style="width: 11%;">款式</th>
               <th style="width: 11%;">顏色</th>
               <th style="width: 11%;">出廠日</th>
-              <th style="width: 15%;">入籍日期</th>
+              <th style="width: 15%;">狀態</th>
               <th style="width: 10%;">操作</th>
             </tr>
           </thead>
@@ -42,7 +42,11 @@
               <td>{{ vehicle.vehicle_model || '-' }}</td>
               <td>{{ vehicle.vehicle_color }}</td>
               <td>{{ formatManufactureDate(vehicle.manufacture_year, vehicle.manufacture_month) }}</td>
-              <td>{{ vehicle.registration_date || '-' }}</td>
+              <td>
+                  <span :class="vehicle.vehicle_status === 'active' ? 'text-success' : 'text-danger'">
+                      {{ vehicle.vehicle_status === 'active' ? '在籍中' : '已退籍' }}
+                  </span>
+              </td>
               <td>
                 <button
                   @click.stop="viewDetail(vehicle)"

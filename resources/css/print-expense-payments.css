@@ -1,0 +1,258 @@
+/* ========================================
+   支出款項列印報表樣式
+   ======================================== */
+
+/* 列印容器基本樣式 */
+.print-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+}
+
+/* 報表標題區 */
+.print-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #333;
+}
+
+.print-header h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.print-date {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* 資料表格 */
+.print-table {
+  width: 100%;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+  border-collapse: collapse;
+}
+
+.print-table thead th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  text-align: center;
+  padding: 0.75rem 0.5rem;
+  border: 1px solid #dee2e6;
+}
+
+.print-table tbody td {
+  padding: 0.5rem;
+  vertical-align: middle;
+  border: 1px solid #dee2e6;
+}
+
+.print-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.print-table tbody tr:hover {
+  background-color: #f1f3f5;
+}
+
+/* 統計資訊區 */
+.print-statistics {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.statistics-table {
+  width: 60%;
+  margin-left: auto;
+  font-size: 0.95rem;
+  border-collapse: collapse;
+}
+
+.statistics-table th {
+  background-color: #e9ecef;
+  font-weight: bold;
+  width: 25%;
+  padding: 0.75rem;
+  border: 1px solid #dee2e6;
+  text-align: left;
+}
+
+.statistics-table td {
+  padding: 0.75rem;
+  width: 25%;
+  border: 1px solid #dee2e6;
+}
+
+/* 操作按鈕 */
+.print-actions {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.print-actions .btn {
+  margin: 0 0.5rem;
+  min-width: 100px;
+}
+
+/* ========================================
+   列印專用樣式
+   ======================================== */
+
+@media print {
+  /* 頁面設定 */
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  /* 重置容器樣式 */
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .print-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* 隱藏不必要的元素 */
+  .no-print,
+  .print-actions {
+    display: none !important;
+  }
+
+  /* 表格優化 */
+  .print-table {
+    font-size: 11px;
+    page-break-inside: auto;
+  }
+
+  .print-table thead {
+    display: table-header-group; /* 每頁重複顯示表頭 */
+  }
+
+  .print-table tbody tr {
+    page-break-inside: avoid; /* 避免切割表格行 */
+  }
+
+  .print-table th,
+  .print-table td {
+    padding: 0.3rem 0.2rem;
+    border: 1px solid #000 !important;
+  }
+
+  /* 移除斑馬條紋（列印時可能不清楚） */
+  .print-table tbody tr:nth-child(even) {
+    background-color: transparent;
+  }
+
+  .print-table tbody tr:hover {
+    background-color: transparent;
+  }
+
+  /* 標題優化 */
+  .print-header {
+    border-bottom: 2px solid #000;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .print-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+    color: #000;
+  }
+
+  .print-date {
+    font-size: 0.8rem;
+    color: #000;
+  }
+
+  /* 統計區優化 */
+  .print-statistics {
+    margin-top: 1rem;
+    margin-bottom: 0;
+    page-break-inside: avoid;
+  }
+
+  .statistics-table {
+    width: 70%;
+    font-size: 12px;
+  }
+
+  .statistics-table th,
+  .statistics-table td {
+    border: 1px solid #000 !important;
+    padding: 0.4rem;
+  }
+
+  .statistics-table th {
+    background-color: #f0f0f0;
+  }
+
+  /* 確保黑白列印可讀性 */
+  .table-bordered th,
+  .table-bordered td {
+    border-color: #000 !important;
+  }
+
+  /* 避免分頁 */
+  .print-header {
+    page-break-inside: avoid;
+    page-break-after: avoid;
+  }
+
+  /* 強制黑色文字（避免灰色列印不清楚） */
+  * {
+    color: #000 !important;
+  }
+
+  /* 粗體保持粗體 */
+  .fw-bold {
+    font-weight: bold !important;
+  }
+
+  /* 文字對齊保持 */
+  .text-end {
+    text-align: right !important;
+  }
+}
+
+/* ========================================
+   響應式設計（螢幕顯示）
+   ======================================== */
+
+@media screen and (max-width: 768px) {
+  .print-container {
+    padding: 1rem;
+    margin: 1rem;
+  }
+
+  .print-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .print-table {
+    font-size: 0.8rem;
+  }
+
+  .print-table thead th,
+  .print-table tbody td {
+    padding: 0.4rem 0.3rem;
+  }
+
+  .statistics-table {
+    width: 100%;
+    font-size: 0.85rem;
+  }
+}

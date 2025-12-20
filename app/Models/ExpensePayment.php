@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class ExpensePayment extends Model
 {
@@ -48,15 +49,15 @@ class ExpensePayment extends Model
         parent::boot();
 
         static::creating(function (self $model) {
-            if (auth()->check()) {
-                $model->created_by ??= auth()->id();
-                $model->updated_by ??= auth()->id();
+            if (Auth::check()) {
+                $model->created_by ??= Auth::id();
+                $model->updated_by ??= Auth::id();
             }
         });
 
         static::updating(function (self $model) {
-            if (auth()->check()) {
-                $model->updated_by = auth()->id();
+            if (Auth::check()) {
+                $model->updated_by = Auth::id();
             }
         });
     }

@@ -99,7 +99,6 @@
                                                     class="form-control"
                                                     @change="search"
                                                 >
-                                                    <option value="">全部</option>
                                                     <option value="active">在籍</option>
                                                     <option value="inactive">退籍</option>
                                                 </select>

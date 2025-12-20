@@ -68,6 +68,17 @@
                   <span v-if="importForm.processing"> 匯入中...</span>
                   <span v-else> 匯入</span>
                 </button>
+
+                <button
+                  v-if="permissions.canExport"
+                  type="button"
+                  class="btn btn-outline-primary"
+                  :disabled="selectedIds.length === 0"
+                  @click="printSelectedData"
+                  title="列印選中的支出款項"
+                >
+                  <i class="bi bi-printer"></i> 列印選中資料
+                </button>
               </div>
             </div>
 
@@ -189,7 +200,7 @@
                       </th>
                       <th>交易日期</th>
                       <th>時間</th>
-                      <th>公司種類</th>
+                      <!--<th>公司種類</th>-->
                       <th>隊員編號</th>
                       <th>隊員姓名</th>
                       <th>車牌</th>
@@ -218,7 +229,7 @@
                       </td>
                       <td>{{ formatDate(payment.record_date) }}</td>
                       <td>{{ formatTime(payment.record_time) }}</td>
-                      <td>{{ payment.driver?.company_category?.name || '—' }}</td>
+                      <!--<td>{{ payment.driver?.company_category?.name || '—' }}</td>-->
                       <td>{{ payment.member_code || '—' }}</td>
                       <td>{{ payment.member_name }}</td>
                       <td>{{ payment.vehicle_license_number || '—' }}</td>
@@ -712,6 +723,51 @@ function exportData() {
   setTimeout(() => {
     isExporting.value = false
   }, 1200)
+}
+
+// 列印選中的資料
+function printSelectedData() {
+  if (selectedIds.value.length === 0) {
+    alert('請先選擇要列印的交易資料')
+    return
+  }
+
+  try {
+    // 從當前頁面資料中過濾出選中的項目
+    const selectedPayments = props.payments.data.filter(payment =>
+      selectedIds.value.includes(payment.id)
+    )
+
+    // 計算統計資訊
+    const statistics = {
+      totalCount: selectedPayments.length,
+      totalGrossAmount: selectedPayments.reduce((sum, p) => sum + parseFloat(p.gross_amount || 0), 0),
+      totalDeduction: selectedPayments.reduce((sum, p) => sum + parseFloat(p.deduction || 0), 0),
+      totalNetAmount: selectedPayments.reduce((sum, p) => sum + parseFloat(p.net_amount || 0), 0)
+    }
+
+    // 準備列印資料
+    const printData = {
+      payments: selectedPayments,
+      statistics: statistics,
+      printedAt: new Date().toISOString()
+    }
+
+    // 儲存到 localStorage
+    localStorage.setItem('expense_payments_print_data', JSON.stringify(printData))
+
+    // 開啟新視窗
+    window.open(route('admin.expense-payments.print'), '_blank')
+
+    // 設定 5 分鐘後自動清理（避免資料殘留）
+    setTimeout(() => {
+      localStorage.removeItem('expense_payments_print_data')
+    }, 5 * 60 * 1000)
+
+  } catch (error) {
+    console.error('列印資料準備失敗:', error)
+    alert('列印資料準備失敗，請稍後再試')
+  }
 }
 
 function triggerImport() {

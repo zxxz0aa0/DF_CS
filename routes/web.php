@@ -262,6 +262,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
 
             Route::post('bulk-status', [ExpensePaymentController::class, 'bulkStatus'])->name('bulk-status');
             Route::get('export', [ExpensePaymentController::class, 'export'])->name('export');
+            Route::get('print', [ExpensePaymentController::class, 'print'])->name('print');
             Route::get('template', [ExpensePaymentController::class, 'template'])->name('template');
             Route::post('import', [ExpensePaymentController::class, 'import'])->name('import');
         });

@@ -135,6 +135,17 @@ class ExpensePaymentController extends Controller
         return Excel::download(new ExpensePaymentsExport($filters), 'expense_payments_' . now()->format('Ymd_His') . '.xlsx');
     }
 
+    /**
+     * 顯示列印頁面
+     *
+     * 前端會透過 localStorage 傳遞選中的資料
+     * 此方法只負責渲染 Print.vue 頁面
+     */
+    public function print(): Response
+    {
+        return Inertia::render('Admin/ExpensePayments/Print');
+    }
+
     public function template(): BinaryFileResponse
     {
         return Excel::download(new ExpensePaymentsTemplateExport(), 'expense_payments_template.xlsx');
