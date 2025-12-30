@@ -320,22 +320,46 @@
 
             <div class="col-md-6">
               <label class="form-label">隊員<span class="text-danger">*</span></label>
-              <select v-model="createForm.driver_id" class="form-select" @change="syncDriverToForm(createForm)">
-                <option value="">未指定</option>
-                <option v-for="driver in drivers" :key="driver.id" :value="driver.id">
-                  {{ driver.name }} ({{ driver.id_number }})
-                </option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">隊員編號</label>
-              <input v-model="createForm.member_code" type="text" class="form-control">
+              <!-- 搜尋輸入框 -->
+              <input
+                v-model="driverSearchCreate"
+                type="text"
+                class="form-control"
+                placeholder="搜尋隊員姓名或編號..."
+                @focus="showDriverListCreate = true"
+              >
+              <!-- 點選式隊員列表 -->
+              <div
+                v-if="showDriverListCreate && driverSearchCreate.trim()"
+                class="driver-search-results"
+              >
+                <div v-if="filteredDriversCreate.length === 0" class="list-group-item text-muted text-center">
+                  找不到符合的隊員
+                </div>
+                <div
+                  v-for="driver in filteredDriversCreate"
+                  :key="driver.id"
+                  class="list-group-item list-group-item-action"
+                  :class="{ active: createForm.driver_id === driver.id }"
+                  @click="selectDriverForCreate(driver)"
+                >
+                  <div class="d-flex align-items-center">
+                    <i
+                      class="bi me-2"
+                      :class="createForm.driver_id === driver.id ? 'bi-check-circle-fill' : 'bi-circle'"
+                    ></i>
+                    <div>
+                      <div class="fw-bold">{{ driver.name }}</div>
+                      <small class="text-muted">{{ driver.id_number }}</small>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="filteredDriversCreate.length > 0" class="list-group-item text-muted text-center small">
+                  找到 {{ filteredDriversCreate.length }} 位隊員
+                </div>
+              </div>
             </div>
 
-            <div class="col-md-6">
-              <label class="form-label">隊員姓名<span class="text-danger">*</span></label>
-              <input v-model="createForm.member_name" type="text" class="form-control" required>
-            </div>
             <div class="col-md-6">
               <label class="form-label">車輛</label>
               <select v-model="createForm.vehicle_id" class="form-select" @change="syncVehicleToForm(createForm)">
@@ -347,9 +371,20 @@
             </div>
 
             <div class="col-md-6">
+              <label class="form-label">隊員姓名<span class="text-danger">*</span></label>
+              <input v-model="createForm.member_name" type="text" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
               <label class="form-label">車牌號碼</label>
               <input v-model="createForm.vehicle_license_number" type="text" class="form-control">
             </div>
+
+            <div class="col-md-6">
+              <label class="form-label">隊員編號</label>
+              <input v-model="createForm.member_code" type="text" class="form-control">
+            </div>
+
             <div class="col-md-6">
               <label class="form-label">款項名稱<span class="text-danger">*</span></label>
               <input v-model="createForm.item_name" type="text" class="form-control" required>
@@ -424,12 +459,44 @@
 
             <div class="col-md-6">
               <label class="form-label">隊員</label>
-              <select v-model="editForm.driver_id" class="form-select" @change="syncDriverToForm(editForm)">
-                <option value="">未指定</option>
-                <option v-for="driver in drivers" :key="driver.id" :value="driver.id">
-                  {{ driver.name }} ({{ driver.id_number }})
-                </option>
-              </select>
+              <!-- 搜尋輸入框 -->
+              <input
+                v-model="driverSearchEdit"
+                type="text"
+                class="form-control"
+                placeholder="搜尋隊員姓名或編號..."
+                @focus="showDriverListEdit = true"
+              >
+              <!-- 點選式隊員列表 -->
+              <div
+                v-if="showDriverListEdit && driverSearchEdit.trim()"
+                class="driver-search-results"
+              >
+                <div v-if="filteredDriversEdit.length === 0" class="list-group-item text-muted text-center">
+                  找不到符合的隊員
+                </div>
+                <div
+                  v-for="driver in filteredDriversEdit"
+                  :key="driver.id"
+                  class="list-group-item list-group-item-action"
+                  :class="{ active: editForm.driver_id === driver.id }"
+                  @click="selectDriverForEdit(driver)"
+                >
+                  <div class="d-flex align-items-center">
+                    <i
+                      class="bi me-2"
+                      :class="editForm.driver_id === driver.id ? 'bi-check-circle-fill' : 'bi-circle'"
+                    ></i>
+                    <div>
+                      <div class="fw-bold">{{ driver.name }}</div>
+                      <small class="text-muted">{{ driver.id_number }}</small>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="filteredDriversEdit.length > 0" class="list-group-item text-muted text-center small">
+                  找到 {{ filteredDriversEdit.length }} 位隊員
+                </div>
+              </div>
             </div>
             <div class="col-md-6">
               <label class="form-label">隊員編號</label>
@@ -602,6 +669,38 @@ const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const showBulkModal = ref(false)
 const importInput = ref(null)
+
+// 隊員搜尋過濾關鍵字
+const driverSearchCreate = ref('')
+const driverSearchEdit = ref('')
+
+// 控制隊員列表顯示
+const showDriverListCreate = ref(false)
+const showDriverListEdit = ref(false)
+
+// 新增表單的過濾後隊員列表
+const filteredDriversCreate = computed(() => {
+  if (!driverSearchCreate.value.trim()) {
+    return props.drivers
+  }
+  const keyword = driverSearchCreate.value.toLowerCase()
+  return props.drivers.filter(driver => {
+    return driver.name.toLowerCase().includes(keyword) ||
+           driver.id_number.toLowerCase().includes(keyword)
+  })
+})
+
+// 編輯表單的過濾後隊員列表
+const filteredDriversEdit = computed(() => {
+  if (!driverSearchEdit.value.trim()) {
+    return props.drivers
+  }
+  const keyword = driverSearchEdit.value.toLowerCase()
+  return props.drivers.filter(driver => {
+    return driver.name.toLowerCase().includes(keyword) ||
+           driver.id_number.toLowerCase().includes(keyword)
+  })
+})
 
 // 強制關閉所有 dialog，避免殘留的 backdrop 造成整頁像 modal
 function forceCloseDialogs() {
@@ -862,6 +961,8 @@ function openCreateModal() {
   createForm.record_date = new Date().toISOString().slice(0, 10)
   createForm.record_time = '09:00'
   createForm.status = 'pending'
+  driverSearchCreate.value = '' // 重置搜尋關鍵字
+  showDriverListCreate.value = false // 隱藏列表
   showCreateModal.value = true
 }
 
@@ -897,6 +998,8 @@ function openEditModal(payment) {
   editForm.payment_date = formatDateForInput(payment.payment_date)
   editForm.payment_method = payment.payment_method || ''
   editForm.note = payment.note || ''
+  driverSearchEdit.value = payment.member_name || '' // 顯示已選擇的隊員姓名
+  showDriverListEdit.value = false // 隱藏列表
   showEditModal.value = true
 }
 
@@ -955,6 +1058,22 @@ function submitBulk() {
       selectedIds.value = []
     }
   })
+}
+
+// 選擇隊員 (新增表單)
+function selectDriverForCreate(driver) {
+  createForm.driver_id = driver.id
+  createForm.member_name = driver.name
+  driverSearchCreate.value = driver.name // 將選中的姓名顯示在搜尋框
+  showDriverListCreate.value = false // 隱藏列表
+}
+
+// 選擇隊員 (編輯表單)
+function selectDriverForEdit(driver) {
+  editForm.driver_id = driver.id
+  editForm.member_name = driver.name
+  driverSearchEdit.value = driver.name // 將選中的姓名顯示在搜尋框
+  showDriverListEdit.value = false // 隱藏列表
 }
 
 function syncDriverToForm(form) {
@@ -1024,5 +1143,52 @@ function formatCurrency(value) {
 <style scoped>
 .table-responsive {
   max-height: 65vh;
+}
+
+/* 隊員搜尋結果列表樣式 */
+.driver-search-results {
+  position: absolute;
+  z-index: 1000;
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  margin-top: 0.25rem;
+}
+
+.driver-search-results .list-group-item {
+  border-left: none;
+  border-right: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.driver-search-results .list-group-item:first-child {
+  border-top: none;
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+}
+
+.driver-search-results .list-group-item:last-child {
+  border-bottom: none;
+  border-bottom-left-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+}
+
+.driver-search-results .list-group-item:hover:not(.text-muted) {
+  background-color: #f8f9fa;
+}
+
+.driver-search-results .list-group-item.active {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+}
+
+.driver-search-results .list-group-item.active .text-muted {
+  color: rgba(255, 255, 255, 0.75) !important;
 }
 </style>
