@@ -55,14 +55,32 @@ class ExpensePaymentController extends Controller
         $payments = $this->expensePaymentService->paginate($filters, max(5, $perPage));
         $statistics = $this->expensePaymentService->statistics($filters);
 
+        // 取得駕駛資料
         $drivers = Driver::select('id', 'name', 'id_number', 'company_category_id')
             ->with('companyCategory:id,name')
             ->orderBy('name')
             ->get();
 
-        $vehicles = Vehicle::select('id', 'license_number')
+        // 取得車輛資料(包含隊編)
+        $vehicles = Vehicle::select('id', 'license_number', 'fleet_number', 'fleet_name')
             ->orderBy('license_number')
             ->get();
+
+        // 取得駕駛-車輛關聯資料(用於智能搜尋)
+        $assignments = \App\Models\DriverVehicleAssignment::with([
+            'driver:id,name,id_number',
+            'vehicle:id,license_number,fleet_number,fleet_name'
+        ])->get()->map(function ($assignment) {
+            return [
+                'driver_id' => $assignment->driver_id,
+                'driver_name' => $assignment->driver->name ?? '',
+                'driver_id_number' => $assignment->driver->id_number ?? '',
+                'vehicle_id' => $assignment->vehicle_id,
+                'vehicle_license_number' => $assignment->vehicle->license_number ?? '',
+                'fleet_number' => $assignment->vehicle->fleet_number ?? '',
+                'fleet_name' => $assignment->vehicle->fleet_name ?? '',
+            ];
+        });
 
         return Inertia::render('Admin/ExpensePayments/Index', [
             'payments' => $payments,
@@ -80,6 +98,7 @@ class ExpensePaymentController extends Controller
             'statistics' => $statistics,
             'drivers' => $drivers,
             'vehicles' => $vehicles,
+            'assignments' => $assignments, // 新增駕駛-車輛關聯資料
             'permissions' => [
                 'canCreate' => $request->user()->can('create expense payments'),
                 'canEdit' => $request->user()->can('edit expense payments'),
