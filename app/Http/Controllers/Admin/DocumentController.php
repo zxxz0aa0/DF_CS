@@ -46,6 +46,31 @@ class DocumentController extends Controller
             }
         }
 
+        // 篩選：在籍狀態(根據搜尋類型決定篩選駕駛或車輛的狀態)
+        $membershipStatus = $request->input('membership_status', 'active'); // 預設為「在籍」
+        $searchType = $request->input('search_type', 'driver');
+
+        if ($membershipStatus !== 'all') {
+            if ($searchType === 'vehicle') {
+                // 篩選車輛狀態: active(在籍) / inactive(退籍)
+                $vehicleStatus = $membershipStatus === 'active' ? 'active' : 'inactive';
+                $query->whereHas('vehicle', function ($q) use ($vehicleStatus) {
+                    $q->where('vehicle_status', $vehicleStatus);
+                });
+            } else {
+                // 篩選駕駛狀態: open(在籍) / 其他(退籍)
+                if ($membershipStatus === 'active') {
+                    $query->whereHas('driver', function ($q) {
+                        $q->where('status', 'open');
+                    });
+                } else {
+                    $query->whereHas('driver', function ($q) {
+                        $q->where('status', '!=', 'open');
+                    });
+                }
+            }
+        }
+
         // 篩選：文件類別
         if ($request->filled('category')) {
             $query->byCategory($request->category);
@@ -73,6 +98,7 @@ class DocumentController extends Controller
             'filters' => [
                 'search_type' => $request->search_type,
                 'keyword' => $request->keyword,
+                'membership_status' => $request->input('membership_status', 'active'),
                 'category' => $request->category,
                 'status' => $request->status,
                 'driver_id' => $request->driver_id,

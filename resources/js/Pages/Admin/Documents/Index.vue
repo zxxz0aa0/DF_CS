@@ -65,12 +65,17 @@
                                     <option value="driver">駕駛資料</option>
                                     <option value="vehicle">車輛資料</option>
                                 </select>
-                                <select v-model="searchForm.category" class="form-select" style="width: 150px;">
+                                <select v-model="searchForm.membership_status" class="form-select" style="width: 130px;">
+                                    <option value="active">在籍</option>
+                                    <option value="inactive">退籍</option>
+                                    <option value="all">全部</option>
+                                </select>
+                                <!--<select v-model="searchForm.category" class="form-select" style="width: 150px;">
                                     <option value="">所有類別</option>
                                     <option value="identity">身分證件</option>
                                     <option value="insurance">保險證件</option>
                                     <option value="vehicle">車輛證件</option>
-                                </select>
+                                </select>-->
                                 <select v-model="searchForm.status" class="form-select" style="width: 150px;">
                                     <option value="">所有狀態</option>
                                     <option value="valid">有效</option>
@@ -267,6 +272,7 @@ const page = usePage()
 const searchForm = reactive({
     search_type: props.filters.search_type || 'driver',
     keyword: props.filters.keyword || '',
+    membership_status: props.filters.membership_status || 'active',
     category: props.filters.category || '',
     status: props.filters.status || '',
 })
@@ -311,6 +317,7 @@ const search = () => {
 const clearSearch = () => {
     searchForm.search_type = 'driver'
     searchForm.keyword = ''
+    searchForm.membership_status = 'active'
     searchForm.category = ''
     searchForm.status = ''
     search()
