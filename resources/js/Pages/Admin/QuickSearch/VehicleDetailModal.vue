@@ -26,14 +26,34 @@ const formatDate = (dateString) => {
     return dateString
 }
 
-// 取得狀態文字
+// 取得車輛狀態文字
 const getStatusText = (status) => {
     return status === 'active' ? '在籍' : '退籍'
 }
 
-// 取得狀態 Badge 類別
+// 取得車輛狀態 Badge 類別
 const getStatusBadgeClass = (status) => {
     return status === 'active' ? 'badge bg-success' : 'badge bg-secondary'
+}
+
+// 取得駕駛狀態文字
+const getDriverStatusText = (status) => {
+    const statusMap = {
+        'open': '在籍',
+        'close': '退籍',
+        'bad_debt': '呆帳'
+    }
+    return statusMap[status] || '未知'
+}
+
+// 取得駕駛狀態 Badge 類別
+const getDriverStatusBadgeClass = (status) => {
+    const classMap = {
+        'open': 'badge bg-success',
+        'close': 'badge bg-secondary',
+        'bad_debt': 'badge bg-danger'
+    }
+    return classMap[status] || 'badge bg-secondary'
 }
 
 watch(() => props.show, (newVal) => {
@@ -288,8 +308,8 @@ onMounted(() => {
                                             <td>{{ driver.mobile_phone1 || '-' }}</td>
                                             <td>{{ driver.company_category?.name || '-' }}</td>
                                             <td>
-                                                <span :class="driver.status === 'open' ? 'badge bg-success' : 'badge bg-secondary'">
-                                                    {{ driver.status === 'open' ? '在籍' : '退籍' }}
+                                                <span :class="getDriverStatusBadgeClass(driver.status)">
+                                                    {{ getDriverStatusText(driver.status) }}
                                                 </span>
                                             </td>
                                         </tr>

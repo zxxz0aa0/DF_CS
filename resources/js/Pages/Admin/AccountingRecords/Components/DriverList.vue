@@ -41,8 +41,8 @@
               </td>
               <td>{{ driver.mobile_phone1 }}</td>
               <td>
-                <span :class="driver.status === 'open' ? 'text-success' : 'text-danger'">
-                {{ driver.status === 'open' ? '在籍中' : '已退籍' }}
+                <span :class="getStatusClass(driver.status)">
+                {{ getStatusText(driver.status) }}
                 </span>
               </td>
               <td>
@@ -105,5 +105,25 @@ const calculateAge = (birthday) => {
   const diff = Date.now() - new Date(birthday).getTime()
   const ageDate = new Date(diff)
   return Math.abs(ageDate.getUTCFullYear() - 1970)
+}
+
+// 取得狀態顯示文字
+const getStatusText = (status) => {
+  const statusMap = {
+    'open': '在籍中',
+    'close': '已退籍',
+    'bad_debt': '呆帳'
+  }
+  return statusMap[status] || '未知'
+}
+
+// 取得狀態顯示的 CSS class
+const getStatusClass = (status) => {
+  const classMap = {
+    'open': 'text-success',
+    'close': 'text-danger',
+    'bad_debt': 'text-danger'
+  }
+  return classMap[status] || 'text-secondary'
 }
 </script>

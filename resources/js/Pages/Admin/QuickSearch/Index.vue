@@ -98,12 +98,41 @@ const calculateAge = (birthday) => {
   return Math.abs(ageDate.getUTCFullYear() - 1970)
 }
 
+// 取得駕駛狀態顯示文字
+const getDriverStatusText = (status) => {
+    const statusMap = {
+        'open': '在籍',
+        'close': '退籍',
+        'bad_debt': '呆帳'
+    }
+    return statusMap[status] || '未知'
+}
+
+// 取得駕駛狀態 badge 的 CSS class
+const getDriverStatusBadgeClass = (status) => {
+    const classMap = {
+        'open': 'badge bg-success',
+        'close': 'badge bg-secondary',
+        'bad_debt': 'badge bg-danger'
+    }
+    return classMap[status] || 'badge bg-secondary'
+}
+
 const formatManufactureDate = (year, month) => {
     if (!year && !month) return '-'
     if (year && month) return `${year}年${month}月`
     if (year) return `${year}年`
     if (month) return `${month}月`
     return '-'
+}
+
+// 跳轉到文件管理頁面並帶入搜尋條件
+const goToDocuments = (type, keyword) => {
+    router.get(route('admin.documents.index'), {
+        search_type: type,
+        keyword: keyword,
+        membership_status: 'active'
+    })
 }
 </script>
 
@@ -167,7 +196,8 @@ const formatManufactureDate = (year, month) => {
                             <table class="table table-hover mb-0">
                                 <thead>
                                     <tr>
-                                        <th style="width: 9%;">姓名</th>
+                                        <th style="width: 12%;">操作</th>
+                                        <th style="width: 8%;">姓名</th>
                                         <th style="width: 11%;">身分證字號</th>
                                         <th style="width: 9%;">生日</th>
                                         <th style="width: 7%;">年齡</th>
@@ -175,11 +205,28 @@ const formatManufactureDate = (year, month) => {
                                         <th style="width: 24%;">通訊地址</th>
                                         <th style="width: 12%;">公司類別</th>
                                         <th>狀態</th>
-                                        <th width="150">操作</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody class="align-middle">
                                     <tr v-for="driver in drivers" :key="driver.id">
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button
+                                                    class="btn btn-info"
+                                                    @click="showDriverDetail(driver.id)"
+                                                    title="查看明細"
+                                                >
+                                                    <i class="bi bi-eye"></i> 明細
+                                                </button>
+                                                <button
+                                                    class="btn btn-warning"
+                                                    @click="goToDocuments('driver', driver.name)"
+                                                    title="查看駕駛證件"
+                                                >
+                                                    <i class="bi bi-file-earmark-text"></i> 證件
+                                                </button>
+                                            </div>
+                                        </td>
                                         <td>{{ driver.name }}</td>
                                         <td>{{ driver.id_number }}</td>
                                         <!--可以顯示遮身分證字號<td>{{ maskIdNumber(driver.id_number) }}</td>-->
@@ -191,17 +238,9 @@ const formatManufactureDate = (year, month) => {
                                         <td>{{ driver.contact_address || '-' }}</td>
                                         <td>{{ driver.company_category?.name || '-' }}</td>
                                         <td>
-                                            <span :class="driver.status === 'open' ? 'badge bg-success' : 'badge bg-secondary'">
-                                                {{ driver.status === 'open' ? '在籍' : '退籍' }}
+                                            <span :class="getDriverStatusBadgeClass(driver.status)">
+                                                {{ getDriverStatusText(driver.status) }}
                                             </span>
-                                        </td>
-                                        <td>
-                                            <button
-                                                class="btn btn-sm btn-info"
-                                                @click="showDriverDetail(driver.id)"
-                                            >
-                                                <i class="bi bi-eye"></i> 明細
-                                            </button>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -222,6 +261,7 @@ const formatManufactureDate = (year, month) => {
                             <table class="table table-hover mb-0">
                                 <thead>
                                     <tr>
+                                        <th style="width: 12%;">操作</th>
                                         <th style="width: 10%;">車牌號碼</th>
                                         <th style="width: 9%;">車隊編號</th>
                                         <th style="width: 12%;">車主名稱</th>
@@ -229,14 +269,31 @@ const formatManufactureDate = (year, month) => {
                                         <th style="width: 6%;">車款</th>
                                         <th style="width: 6%;">顏色</th>
                                         <th style="width: 8%;">排氣量</th>
-                                        <th style="width: 11%;">年份</th>
+                                        <th style="width: 10%;">年份</th>
                                         <th style="width: 12%;">公司類別</th>
                                         <th>狀態</th>
-                                        <th width="150">操作</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody class="align-middle">
                                     <tr v-for="vehicle in vehicles" :key="vehicle.id">
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button
+                                                    class="btn btn-info"
+                                                    @click="showVehicleDetail(vehicle.id)"
+                                                    title="查看明細"
+                                                >
+                                                    <i class="bi bi-eye"></i> 明細
+                                                </button>
+                                                <button
+                                                    class="btn btn-warning"
+                                                    @click="goToDocuments('vehicle', vehicle.license_number)"
+                                                    title="查看車輛證件"
+                                                >
+                                                    <i class="bi bi-file-earmark-text"></i> 證件
+                                                </button>
+                                            </div>
+                                        </td>
                                         <td>{{ vehicle.license_number }}</td>
                                         <td>{{ vehicle.fleet_number || '-' }}</td>
                                         <td>{{ vehicle.owner_name || '-' }}</td>
@@ -250,14 +307,6 @@ const formatManufactureDate = (year, month) => {
                                             <span :class="vehicle.vehicle_status === 'active' ? 'badge bg-success' : 'badge bg-secondary'">
                                                 {{ vehicle.vehicle_status === 'active' ? '在籍' : '退籍' }}
                                             </span>
-                                        </td>
-                                        <td>
-                                            <button
-                                                class="btn btn-sm btn-info"
-                                                @click="showVehicleDetail(vehicle.id)"
-                                            >
-                                                <i class="bi bi-eye"></i> 明細
-                                            </button>
                                         </td>
                                     </tr>
                                 </tbody>

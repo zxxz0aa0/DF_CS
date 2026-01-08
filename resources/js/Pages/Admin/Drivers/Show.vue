@@ -58,8 +58,8 @@
                                         <tr>
                                             <th>狀態:</th>
                                             <td>
-                                                <span :class="'badge ' + (driver.status === 'open' ? 'bg-success' : 'bg-secondary')">
-                                                    {{ driver.status === 'open' ? '在籍中' : '已退籍' }}
+                                                <span :class="'badge ' + getStatusBadgeClass(driver.status)">
+                                                    {{ getStatusText(driver.status) }}
                                                 </span>
                                             </td>
                                         </tr>
@@ -306,6 +306,26 @@ const getLicenseExpireClass = (daysRemaining) => {
     if (daysRemaining < 0) return 'text-danger fw-bold'
     if (daysRemaining <= 30) return 'text-warning fw-bold'
     return 'text-success'
+}
+
+// 取得狀態顯示文字
+const getStatusText = (status) => {
+    const statusMap = {
+        'open': '在籍中',
+        'close': '已退籍',
+        'bad_debt': '呆帳'
+    }
+    return statusMap[status] || '未知'
+}
+
+// 取得狀態 badge 的 CSS class
+const getStatusBadgeClass = (status) => {
+    const classMap = {
+        'open': 'bg-success',
+        'close': 'bg-secondary',
+        'bad_debt': 'bg-danger'
+    }
+    return classMap[status] || 'bg-secondary'
 }
 
 const confirmDelete = () => {

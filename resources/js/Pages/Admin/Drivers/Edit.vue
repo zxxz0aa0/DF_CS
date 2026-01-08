@@ -32,7 +32,7 @@
                                 <!-- 基本資料 -->
                                 <div class="col-md-6">
                                     <h5 class="border-bottom pb-2 mb-3">基本資料</h5>
-                                    
+
                                     <div class="mb-3">
                                         <label for="name" class="form-label">
                                             姓名 <span class="text-danger">*</span>
@@ -147,7 +147,7 @@
                                 <!-- 聯絡資訊 -->
                                 <div class="col-md-6">
                                     <h5 class="border-bottom pb-2 mb-3">聯絡資訊</h5>
-                                    
+
                                     <div class="mb-3">
                                         <label for="contact_address" class="form-label">通訊地址</label>
                                         <textarea
@@ -225,7 +225,7 @@
                                 <!-- 緊急聯絡人 -->
                                 <div class="col-md-6">
                                     <h5 class="border-bottom pb-2 mb-3">緊急聯絡人</h5>
-                                    
+
                                     <div class="mb-3">
                                         <label for="emergency_contact" class="form-label">緊急聯絡人</label>
                                         <input
@@ -258,7 +258,7 @@
                                 <!-- 日期與狀態資訊 -->
                                 <div class="col-md-6">
                                     <h5 class="border-bottom pb-2 mb-3">日期與狀態</h5>
-                                    
+
                                     <div class="mb-3">
                                         <label for="registration_date" class="form-label">
                                             入籍日期 <span class="text-danger">*</span>
@@ -348,6 +348,7 @@
                                             <option value="">請選擇狀態</option>
                                             <option value="open">在籍中</option>
                                             <option value="close">已退籍</option>
+                                            <option value="bad_debt">呆帳</option>
                                         </select>
                                         <div v-if="errors.status" class="invalid-feedback">
                                             {{ errors.status }}
@@ -358,7 +359,7 @@
                                 <!-- 備註 -->
                                 <div class="col-md-12">
                                     <h5 class="border-bottom pb-2 mb-3">備註</h5>
-                                    
+
                                     <div class="mb-3">
                                         <label for="notes" class="form-label">備註</label>
                                         <textarea

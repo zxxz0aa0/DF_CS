@@ -121,8 +121,8 @@
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    <span :class="['badge', debtor.driver?.status === 'open' ? 'bg-success' : 'bg-secondary']">
-                                        {{ debtor.driver?.status === 'open' ? '在籍' : '已退籍' }}
+                                    <span :class="['badge', getDriverStatusBadgeClass(debtor.driver?.status)]">
+                                        {{ getDriverStatusText(debtor.driver?.status) }}
                                     </span>
                                 </td>
                                 <td>
@@ -294,5 +294,25 @@ const formatDate = (date) => {
     }
 
     return new Date(date).toLocaleDateString('zh-TW')
+}
+
+// 取得駕駛狀態顯示文字
+const getDriverStatusText = (status) => {
+    const statusMap = {
+        'open': '在籍',
+        'close': '已退籍',
+        'bad_debt': '呆帳'
+    }
+    return statusMap[status] || '未知'
+}
+
+// 取得駕駛狀態 badge 的 CSS class
+const getDriverStatusBadgeClass = (status) => {
+    const classMap = {
+        'open': 'bg-success',
+        'close': 'bg-secondary',
+        'bad_debt': 'bg-danger'
+    }
+    return classMap[status] || 'bg-secondary'
 }
 </script>

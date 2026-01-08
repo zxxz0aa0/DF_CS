@@ -34,7 +34,7 @@ class DriverUpdateRequest extends FormRequest
             'fleet_leave_date' => 'nullable|date|after:fleet_join_date',
             'license_expire_date' => 'nullable|date',
             'professional_license_expire_date' => 'nullable|date',
-            'status' => 'required|in:open,close',
+            'status' => 'required|in:open,close,bad_debt',
             'notes' => 'nullable|string|max:2000',
         ];
     }

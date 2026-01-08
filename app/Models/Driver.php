@@ -77,7 +77,12 @@ class Driver extends Model
 
     public function getStatusTextAttribute(): string
     {
-        return $this->status === 'open' ? '在籍中' : '已退籍';
+        return match ($this->status) {
+            'open' => '在籍中',
+            'close' => '已退籍',
+            'bad_debt' => '呆帳',
+            default => '未知',
+        };
     }
 
     public function getLicenseDaysRemainingAttribute(): ?int

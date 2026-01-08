@@ -33,12 +33,22 @@ const formatDate = (date) => {
 
 // 取得狀態文字
 const getStatusText = (status) => {
-    return status === 'open' ? '在籍中' : '已退籍'
+    const statusMap = {
+        'open': '在籍中',
+        'close': '已退籍',
+        'bad_debt': '呆帳'
+    }
+    return statusMap[status] || '未知'
 }
 
 // 取得狀態 Badge 類別
 const getStatusBadgeClass = (status) => {
-    return status === 'open' ? 'badge bg-success' : 'badge bg-secondary'
+    const classMap = {
+        'open': 'badge bg-success',
+        'close': 'badge bg-secondary',
+        'bad_debt': 'badge bg-danger'
+    }
+    return classMap[status] || 'badge bg-secondary'
 }
 
 watch(() => props.show, (newVal) => {
