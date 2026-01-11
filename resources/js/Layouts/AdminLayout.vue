@@ -108,6 +108,40 @@
                             </ul>
                         </li>
 
+                        <!-- 報表管理 -->
+                        <li
+                            v-if="canSeeReportManagement"
+                            class="nav-item"
+                            :class="{ 'menu-open': isReportMenuActive || reportMenuOpen }"
+                        >
+                            <a
+                                href="#"
+                                class="nav-link"
+                                :class="{ active: isReportMenuActive }"
+                                data-lte-toggle="treeview"
+                                @click.prevent="toggleReportMenu"
+                            >
+                                <i class="nav-icon bi bi-bar-chart-line"></i>
+                                <p>
+                                    報表管理
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item ps-4">
+                                    <Link
+                                        :href="route('admin.reports.daily-transaction.index')"
+                                        class="nav-link"
+                                        :class="{ active: route().current('admin.reports.daily-transaction.*') }"
+                                        @click="closeSidebar"
+                                    >
+                                        <i class="nav-icon bi bi-table"></i>
+                                        <p>每日交易明細表</p>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </li>
+
                         <!-- 駕駛管理 -->
                         <li v-if="canSeeDriverManagement" class="nav-item" :class="{ 'menu-open': isDriverManagementActive || driverMenuOpen }">
                             <a href="#" class="nav-link" :class="{ active: isDriverManagementActive }" data-lte-toggle="treeview" @click.prevent="toggleDriverMenu">
@@ -349,6 +383,7 @@ defineProps({
 })
 
 const userMenuOpen = ref(false)
+const reportMenuOpen = ref(false)
 const permissionMenuOpen = ref(false)
 const companyMenuOpen = ref(false)
 const driverMenuOpen = ref(false)
@@ -427,6 +462,11 @@ const canSeeCollectionManagement = computed(() => {
     return can('view collections')
 })
 
+// 控制報表管理選單顯示
+const canSeeReportManagement = computed(() => {
+    return can('view reports')
+})
+
 const canSeeAccountingMenu = computed(() => {
     return canSeeAccountingManagement.value || canSeeExpensePaymentManagement.value || canSeeCollectionManagement.value
 })
@@ -467,9 +507,30 @@ const isAccountingMenuActive = computed(() => {
     return route().current('admin.accounting.*') || isExpensePaymentActive.value
 })
 
+// 控制報表管理選單啟用狀態
+const isReportMenuActive = computed(() => {
+    return route().current('admin.reports.*')
+})
+
+// 控制報表管理選單展開/收合
+const toggleReportMenu = () => {
+    reportMenuOpen.value = !reportMenuOpen.value
+    if (reportMenuOpen.value) {
+        userMenuOpen.value = false
+        permissionMenuOpen.value = false
+        companyMenuOpen.value = false
+        driverMenuOpen.value = false
+        vehicleMenuOpen.value = false
+        vehicleLicenseMenuOpen.value = false
+        accountMenuOpen.value = false
+        accountingMenuOpen.value = false
+    }
+}
+
 const toggleUserMenu = () => {
     userMenuOpen.value = !userMenuOpen.value
     if (userMenuOpen.value) {
+        reportMenuOpen.value = false
         permissionMenuOpen.value = false
         companyMenuOpen.value = false
         driverMenuOpen.value = false
@@ -484,6 +545,7 @@ const togglePermissionMenu = () => {
     permissionMenuOpen.value = !permissionMenuOpen.value
     if (permissionMenuOpen.value) {
         userMenuOpen.value = false
+        reportMenuOpen.value = false
         companyMenuOpen.value = false
         driverMenuOpen.value = false
         vehicleMenuOpen.value = false
@@ -498,6 +560,7 @@ const toggleCompanyMenu = () => {
     if (companyMenuOpen.value) {
         userMenuOpen.value = false
         permissionMenuOpen.value = false
+        reportMenuOpen.value = false
         driverMenuOpen.value = false
         vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
@@ -512,6 +575,7 @@ const toggleDriverMenu = () => {
         userMenuOpen.value = false
         permissionMenuOpen.value = false
         companyMenuOpen.value = false
+        reportMenuOpen.value = false
         vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
         accountMenuOpen.value = false
@@ -526,6 +590,7 @@ const toggleVehicleMenu = () => {
         permissionMenuOpen.value = false
         companyMenuOpen.value = false
         driverMenuOpen.value = false
+        reportMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
         accountMenuOpen.value = false
         accountingMenuOpen.value = false
@@ -539,6 +604,7 @@ const toggleVehicleLicenseMenu = () => {
         permissionMenuOpen.value = false
         companyMenuOpen.value = false
         driverMenuOpen.value = false
+        reportMenuOpen.value = false
         vehicleMenuOpen.value = false
         accountMenuOpen.value = false
         accountingMenuOpen.value = false
@@ -554,6 +620,7 @@ const toggleAccountMenu = () => {
         driverMenuOpen.value = false
         vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
+        reportMenuOpen.value = false
         accountingMenuOpen.value = false
     }
 }
@@ -568,6 +635,7 @@ const toggleAccountingMenu = () => {
         vehicleMenuOpen.value = false
         vehicleLicenseMenuOpen.value = false
         accountMenuOpen.value = false
+        reportMenuOpen.value = false
     }
 }
 
@@ -652,6 +720,7 @@ const closeSidebar = () => {
     document.body.classList.remove('sidebar-open')
 
     userMenuOpen.value = false
+    reportMenuOpen.value = false
     permissionMenuOpen.value = false
     companyMenuOpen.value = false
     driverMenuOpen.value = false

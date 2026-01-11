@@ -20,6 +20,8 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\Admin\VehicleLicenseController;
 use App\Http\Controllers\Admin\VendorController;
+use App\Http\Controllers\Admin\Report\DailyTransactionReportController;
+use App\Http\Controllers\Admin\Report\ReportConfigurationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -292,6 +294,34 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission:view adm
         Route::put('/{recurringCost}', [RecurringCostController::class, 'update'])->name('update')->middleware('permission:edit recurring costs');
         Route::delete('/{recurringCost}', [RecurringCostController::class, 'destroy'])->name('destroy')->middleware('permission:delete recurring costs');
         Route::post('/batch-apply', [RecurringCostController::class, 'batchApply'])->name('batch-apply')->middleware('permission:edit recurring costs');
+    });
+
+    // 報表管理路由
+    Route::prefix('reports')->name('reports.')->middleware('permission:view reports')->group(function () {
+
+        // 每日交易明細報表
+        Route::get('/daily-transaction', [DailyTransactionReportController::class, 'index'])
+            ->name('daily-transaction.index');
+
+        Route::get('/daily-transaction/preview', [DailyTransactionReportController::class, 'preview'])
+            ->name('daily-transaction.preview');
+
+        Route::get('/daily-transaction/export', [DailyTransactionReportController::class, 'export'])
+            ->name('daily-transaction.export')
+            ->middleware('permission:export reports');
+
+        // 報表組合管理
+        Route::post('/configurations', [ReportConfigurationController::class, 'store'])
+            ->name('configurations.store')
+            ->middleware('permission:create report configurations');
+
+        Route::put('/configurations/{reportConfiguration}', [ReportConfigurationController::class, 'update'])
+            ->name('configurations.update')
+            ->middleware('permission:edit report configurations');
+
+        Route::delete('/configurations/{reportConfiguration}', [ReportConfigurationController::class, 'destroy'])
+            ->name('configurations.destroy')
+            ->middleware('permission:delete report configurations');
     });
 });
 
