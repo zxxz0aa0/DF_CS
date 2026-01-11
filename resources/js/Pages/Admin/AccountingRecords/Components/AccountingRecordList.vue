@@ -188,6 +188,14 @@ const columns = computed(() => [
     defaultContent: '-',
     render: (_data, type, row) => renderPlain(row.vehicle_license_number, type)
   },
+    {
+    title: '台號',
+    data: 'vehicle_fleet_number',
+    width: COLUMN_WIDTHS.vehicleLicense,
+    className: 'text-center align-middle',
+    defaultContent: '-',
+    render: (_data, type, row) => renderPlain(row.vehicle_fleet_number, type)
+  },
   {
     title: '借方',
     data: 'debit_amount',

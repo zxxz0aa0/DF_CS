@@ -19,6 +19,7 @@ class AccountingRecord extends Model
         'driver_name',
         'driver_id_number',
         'vehicle_license_number',
+        'vehicle_fleet_number',
         'debit_amount',
         'credit_amount',
         'note',

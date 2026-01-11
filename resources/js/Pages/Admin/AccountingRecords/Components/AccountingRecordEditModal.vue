@@ -51,7 +51,10 @@
                 </span>
                 <span v-if="record.driver_name && record.vehicle_license_number"> | </span>
                 <span v-if="record.vehicle_license_number">
-                  <i class="bi bi-car-front me-1"></i>{{ record.vehicle_license_number }}
+                  <i class="bi bi-car-front me-1"></i>{{ record.vehicle_license_number }}   |  
+                </span>
+                <span v-if="record.vehicle_fleet_number">
+                  <i class="bi bi-tag me-1"></i>{{ record.vehicle_fleet_number }}
                 </span>
               </div>
             </div>

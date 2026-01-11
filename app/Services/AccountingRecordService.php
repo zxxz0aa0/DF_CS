@@ -155,6 +155,8 @@ class AccountingRecordService
                     'driver_name' => $driver ? $driver->name : null,
                     'driver_id_number' => $driver ? $driver->id_number : null,
                     'vehicle_license_number' => $vehicle ? $vehicle->license_number : null,
+                    // 記錄車隊編號(來自vehicles資料表的fleet_number欄位)
+                    'vehicle_fleet_number' => $vehicle ? $vehicle->fleet_number : null,
                     'debit_amount' => $recordData['debit_amount'] ?? null,
                     'credit_amount' => $recordData['credit_amount'] ?? null,
                     'note' => $recordData['note'] ?? null,
@@ -192,6 +194,8 @@ class AccountingRecordService
             if (isset($data['vehicle_id']) && $data['vehicle_id'] != $record->vehicle_id) {
                 $vehicle = Vehicle::find($data['vehicle_id']);
                 $data['vehicle_license_number'] = $vehicle ? $vehicle->license_number : null;
+                // 同時更新車隊編號
+                $data['vehicle_fleet_number'] = $vehicle ? $vehicle->fleet_number : null;
             }
 
             $record->update($data);
