@@ -103,7 +103,7 @@ class DailyTransactionReportController extends Controller
 
                              return [
                                  'id' => $record->id,
-                                 'transaction_date' => $record->created_at->format('Y-m-d'),
+                                 'created_at' => $record->created_at->format('Y-m-d H:i'),
                                  'company_category' => $companyCategory,
                                  'vehicle_fleet_number' => $record->vehicle_fleet_number ?? '-',
                                  'vehicle_license_number' => $record->vehicle_license_number ?? '-',
@@ -284,7 +284,7 @@ class DailyTransactionReportController extends Controller
 
                              return [
                                  'id' => $record->id,
-                                 'transaction_date' => $record->created_at->format('Y-m-d'),
+                                 'created_at' => $record->created_at->format('Y-m-d h:i'),
                                  'company_category' => $companyCategory,
                                  'vehicle_fleet_number' => $record->vehicle_fleet_number ?? '-',
                                  'vehicle_license_number' => $record->vehicle_license_number ?? '-',

@@ -19,14 +19,14 @@
         <table class="report-table">
             <thead>
                 <tr>
-                    <th>交易日期</th>
-                    <th>公司類別</th>
-                    <th>車隊編號</th>
-                    <th>車牌號碼</th>
-                    <th>駕駛姓名</th>
-                    <th>會計科目</th>
-                    <th>借方金額</th>
-                    <th>貸方金額</th>
+                    <th style="width: 17%;">交易日期</th>
+                    <th style="width: 10%;">公司類別</th>
+                    <th style="width: 10%;">車隊編號</th>
+                    <th style="width: 11%;">車號</th>
+                    <th style="width: 8%;">姓名</th>
+                    <th style="width: 10%;">會計科目</th>
+                    <th style="width: 10%;">借方金額</th>
+                    <th style="width: 10%;">貸方金額</th>
                     <th>備註</th>
                 </tr>
             </thead>
@@ -35,7 +35,7 @@
                     <td colspan="9" class="text-center">查無資料</td>
                 </tr>
                 <tr v-for="record in records" :key="record.id">
-                    <td class="text-center">{{ record.transaction_date }}</td>
+                    <td class="text-center">{{ record.created_at }}</td>
                     <td class="text-center">{{ record.company_category }}</td>
                     <td class="text-center">{{ record.vehicle_fleet_number }}</td>
                     <td class="text-center">{{ record.vehicle_license_number }}</td>

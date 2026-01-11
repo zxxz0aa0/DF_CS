@@ -18,7 +18,7 @@
         </template>
 
         <!-- 統計卡片 -->
-        <div class="row mb-3">
+        <div class="row mb-2">
             <div class="col-md-6">
                 <div class="info-box">
                     <span class="info-box-icon bg-success">
@@ -46,7 +46,21 @@
         <!-- 主要內容卡片 -->
         <div class="card">
             <div class="card-header" style="background-color:#B3D9D9;">
-                <h3 class="card-title">交易明細查詢</h3>
+                <div>
+                    <h3 class="card-title">交易明細查詢</h3>
+                </div>
+                <div class="float-right">
+                    <button @click="previewReport" class="btn btn-sm btn-primary">
+                        <i class="bi bi-eye"></i> 預覽報表
+                    </button>
+                    <button v-if="permissions.canExport" @click="exportExcel" class="btn btn-sm btn-success ms-2" :disabled="exporting">
+                        <i class="bi bi-file-earmark-excel"></i>
+                        {{ exporting ? '匯出中...' : '匯出 Excel' }}
+                    </button>
+                    <button v-if="form.filter_config_id && permissions.canDeleteConfig" @click="deleteConfig" class="btn btn-sm btn-danger ms-2">
+                        <i class="bi bi-trash"></i> 刪除目前組合
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <!-- 工具列 -->
@@ -188,42 +202,9 @@
                     </div>
                 </div>
 
-                <!-- 操作按鈕列 -->
-                <div class="d-flex justify-content-between mb-3">
-                    <div>
-                        <span class="text-muted">
-                            共 {{ records.total }} 筆記錄
-                        </span>
-                    </div>
-                    <div>
-                        <button
-                            @click="previewReport"
-                            class="btn btn-primary"
-                        >
-                            <i class="bi bi-eye"></i> 預覽報表
-                        </button>
-                        <button
-                            v-if="permissions.canExport"
-                            @click="exportExcel"
-                            class="btn btn-success ms-2"
-                            :disabled="exporting"
-                        >
-                            <i class="bi bi-file-earmark-excel"></i>
-                            {{ exporting ? '匯出中...' : '匯出 Excel' }}
-                        </button>
-                        <button
-                            v-if="form.filter_config_id && permissions.canDeleteConfig"
-                            @click="deleteConfig"
-                            class="btn btn-danger ms-2"
-                        >
-                            <i class="bi bi-trash"></i> 刪除目前組合
-                        </button>
-                    </div>
-                </div>
-
                 <!-- 資料表格 -->
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover table-sm">
+                    <table class="table table-bordered table-hover table-sm mt-3">
                         <thead class="table-light">
                             <tr>
                                 <th class="text-center">交易日期</th>
@@ -245,7 +226,7 @@
                                 </td>
                             </tr>
                             <tr v-for="record in records.data" :key="record.id">
-                                <td class="text-center">{{ record.transaction_date }}</td>
+                                <td class="text-center">{{ record.created_at }}</td>
                                 <td class="text-center">{{ record.company_category }}</td>
                                 <td class="text-center">{{ record.vehicle_fleet_number }}</td>
                                 <td class="text-center">{{ record.vehicle_license_number }}</td>
@@ -311,10 +292,10 @@
                                 type="text"
                                 v-model="configName"
                                 class="form-control"
-                                placeholder="例如：計程車-燃料費"
+                                placeholder="例如：計程車、車行、租賃"
                                 @keyup.enter="saveConfig"
                             >
-                            <div class="form-text">請輸入一個容易識別的名稱</div>
+                            <div class="form-text">請不要重複名稱、若要覆蓋請先選舊名稱，刪除然後再新增</div>
                         </div>
                         <div class="alert alert-info mb-0">
                             <small>
